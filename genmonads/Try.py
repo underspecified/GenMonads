@@ -1,4 +1,5 @@
-from Option import *
+from genmonads.Monad import *
+from genmonads.Option import *
 
 
 class Try(Monad):

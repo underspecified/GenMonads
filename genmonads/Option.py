@@ -1,4 +1,4 @@
-from Monad import *
+from genmonads.Monad import *
 
 
 class Option(Monad):
