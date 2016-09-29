@@ -2,7 +2,6 @@
 Author: Eric Nichols <underspecified@gmail.com>
 
 This module contains python implementations of common scala-style monads.
-
 It provides a generator-based do syntax using a decompilation trick from Pony [1]
 to translate generators into nested calls to a monad's flat_map, map, and filter functions,
 in a similar fashion to scala [2]. The idea was inspired by a comment by Shin no Noir [3]
@@ -13,12 +12,12 @@ on a post on A Neighborhood of Infinity [4].
 * pony: https://pypi.python.org/pypi/pony
 
 ## Usage
->>> from Option import *
->>> do(x + y
-       for x in option(2)
-       if x < 10
-       for y in option(5)
-       if y % 2 != 0))
+>>> from genmonads.Option import *
+>>> print(do(x + y
+             for x in option(2)
+             if x < 10
+             for y in option(5)
+             if y % 2 != 0))
 Some(7)
 >>> def make_gen():
         for x in option(4):
@@ -26,11 +25,11 @@ Some(7)
                 for y in option(10):
                     if y % 2 == 0:
                         yield x - y
->>> do(make_gen())
+>>> print(do(make_gen()))
 Some(-6)
->>> option(5) >> (lambda x: option(x * 2))
+>>> print(option(5) >> (lambda x: option(x * 2)))
 Some(10)
->>> option(None)
+>>> print(option(None))
 None_()
 
 ## Todo
