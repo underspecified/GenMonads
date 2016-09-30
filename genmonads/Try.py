@@ -66,7 +66,7 @@ class Success(Try):
         return 'Success(%s)' % self._result
 
     def map(self, f):
-        return Success(f(self.get()))
+        return Try(f(self.run()))
 
     def flat_map(self, f):
         return self.map(f).flatten()
