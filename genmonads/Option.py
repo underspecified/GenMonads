@@ -135,7 +135,7 @@ def main():
                 for y in option(10):
                     if y % 2 == 0:
                         yield x - y
-    print(do(make_gen()))
+    print(mfor(make_gen()))
 
     print(option(5) >> (lambda x: option(x * 2)))
 

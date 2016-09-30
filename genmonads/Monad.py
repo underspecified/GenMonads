@@ -33,11 +33,12 @@ class MonadIter(object):
         self.monad = monad
 
     def __next__(self):
-        raise(TypeError('Use do(...) function or %s.do(...) class method for iteration' % self.monad.__mname__))
+        raise(TypeError('Use mfor(...) function for iteration' % self.monad.__mname__))
 
     next = __next__
 
 
+# noinspection PyPep8Naming,PyMethodMayBeStatic
 class MonadTranslator(PythonTranslator):
     def postGenExpr(self, node):
         return node.code.src
@@ -54,7 +55,6 @@ class MonadTranslator(PythonTranslator):
         src += '.flat_map(lambda %s: ' % node.assign.src
         return src
 
-    #ast.Lambda(argnames, defaults, flags, func_decompiler.ast)
     def postLambda(self, node):
         #print('postLambda:', node, file=sys.stderr)
         src = 'lambda %s: %s' % (','.join(node.argnames), node.code.src)
