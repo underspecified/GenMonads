@@ -22,7 +22,7 @@ class Try(Monad):
         return self._done
 
     def filter(self, f):
-        return self.flat_map(lambda x: Success(x) if f(x) else Failure(TypeError("Filter failed!")))
+        return self.flat_map(lambda x: Success(x) if f(x) else Failure(TypeError("filter(...) failed!")))
 
     def flat_map(self, f):
         return self.map(f).flatten()
