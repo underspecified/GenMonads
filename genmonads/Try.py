@@ -22,7 +22,7 @@ class Try(Monad):
         return self._done
 
     def filter(self, f):
-        return self.eval() if self.eval() and f(self.get()) else Failure(TypeError("Filter failed!"))
+        return self.eval() if self.eval() and f(self.run()) else Failure(TypeError("Filter failed!"))
 
     def flat_map(self, f):
         return self.map(f).flatten()
@@ -31,7 +31,7 @@ class Try(Monad):
         return Try(lambda: self.run().run())
 
     def get(self):
-        self.eval().get()
+        return self.eval().get()
 
     def get_or_else(self, default):
         # noinspection PyArgumentList
@@ -118,7 +118,7 @@ class Failure(Try):
         return default
 
     def run(self):
-        raise self.get()
+        return self.get()
 
     def to_option(self):
         return None_()
@@ -126,22 +126,22 @@ class Failure(Try):
 
 def main():
     print(do(x + y
-             for x in Try(2)
+             for x in Try(lambda: 2)
              if x < 10
-             for y in Try(5)
+             for y in Try(lambda: 5)
              if y % 2 != 0))
 
     def make_gen():
-        for x in Try(4):
+        for x in Try(lambda: 4):
             if x > 2:
-                for y in Try(10):
+                for y in Try(lambda: 10):
                     if y % 2 == 0:
                         yield x - y
     print(do(make_gen()))
 
-    print(Try(5) >> (lambda x: Try(x * 2)))
+    print((Try(lambda: 5) >> (lambda x: Try(lambda: x * 2))).eval())
 
-    print(Try(None).map(lambda x: x * 2))
+    print(Try(lambda: None).map(lambda x: x * 2).eval())
 
 
 if __name__ == '__main__':
