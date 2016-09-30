@@ -22,7 +22,7 @@ class Try(Monad):
         return self._done
 
     def filter(self, f):
-        return self.eval() if self.eval() and f(self.run()) else Failure(TypeError("Filter failed!"))
+        return self.flat_map(lambda x: Success(x) if f(x) else Failure(TypeError("Filter failed!")))
 
     def flat_map(self, f):
         return self.map(f).flatten()
@@ -129,7 +129,7 @@ def main():
              for x in Try(lambda: 2)
              if x < 10
              for y in Try(lambda: 5)
-             if y % 2 != 0))
+             if y % 2 != 0).eval())
 
     def make_gen():
         for x in Try(lambda: 4):
@@ -137,7 +137,7 @@ def main():
                 for y in Try(lambda: 10):
                     if y % 2 == 0:
                         yield x - y
-    print(do(make_gen()))
+    print(do(make_gen()).eval())
 
     print((Try(lambda: 5) >> (lambda x: Try(lambda: x * 2))).eval())
 
