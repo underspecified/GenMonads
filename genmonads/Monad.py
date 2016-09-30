@@ -54,6 +54,13 @@ class MonadTranslator(PythonTranslator):
         src += '.flat_map(lambda %s: ' % node.assign.src
         return src
 
+    #ast.Lambda(argnames, defaults, flags, func_decompiler.ast)
+    def postLambda(self, node):
+        #print('postLambda:', node, file=sys.stderr)
+        src = 'lambda %s: %s' % (','.join(node.argnames), node.code.src)
+        #print('src:', src, file=sys.stderr)
+        return src
+
 
 def ast2src(tree):
     MonadTranslator(tree)
@@ -66,7 +73,7 @@ def mfor(gen, frame_depth=1):
         ast_, external_names, cells = decompile(gen)
         #print('ast:', ast_, file=sys.stderr)
         #print('external_names:', external_names, file=sys.stderr)
-        #print(gen.gi_frame.f_globals, file=sys.stderr)
+        #print('globals:', gen.gi_frame.f_globals, file=sys.stderr)
         monad = gen.gi_frame.f_locals['.0'].monad if '.0' in gen.gi_frame.f_locals else Monad
         code = re.sub(r'''^\.0''', 'monad', ast2src(ast_))
         #print('code:', code, file=sys.stderr)
