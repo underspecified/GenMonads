@@ -36,6 +36,7 @@ None_()
 * variable assignment in generator functions
 * Either[A,B] and other monads
 * optional Haskell nomenclature?
+* Try.or_else(recover)
 
 ## References
 [1] http://stackoverflow.com/questions/16115713/how-pony-orm-does-its-tricks
