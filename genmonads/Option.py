@@ -10,7 +10,7 @@ class Option(Monad):
     @staticmethod
     def from_value(value):
         if value is None:
-            return None_()
+            return Nothing()
         else:
             return Some(value)
 
@@ -67,7 +67,7 @@ class Some(Option):
         return self.map(f).flatten()
 
     def filter(self, f):
-        return self if f(self.value) else None_()
+        return self if f(self.value) else Nothing()
 
     def flatten(self):
         return self.get()
@@ -86,7 +86,7 @@ class Some(Option):
 
 
 # noinspection PyMissingConstructor,PyPep8Naming
-class None_(Option):
+class Nothing(Option):
     # noinspection PyInitNewSignature
     def __init__(self):
         pass
@@ -98,7 +98,7 @@ class None_(Option):
         return MonadIter(self)
 
     def __str__(self):
-        return 'None_()'
+        return 'Nothing'
 
     def filter(self, f):
         return self

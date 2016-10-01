@@ -122,7 +122,7 @@ class Failure(Try):
         return self.get()
 
     def to_option(self):
-        return None_()
+        return Nothing()
 
 
 def main():
