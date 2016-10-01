@@ -4,52 +4,54 @@ from genmonads.Option import *
 
 
 class Try(Monad):
-    def __init__(self, thunk):
-        self.thunk = thunk
-        self._done = None
+    def __init__(self, *args, **kwargs):
+        raise ValueError(
+            "Tried to call the constructor of abstract base class Try. Use the try_to() function instead."
+        )
+
+    def __bool__(self):
+        raise NotImplementedError
+
+    def __eq__(self, other):
+        raise NotImplementedError
 
     def __iter__(self):
-        return MonadIter(self)
+        raise NotImplementedError
 
     def __mname__(self):
         return 'Try'
 
-    def eval(self):
-        if not self._done:
-            try:
-                self._done = Success(self.thunk())
-            except Exception as ex:
-                self._done = Failure(ex)
-        return self._done
-
     def filter(self, f):
-        return self.flat_map(lambda x: Success(x) if f(x) else Failure(TypeError("filter(...) failed!")))
+        raise NotImplementedError
 
     def flat_map(self, f):
-        return self.map(f).flatten()
+        raise NotImplementedError
 
     def flatten(self):
-        return Try(lambda: self.run().run())
+        raise NotImplementedError
+
+    @staticmethod
+    def from_thunk(thunk):
+        try:
+            return Success(thunk())
+        except Exception as e:
+            return Failure(e)
 
     def get(self):
-        return self.eval().get()
+        raise NotImplementedError
 
     def get_or_else(self, default):
-        # noinspection PyArgumentList
-        return self.eval().get_or_else(default)
+        raise NotImplementedError
 
     def map(self, f):
-        return Try(lambda: f(self.thunk()))
-
-    def run(self):
-        return self.eval().get()
+        raise NotImplementedError
 
     def to_option(self):
-        return self.eval().to_option()
+        raise NotImplementedError
 
 
 def try_to(thunk):
-    return Try(thunk)
+    return Try.from_thunk(thunk)
 
 
 # noinspection PyMissingConstructor
@@ -57,17 +59,25 @@ class Success(Try):
     def __init__(self, result):
         self._result = result
 
+    def __bool__(self):
+        return True
+
+    def __eq__(self, other):
+        if isinstance(other, Success):
+            return self.get().__eq__(other.get())
+        return False
+
     def __iter__(self):
         return MonadIter(self)
 
-    def __bool__(self):
-        return True
+    def __mname__(self):
+        return 'Try'
 
     def __str__(self):
         return 'Success(%s)' % self._result
 
-    def map(self, f):
-        return Try(f(self.run()))
+    def filter(self, f):
+        return self.flat_map(lambda x: Success(x) if f(x) else Failure(ValueError("Filter failed!")))
 
     def flat_map(self, f):
         return self.map(f).flatten()
@@ -82,8 +92,8 @@ class Success(Try):
     def get_or_else(self, default):
         return self._result
 
-    def run(self):
-        return self.get()
+    def map(self, f):
+        return Try.from_thunk(lambda: f(self.get()))
 
     def to_option(self):
         return Some(self._result)
@@ -94,16 +104,24 @@ class Failure(Try):
     def __init__(self, ex):
         self._ex = ex
 
-    def __iter__(self):
-        return MonadIter(self)
-
     def __bool__(self):
         return False
+
+    def __eq__(self, other):
+        if isinstance(other, Success):
+            return self.get().__eq__(other.get())
+        return False
+
+    def __iter__(self):
+        return MonadIter(self)
 
     def __str__(self):
         return 'Failure(%s)' % self._ex
 
-    def map(self, f):
+    def __mname__(self):
+        return 'Try'
+
+    def filter(self, f):
         return self
 
     def flat_map(self, f):
@@ -113,13 +131,16 @@ class Failure(Try):
         return self
 
     def get(self):
-        raise self._ex
+        return self._ex
 
     def get_or_else(self, default):
         return default
 
-    def run(self):
-        return self.get()
+    def map(self, f):
+        return self
+
+    def raise_ex(self):
+        raise self._ex
 
     def to_option(self):
         return Nothing()
@@ -127,22 +148,22 @@ class Failure(Try):
 
 def main():
     print(do(x + y
-             for x in Try(lambda: 2)
+             for x in try_to(lambda: 2)
              if x < 10
-             for y in Try(lambda: 5)
-             if y % 2 != 0).eval())
+             for y in try_to(lambda: 5)
+             if y % 2 != 0))
 
     def make_gen():
-        for x in Try(lambda: 4):
+        for x in try_to(lambda: 4):
             if x > 2:
-                for y in Try(lambda: 10):
+                for y in try_to(lambda: 10):
                     if y % 2 == 0:
                         yield x - y
-    print(do(make_gen()).eval())
+    print(do(make_gen()))
 
-    print((Try(lambda: 5) >> (lambda x: Try(lambda: x * 2))).eval())
+    print((try_to(lambda: 5) >> (lambda x: try_to(lambda: 2))))
 
-    print(Try(lambda: None).map(lambda x: x * 2).eval())
+    print(try_to(lambda: 1 / 0).map(lambda x: x * 2))
 
 
 if __name__ == '__main__':
