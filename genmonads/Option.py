@@ -7,14 +7,10 @@ class Option(Monad):
             "Tried to call the constructor of abstract base class Option. Use the option() function instead."
         )
 
-    @staticmethod
-    def from_value(value):
-        if value is None:
-            return Nothing()
-        else:
-            return Some(value)
-
     def __bool__(self):
+        raise NotImplementedError
+
+    def __eq__(self, other):
         raise NotImplementedError
 
     def __iter__(self):
@@ -31,6 +27,13 @@ class Option(Monad):
 
     def flatten(self):
         raise NotImplementedError
+
+    @staticmethod
+    def from_value(value):
+        if value is None:
+            return Nothing()
+        else:
+            return Some(value)
 
     def get(self):
         raise NotImplementedError
@@ -57,6 +60,11 @@ class Some(Option):
     def __bool__(self):
         return True
 
+    def __eq__(self, other):
+        if isinstance(other, Some):
+            return self.value.__eq__(other.value)
+        return False
+
     def __iter__(self):
         return MonadIter(self)
 
@@ -67,7 +75,7 @@ class Some(Option):
         return self.map(f).flatten()
 
     def filter(self, f):
-        return self if f(self.value) else Nothing()
+        return self.flat_map(lambda x: Some(x) if f(x) else Nothing())
 
     def flatten(self):
         return self.get()
@@ -94,11 +102,16 @@ class Nothing(Option):
     def __bool__(self):
         return False
 
+    def __eq__(self, other):
+        if isinstance(other, Nothing):
+            return True
+        return False
+
     def __iter__(self):
         return MonadIter(self)
 
     def __str__(self):
-        return 'Nothing'
+        return 'Nothing()'
 
     def filter(self, f):
         return self
