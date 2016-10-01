@@ -18,8 +18,8 @@ setup(
     # https://packaging.python.org/en/latest/single_source_version.html
     version='0.0.1',
 
-    description='Python monads with generator-based do syntax',
-    long_description="Python monads with generator-based do syntax",
+    description='Python monads with generator-based syntax',
+    long_description="Python monads with generator-based syntax",
 
     # # The project's main homepage.
     url='http://www.underspecified.org',

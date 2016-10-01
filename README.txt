@@ -1,10 +1,10 @@
-# GenMonads: Python monads with generator-based do-notation
+# GenMonads: Python monads with generator-based syntax
 Author: Eric Nichols <underspecified@gmail.com>
 
-This module contains python implementations of common scala-style monads.
+This module contains python implementations of some scala-style monads.
 
-It provides a generator-based do-notation using a decompilation trick from Pony
-[1] to translate generators into nested calls to a monad's flat_map, map, and
+It provides a generator-based syntax using a decompilation trick from Pony [1]
+to translate generators into nested calls to a monad's flat_map, map, and
 filter functions, in a similar fashion to scala's for comprehensions [2].
 
 The idea was inspired by a comment by Shin no Noir [3] on a post on A
@@ -13,10 +13,10 @@ Neighborhood of Infinity [4].
 
 ## Features
 
-GenMonads supports do-notation by using a special function to evaluate a
-generator over monads (the functions is named "mfor," short for "monadic for
-comprehension," as it is modeled after scala's for comprehensions, but the
-synonym "do" is also available):
+GenMonads supports do-notation-like syntax by using a special function to
+evaluate a generator over monads (the functions is named "mfor," short for
+"monadic for comprehension," as it is modeled after scala's for comprehensions,
+but the synonym "do" is also available):
 
 >>> from genmonads.Option import *
 >>> print(mfor(x + y
@@ -48,8 +48,8 @@ variable assignment in generator function bodies is not currently implemented:
 Some(-6)
 
 Monad chaining with the bind operator is also supported (>>= and >> are
-combined into a single ">>" operator due to syntactic limitations in
-overloading ">>=" in python):
+combined into a single >> operator due to syntactic limitations in
+overloading >>= in python):
 
 >>> print(option(5) >> (lambda x: option(x * 2)))
 Some(10)
@@ -60,12 +60,12 @@ Following scala's monadic handling of nulls, the option(...) function can be
 used to inject computations that can return None into the Option monad:
 
 >>> print(option(None))
-None_()
+Nothing()
 >>> pets = {'cat': 1, 'dog': 2, 'bird': 3}
 >>> print(option(pets.get('dog')))
 Some(2)
 >>> print(option(pets.get('iguana')))
-None_()
+Nothing()
 
 
 ## Requirements
@@ -79,6 +79,10 @@ None_()
 * type annotations of the monads
 * Either[A,B] and other monads
 * Try.or_else(recover)
+
+
+## License
+This project is licensed under theGNU Affero General Public License v3 (AGPLv3).
 
 
 ## References
