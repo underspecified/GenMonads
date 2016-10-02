@@ -17,7 +17,7 @@ GenMonads supports do-notation-like syntax by using a special function to
 evaluate a generator over monads (the functions is named "mfor," short for
 "monadic for comprehension," as it is modeled after scala's for comprehensions,
 but the synonym "do" is also available):
-
+```
 >>> from genmonads.Option import *
 >>> print(mfor(x + y
                for x in option(2)
@@ -25,19 +25,19 @@ but the synonym "do" is also available):
                for y in option(5)
                if y % 2 != 0))
 Some(7)
-
+```
 The above generator is automatically translated into the following at run-time:
-
+```
 >>> print(option(2) \
               .filter(lambda x: x < 10) \
               .flat_map(lambda x: option(5) \
                    .filter(lambda y: y % 2 != 0) \
                    .map(lambda y: x + y)))
 Some(7)
-
+```
 Both generator expressions and generator functions are supported, though
 variable assignment in generator function bodies is not currently implemented:
-
+```
 >>> def make_gen():
         for x in option(4):
             if x > 2:
@@ -46,19 +46,19 @@ variable assignment in generator function bodies is not currently implemented:
                         yield x - y
 >>> print(mfor(make_gen()))
 Some(-6)
-
+```
 Monad chaining with the bind operator is also supported (>>= and >> are
 combined into a single >> operator due to syntactic limitations in
 overloading >>= in python):
-
+```
 >>> print(option(5) >> (lambda x: option(x * 2)))
 Some(10)
 >>> print(option(5) >> (lambda _: option(2)))
 Some(2)
-
+```
 Following scala's monadic handling of nulls, the option(...) function can be
 used to inject computations that can return None into the Option monad:
-
+```
 >>> print(option(None))
 Nothing()
 >>> pets = {'cat': 1, 'dog': 2, 'bird': 3}
@@ -66,7 +66,7 @@ Nothing()
 Some(2)
 >>> print(option(pets.get('iguana')))
 Nothing()
-
+```
 
 ## Requirements
 * Python 3: https://www.python.org
