@@ -1,9 +1,14 @@
 import re
 import sys
+from typing import TypeVar
 
 from pony.orm.decompiling import decompile
 
 from genmonads.MonadTrans import ast2src
+
+A = TypeVar('A')
+B = TypeVar('B')
+T = TypeVar('T')
 
 
 class Monad(object):
@@ -40,16 +45,6 @@ class Monad(object):
         """
         return self.flat_map(f)
 
-    def filter(self, f):
-        """
-        Args:
-            f (Callable[[T],bool]): the predicate
-
-        Returns:
-            Option[T]: this instance if the predicate is true when applied to its inner value, Nothing otherwise
-        """
-        raise NotImplementedError
-
     def flat_map(self, f):
         """
         Applies a function that produces an Monad from unwrapped values to an Monad's inner value and flattens the
@@ -61,11 +56,11 @@ class Monad(object):
         Returns:
             Monad[B]: the resulting monad
         """
-        raise NotImplementedError
+        return self.map(f).flatten()
 
     def flatten(self):
         """
-        Flattens nested instances of Monad. Equivalent to self.flat_map(lambda x: Monad.pure(x))
+        Flattens nested instances of Monad.
 
         Returns:
             Monad[T]: the flattened monad
@@ -112,7 +107,7 @@ class MonadIter(object):
 
 
 # noinspection PyShadowingBuiltins,PyProtectedMember
-def mfor(gen, frame_depth=1):
+def mfor(gen, frame_depth=5):
     """The monadic for-comprehension
     Evaluates a generator over a monadic value, translating it into the equivalent for-comprehension.
 
@@ -139,15 +134,23 @@ def mfor(gen, frame_depth=1):
         #print('code:', code, file=sys.stderr)
 
         # next we insert the original monad into the code's locals and return the results of its evaluation
-        globals = sys._getframe(frame_depth).f_globals
-        locals = sys._getframe(frame_depth).f_locals
-        locals['monad'] = monad
-        return eval(code, globals, locals)
-    except Exception as e:
-        raise e
+        i = frame_depth
+        while i >= 0:
+            # noinspection PyBroadException
+            try:
+                globals = sys._getframe(i).f_globals
+                locals = sys._getframe(i).f_locals
+                locals['monad'] = monad
+                return eval(code, globals, locals)
+            except Exception:
+                i -= 1
+        if i < 0:
+            raise ValueError("Monad not found in generator locals at frame depth %d!" % frame_depth)
+    except Exception as ex:
+        raise ex
 
 
-def do(gen, frame_depth=1):
+def do(gen, frame_depth=5):
     """A synonym for mfor
     Evaluates a generator over a monadic value, translating it into the equivalent for-comprehension.
 
