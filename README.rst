@@ -86,6 +86,20 @@ the Option monad:
     >>> print(option(pets.get('iguana')))
     Nothing
 
+Installation
+------------
+
+GenMonads can be installed from the GitHub project page https://github.com/underspecified/GenMonads via pip:
+
+.. code:: bash
+
+    > pip3 install --upgrade git+https://git@github.com/underspecified/GenMonads.git
+
+Documentation
+-------------
+
+See the project's Read the Docs page at https://underspecified.github.io/GenMonads/
+
 Requirements
 ------------
 
