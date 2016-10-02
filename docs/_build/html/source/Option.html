@@ -1,0 +1,522 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Option module &mdash; GenMonads 0.0.1 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="GenMonads 0.0.1 documentation" href="../index.html"/> 
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> GenMonads
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.0.1
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <!-- Local TOC -->
+                <div class="local-toc"><ul>
+<li><a class="reference internal" href="#">Option module</a></li>
+</ul>
+</div>
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../index.html">GenMonads</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+ 
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../index.html">Docs</a> &raquo;</li>
+      
+    <li>Option module</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="../_sources/source/Option.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="module-Option">
+<span id="option-module"></span><h1>Option module<a class="headerlink" href="#module-Option" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="Option.Nothing">
+<em class="property">class </em><code class="descclassname">Option.</code><code class="descname">Nothing</code><a class="headerlink" href="#Option.Nothing" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#Option.Option" title="Option.Option"><code class="xref py py-class docutils literal"><span class="pre">Option.Option</span></code></a></p>
+<p>A type that represents the absence of an optional value. Forms the Option monad together with Some.</p>
+<dl class="method">
+<dt id="Option.Nothing.flatten">
+<code class="descname">flatten</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Option.Nothing.flatten" title="Permalink to this definition">¶</a></dt>
+<dd><p>Flattens nested instances of Option. Equivalent to self.flat_map(lambda x: Option.pure(x))</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Option[T]</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="Option.Nothing.get">
+<code class="descname">get</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Option.Nothing.get" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the Option&#8217;s inner value. Raises a ValueError for instances of Nothing.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">the inner value</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">T</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="Option.Nothing.get_or_else">
+<code class="descname">get_or_else</code><span class="sig-paren">(</span><em>default</em><span class="sig-paren">)</span><a class="headerlink" href="#Option.Nothing.get_or_else" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the Option&#8217;s inner value if an instance of Some or default if instance of Nothing.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>default</strong> &#8211; the value to return for Nothing instances</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">the Option&#8217;s inner value if an instance of Some or default if instance of Nothing</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">T</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="Option.Nothing.get_or_none">
+<code class="descname">get_or_none</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Option.Nothing.get_or_none" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the Option&#8217;s inner value if an instance of Some or None if instance of Nothing. Provided as interface
+to code that expects None values.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">the Option&#8217;s inner value if an instance of Some or None if instance of Nothing</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">Union[T,None]</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="Option.Nothing.map">
+<code class="descname">map</code><span class="sig-paren">(</span><em>f</em><span class="sig-paren">)</span><a class="headerlink" href="#Option.Nothing.map" title="Permalink to this definition">¶</a></dt>
+<dd><p>Applies a function to the inner value of an Option.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>f</strong> (<em>Callable[[A],B]</em>) &#8211; the function to apply</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">the resulting Option</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">Option[B]</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="Option.Option">
+<em class="property">class </em><code class="descclassname">Option.</code><code class="descname">Option</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#Option.Option" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">genmonads.MonadFilter.MonadFilter</span></code></p>
+<p>A type that represents an optional value. Instances of type Option[T] are either an instance of Some[T] or Nothing.</p>
+<p>Monadic computing is supported with map, flat_map, flatten, and filter functions, and for-comprehensions can be
+formed by evaluating generators over monads with the mfor function.</p>
+<dl class="staticmethod">
+<dt id="Option.Option.empty">
+<em class="property">static </em><code class="descname">empty</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Option.Option.empty" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Nothing, the empty instance for this monad</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">Option[T]</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="Option.Option.flatten">
+<code class="descname">flatten</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Option.Option.flatten" title="Permalink to this definition">¶</a></dt>
+<dd><p>Flattens nested instances of Option.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Option[T]</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="Option.Option.get">
+<code class="descname">get</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Option.Option.get" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the Option&#8217;s inner value. Raises a ValueError for instances of Nothing.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">the inner value</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">T</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="Option.Option.get_or_else">
+<code class="descname">get_or_else</code><span class="sig-paren">(</span><em>default</em><span class="sig-paren">)</span><a class="headerlink" href="#Option.Option.get_or_else" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the Option&#8217;s inner value if an instance of Some or default if instance of Nothing.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>default</strong> &#8211; the value to return for Nothing instances</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">the Option&#8217;s inner value if an instance of Some or default if instance of Nothing</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">T</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="Option.Option.get_or_none">
+<code class="descname">get_or_none</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Option.Option.get_or_none" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the Option&#8217;s inner value if an instance of Some or None if instance of Nothing. Provided as interface
+to code that expects None values.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">the Option&#8217;s inner value if an instance of Some or None if instance of Nothing</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">Union[T,None]</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="Option.Option.map">
+<code class="descname">map</code><span class="sig-paren">(</span><em>f</em><span class="sig-paren">)</span><a class="headerlink" href="#Option.Option.map" title="Permalink to this definition">¶</a></dt>
+<dd><p>Applies a function to the inner value of an Option.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>f</strong> (<em>Callable[[A],B]</em>) &#8211; the function to apply</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">the resulting Option</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">Option[B]</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="Option.Option.pure">
+<em class="property">static </em><code class="descname">pure</code><span class="sig-paren">(</span><em>value</em><span class="sig-paren">)</span><a class="headerlink" href="#Option.Option.pure" title="Permalink to this definition">¶</a></dt>
+<dd><p>Injects a value into the Option monad. This function should be used instead of calling Option.__init__
+directly.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>value</strong> (<em>T</em>) &#8211; the value</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">the resulting Option</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">Option[T]</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="Option.Some">
+<em class="property">class </em><code class="descclassname">Option.</code><code class="descname">Some</code><span class="sig-paren">(</span><em>value</em><span class="sig-paren">)</span><a class="headerlink" href="#Option.Some" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#Option.Option" title="Option.Option"><code class="xref py py-class docutils literal"><span class="pre">Option.Option</span></code></a></p>
+<p>A type that represents the presence of an optional value. Forms the Option monad together with Nothing.</p>
+<dl class="method">
+<dt id="Option.Some.flatten">
+<code class="descname">flatten</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Option.Some.flatten" title="Permalink to this definition">¶</a></dt>
+<dd><p>Flattens nested instances of Option. Equivalent to self.flat_map(lambda x: Option.pure(x))</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Option[T]</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="Option.Some.get">
+<code class="descname">get</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Option.Some.get" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the Option&#8217;s inner value. Raises a ValueError for instances of Nothing.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">the inner value</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">T</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="Option.Some.get_or_else">
+<code class="descname">get_or_else</code><span class="sig-paren">(</span><em>default</em><span class="sig-paren">)</span><a class="headerlink" href="#Option.Some.get_or_else" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the Option&#8217;s inner value if an instance of Some or default if instance of Nothing.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>default</strong> &#8211; the value to return for Nothing instances</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">the Option&#8217;s inner value if an instance of Some or default if instance of Nothing</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">T</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="Option.Some.get_or_none">
+<code class="descname">get_or_none</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Option.Some.get_or_none" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the Option&#8217;s inner value if an instance of Some or None if instance of Nothing. Provided as interface
+to code that expects None values.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">the Option&#8217;s inner value if an instance of Some or None if instance of Nothing</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">Union[T,None]</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="Option.Some.map">
+<code class="descname">map</code><span class="sig-paren">(</span><em>f</em><span class="sig-paren">)</span><a class="headerlink" href="#Option.Some.map" title="Permalink to this definition">¶</a></dt>
+<dd><p>Applies a function to the inner value of an Option.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>f</strong> (<em>Callable[[A],B]</em>) &#8211; the function to apply</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">the resulting Option</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">Option[B]</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="Option.main">
+<code class="descclassname">Option.</code><code class="descname">main</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Option.main" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="Option.option">
+<code class="descclassname">Option.</code><code class="descname">option</code><span class="sig-paren">(</span><em>value</em><span class="sig-paren">)</span><a class="headerlink" href="#Option.option" title="Permalink to this definition">¶</a></dt>
+<dd><p>Constructs an Option instance from value. This function converts None into an instance of Nothing.
+If this behavior is undesired, use Option.pure instead.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>value</strong> (<em>T</em>) &#8211; the value</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">the resulting Option</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">Option[T]</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+
+
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2016, Eric Nichols.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../',
+            VERSION:'0.0.1',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="../_static/jquery.js"></script>
+      <script type="text/javascript" src="../_static/underscore.js"></script>
+      <script type="text/javascript" src="../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>
