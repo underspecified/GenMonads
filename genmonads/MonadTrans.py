@@ -7,8 +7,8 @@ from pony.thirdparty.compiler.ast import *
 class MonadTranslator(PythonTranslator):
     # noinspection PyUnresolvedReferences
     """
-    The translator class that converts the AST of a generator over monads into a series of nested calls to flat_map,
-    map, and filter.
+    The translator class that converts the AST of a generator over monads into a series of nested calls to
+    `flat_map()`, `map()`, and `filter()`.
 
     For example, consider the following generator:
 
@@ -32,8 +32,9 @@ class MonadTranslator(PythonTranslator):
 
     def postGenExpr(self, node):
         """
-        Converts the AST node for the full generator expression into its code representation. Responsible for
-        discarding the parentheses around the generator expression.
+        Converts the AST node for the full generator expression into its code representation.
+
+        Responsible for discarding the parentheses around the generator expression.
 
         Args:
             node (GenExpr): the AST node
@@ -45,8 +46,9 @@ class MonadTranslator(PythonTranslator):
 
     def postGenExprInner(self, node):
         """
-        Converts the AST node for the generator's inner expression into its code representation. Responsible for
-        converting the final flat_map call into a call to map and adding closing parentheses.
+        Converts the AST node for the generator's inner expression into its code representation.
+
+        Responsible for converting the final `flat_map` call into a call to `map` and adding closing parentheses.
 
         Args:
             node (GenExprInner): the AST node
@@ -61,8 +63,9 @@ class MonadTranslator(PythonTranslator):
 
     def postGenExprFor(self, node):
         """
-        Converts the AST node for the body of a generator's for statements into its code representation.
-        Responsible for converting if statements into calls to filter and "for x in y" in to calls to flat_map.
+        Converts the AST node for the body of a generator's `for` statements into its code representation.
+
+        Responsible for converting `if` statements into calls to `filter` and `for x in y` in to calls to `flat_map`.
 
         Args:
             node (GenExprFor): the AST node
@@ -90,8 +93,8 @@ class MonadTranslator(PythonTranslator):
 
 def ast2src(tree):
     """
-    Converts an AST into python source, replacing generator expressions into a series of nested calls to flat_map,
-    map, and filter by applying the MonadTranslator to an AST.
+    Converts an AST into python source, replacing generator expressions into a series of nested calls to `flat_map`,
+    `map`, and `filter` by applying the `MonadTranslator` to an AST.
 
     Args:
         tree (GenExpr): the AST node of a generator expression

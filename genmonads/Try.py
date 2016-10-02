@@ -12,16 +12,18 @@ T = TypeVar('T')
 
 class Try(MonadFilter):
     """
-    A type that represents a failable computation. Instances of type Try[T] are either instances of Success[T] or
-    Failure. This monad uses eager evaluation. For lazy computations, see the Task monad (under construction).
+    A type that represents a failable computation.
 
-    Instances of Try[T] are constructed by passing a computation wrapped in a thunk (i.e. a lambda expression with no
-    arguments) to either the try_to() or Try.pure() or functions. The thunk is evaluated immediately, and successful
-    computations return the result wrapped in Success, while computations that raise an exception return that exception
-    wrapped in Failure.
+    Instances of type `Try[T]` are either instances of `Success[T]` or `Failure[T]`. This monad uses eager evaluation.
+    For lazy computations, see the `Task` monad (under construction).
 
-    Monadic computing is supported with map, flat_map, flatten, and filter functions, and for-comprehensions can be
-    formed by evaluating generators over monads with the mfor function.
+    Instances of `Try[T]` are constructed by passing a computation wrapped in a thunk (i.e. a lambda expression
+    with no arguments) to either the `try_to()` or `Try.pure()` or functions. The thunk is evaluated immediately,
+    and successful computations return the result wrapped in `Success`, while computations that raise an exception
+    return that exception wrapped in `Failure[T]`.
+
+    Monadic computing is supported with `map`, `flat_map()`, `flatten()`, and `filter()` functions, and
+    for-comprehensions can be formed by evaluating generators over monads with the `mfor()` function.
     """
 
     def __init__(self, *args, **kwargs):
@@ -36,7 +38,7 @@ class Try(MonadFilter):
             other (Try[T]): the value to compare against
 
         Returns:
-            bool: True if inner values are equivalent, False otherwise
+            bool: `True` if inner values are equivalent, `False` otherwise
         """
         if isinstance(other, Try):
             return self.get().__eq__(other.get())
@@ -53,16 +55,16 @@ class Try(MonadFilter):
     def empty():
         """
         Returns:
-            Try[T]: Failure with a ValueError, the empty instance for this monad
+            Try[T]: `Failure[T]` with a `ValueError`, the empty instance for this monad
         """
         return Failure(ValueError("This Try instance is empty!"))
 
     def flatten(self):
         """
-        Flattens nested instances of Try.
+        Flattens nested instances of `Try`.
 
         Returns:
-            Try[T]
+            Try[T]: the flattened monad
         """
         raise NotImplementedError
 
@@ -77,39 +79,40 @@ class Try(MonadFilter):
 
     def get_or_else(self, default):
         """
-        Returns the Try's inner value if an instance of Success or default if instance of Failure.
+        Returns the `Try`'s inner value if an instance of `Success` or `default` if instance of `Failure`.
 
         Args:
-            default: the value to return for Failure instances
+            default: the value to return for `Failure[T]` instances
 
         Returns:
-            T: the Try's inner value if an instance of Success or default if instance of Failure
+            T: the `Try`'s inner value if an instance of `Success` or `default` if instance of `Failure`
         """
         raise NotImplementedError
 
     def map(self, f):
         """
-        Applies a function to the inner value of a Try.
+        Applies a function to the inner value of a `Try`.
 
         Args:
             f (Callable[[A],B]): the function to apply
 
         Returns:
-            Try[B]: the resulting Try
+            Try[B]: the resulting `Try`
         """
         raise NotImplementedError
 
     @staticmethod
     def pure(thunk):
         """
-        Evaluates a failable computation in the Try monad. This function should be used instead of calling Try.__init__
-        directly.
+        Evaluates a failable computation in the `Try` monad.
+
+        This function should be used instead of calling `Try.__init__()` directly.
 
         Args:
             thunk (Callable[[None],T]): the computation
 
         Returns:
-            Try[T]: the resulting Try
+            Try[T]: the resulting `Try`
         """
         try:
             return Success(thunk())
@@ -118,23 +121,25 @@ class Try(MonadFilter):
 
     def to_option(self):
         """
-        Converts an instance of Try[T] to Option[T]. Success[T] is mapped to Some[T], and Failure is mapped to Nothing.
+        Converts an instance of `Try[T]` to `Option[T]`.
+
+        `Success[T]` is mapped to `Some[T]`, and `Failure[T]` is mapped to `Nothing[T]`.
 
         Returns:
-            Option[T]: the corresponding Option
+            Option[T]: the corresponding `Option`
         """
         raise NotImplementedError
 
 
 def try_to(thunk):
     """
-    Evaluates thunk in the Try monad.
+    Evaluates a delayed computation in the `Try` monad.
 
     Args:
-        thunk (Callable[[None],T]): the computation
+        thunk (Callable[[None],T]): the delayed computation
 
     Returns:
-        Try[T]: the resulting Try
+        Try[T]: the resulting `Try`
     """
     return Try.pure(thunk)
 
@@ -154,13 +159,13 @@ class Success(Try):
     def __str__(self):
         """
         Returns:
-            str: a string representation of the Try
+            str: a string representation of monad
         """
         return 'Success(%s)' % self._result
 
     def flatten(self):
         """
-        Flattens nested instances of Try.
+        Flattens nested instances of `Try`.
 
         Returns:
             Try[T]
@@ -172,7 +177,7 @@ class Success(Try):
 
     def get(self):
         """
-        Returns the Try's inner value.
+        Returns the `Try`'s inner value.
 
         Returns:
             Union[T,Exception]: the inner value
@@ -182,49 +187,64 @@ class Success(Try):
     # noinspection PyUnusedLocal
     def get_or_else(self, default):
         """
-        Returns the Try's inner value if an instance of Success or default if instance of Failure.
+        Returns the `Try`'s inner value if an instance of `Success` or default if instance of `Failure[T]`.
 
         Args:
             default: the value to return for Failure instances
 
         Returns:
-            T: the Try's inner value if an instance of Success or default if instance of Failure
+            T: the `Try`'s inner value if an instance of `Success` or default if instance of `Failure[T]`
         """
         return self._result
 
     def map(self, f):
         """
-        Applies a function to the inner value of a Try.
+        Applies a function to the inner value of a `Try`.
 
         Args:
             f (Callable[[A],B]): the function to apply
 
         Returns:
-            Try[B]: the resulting Try
+            Try[B]: the resulting `Try`
         """
         return Try.pure(lambda: f(self.get()))
 
     @staticmethod
     def pure(result):
         """
-        Injects a result into the Success monad.
+        Injects a result into the `Success` monad.
 
         Args:
             result (T): the result
 
         Returns:
-            Try[T]: the resulting Try
+            Try[T]: the resulting `Try`
         """
         return Success(result)
 
     def to_option(self):
         """
-        Converts an instance of Try[T] to Option[T]. Success[T] is mapped to Some[T], and Failure is mapped to Nothing.
+        Converts an instance of `Try[T]` to `Option[T]`.
+
+        `Success[T]` is mapped to `Some[T]`, and `Failure[T]` is mapped to `Nothing[T]`.
 
         Returns:
-            Option[T]: the corresponding Option
+            Option[T]: the corresponding `Option`
         """
         return Some(self._result)
+
+
+def success(result):
+    """
+    Injects a value into the `Success` monad.
+
+    Args:
+        result (T): the result
+
+    Returns:
+        Try[T]: the resulting monad
+    """
+    return Success.pure(result)
 
 
 # noinspection PyMissingConstructor
@@ -235,7 +255,7 @@ class Failure(Try):
     def __str__(self):
         """
         Returns:
-            str: a string representation of the Try
+            str: a string representation of the monad
         """
         return 'Failure(%s)' % self.get()
 
@@ -248,16 +268,16 @@ class Failure(Try):
 
     def flatten(self):
         """
-        Flattens nested instances of Try.
+        Flattens nested instances of `Try`.
 
         Returns:
-            Try[T]
+            Try[T]: the flattened monad
         """
         return self
 
     def get(self):
         """
-        Returns the Try's inner value.
+        Returns the `Try`'s inner value.
 
         Returns:
             Union[T,Exception]: the inner value
@@ -266,31 +286,31 @@ class Failure(Try):
 
     def get_or_else(self, default):
         """
-        Returns the Try's inner value if an instance of Success or default if instance of Failure.
+        Returns the `Try`'s inner value if an instance of `Success` or `default` if instance of `Failure`.
 
         Args:
-            default: the value to return for Failure instances
+            default: the value to return for `Failure[T]` instances
 
         Returns:
-            T: the Try's inner value if an instance of Success or default if instance of Failure
+            T: the `Try`'s inner value if an instance of `Success` or `default` if instance of `Failure`
         """
         return default
 
     def map(self, f):
         """
-        Applies a function to the inner value of a Try.
+        Applies a function to the inner value of a `Try`.
 
         Args:
             f (Callable[[A],B]): the function to apply
 
         Returns:
-            Try[B]: the resulting Try
+            Try[B]: the resulting `Try`
         """
         return self
 
     def raise_ex(self):
         """
-        Raises this Failure instance's exception.
+        Raises this `Failure` instance's exception.
 
         Raises:
             Exception: the exception
@@ -299,12 +319,27 @@ class Failure(Try):
 
     def to_option(self):
         """
-        Converts an instance of Try[T] to Option[T]. Success[T] is mapped to Some[T], and Failure is mapped to Nothing.
+        Converts an instance of `Try[T]` to `Option[T]`.
+        
+        `Success[T]` is mapped to `Some[T]`, and `Failure[T]` is mapped to `Nothing[T]`.
 
         Returns:
-            Option[T]: the corresponding Option
+            Option[T]: the corresponding `Option`
         """
         return Nothing()
+
+
+def failure(ex):
+    """
+    Injects an exception into the `Failure` monad.
+
+    Args:
+        ex (Exception): the exception
+
+    Returns:
+        Failure[T]: the resulting `Failure`
+    """
+    return Failure.pure(ex)
 
 
 def main():
@@ -328,7 +363,7 @@ def main():
                         yield x - y
     print(mfor(make_gen()))
 
-    print((try_to(lambda: 5) >> (lambda x: try_to(lambda: 2))))
+    print((try_to(lambda: 5) >> try_to(lambda: 2)))
 
     print(try_to(lambda: 1 / 0).map(lambda x: x * 2))
 

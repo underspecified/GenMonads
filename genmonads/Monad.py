@@ -15,8 +15,8 @@ class Monad(object):
     """
     A base class for representing monads.
 
-    Monadic computing is supported with map, flat_map, and flatten functions, and for-comprehensions can be formed by
-    evaluating generators over monads with the mfor function.
+    Monadic computing is supported with `map()`, `flat_map()`, and `flatten()` functions, and for-comprehensions
+    can be formed by evaluating generators over monads with the `mfor()` function.
     """
 
     def __iter__(self):
@@ -35,20 +35,23 @@ class Monad(object):
 
     def __rshift__(self, f):
         """
-        A symbolic alias for flat_map.
+        A symbolic alias for `flat_map()`. Uses dynamic type checking to permit arguments of the forms
+         `self >> lambda x: Monad(x)` and `self >> Monad(x)`.
 
         Args:
-            f (Callable[[A],Monad[B]]): the function to apply
+            f (Union[Callable[[A],Monad[B]],Monad[B]]): the function to apply
 
         Returns:
             Monad[B]
         """
-        return self.flat_map(f)
+        return f if isinstance(f, Monad) else self.flat_map(f)
 
     def flat_map(self, f):
         """
         Applies a function that produces an Monad from unwrapped values to an Monad's inner value and flattens the
-        nested result. Equivalent to self.map(f).flatten()
+        nested result.
+
+        Equivalent to `self.map(f).flatten()`.
 
         Args:
             f (Callable[[A],Monad[B]]): the function to apply
@@ -151,7 +154,9 @@ def mfor(gen, frame_depth=5):
 
 
 def do(gen, frame_depth=5):
-    """A synonym for mfor
+    """
+    A synonym for `mfor`.
+
     Evaluates a generator over a monadic value, translating it into the equivalent for-comprehension.
 
     Args:
