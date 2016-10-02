@@ -1,0 +1,171 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>&lt;no title&gt; &#8212; GenMonads 0.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="GenMonads 0.0.1 documentation" href="index.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <p># GenMonads: Python monads with generator-based syntax
+Author: Eric Nichols &lt;<a class="reference external" href="mailto:underspecified&#37;&#52;&#48;gmail&#46;com">underspecified<span>&#64;</span>gmail<span>&#46;</span>com</a>&gt;</p>
+<p>This module contains python implementations of some scala-style monads.</p>
+<p>It provides a generator-based syntax using a decompilation trick from Pony [1]
+to translate generators into nested calls to a monad&#8217;s flat_map, map, and
+filter functions, in a similar fashion to scala&#8217;s for comprehensions [2].</p>
+<p>The idea was inspired by a comment by Shin no Noir [3] on a post on A
+Neighborhood of Infinity [4].</p>
+<p>## Features</p>
+<p>GenMonads supports do-notation-like syntax by using a special function to
+evaluate a generator over monads (the functions is named &#8220;mfor,&#8221; short for
+&#8220;monadic for comprehension,&#8221; as it is modeled after scala&#8217;s for comprehensions,
+but the synonym &#8220;do&#8221; is also available):</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">genmonads.Option</span> <span class="k">import</span> <span class="o">*</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">mfor</span><span class="p">(</span><span class="n">x</span> <span class="o">+</span> <span class="n">y</span>
+<span class="go">               for x in option(2)</span>
+<span class="go">               if x &lt; 10</span>
+<span class="go">               for y in option(5)</span>
+<span class="go">               if y % 2 != 0))</span>
+<span class="go">Some(7)</span>
+</pre></div>
+</div>
+<p>The above generator is automatically translated into the following at run-time:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">option</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span> \
+<span class="go">              .filter(lambda x: x &lt; 10) \</span>
+<span class="go">              .flat_map(lambda x: option(5) \</span>
+<span class="go">                   .filter(lambda y: y % 2 != 0) \</span>
+<span class="go">                   .map(lambda y: x + y)))</span>
+<span class="go">Some(7)</span>
+</pre></div>
+</div>
+<p>Both generator expressions and generator functions are supported, though
+variable assignment in generator function bodies is not currently implemented:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="k">def</span> <span class="nf">make_gen</span><span class="p">():</span>
+<span class="go">        for x in option(4):</span>
+<span class="go">            if x &gt; 2:</span>
+<span class="go">                for y in option(10):</span>
+<span class="go">                    if y % 2 == 0:</span>
+<span class="go">                        yield x - y</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">mfor</span><span class="p">(</span><span class="n">make_gen</span><span class="p">()))</span>
+<span class="go">Some(-6)</span>
+</pre></div>
+</div>
+<p>Monad chaining with the bind operator is also supported (&gt;&gt;= and &gt;&gt; are
+combined into a single &gt;&gt; operator due to syntactic limitations in
+overloading &gt;&gt;= in python):</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">option</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span> <span class="o">&gt;&gt;</span> <span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">option</span><span class="p">(</span><span class="n">x</span> <span class="o">*</span> <span class="mi">2</span><span class="p">)))</span>
+<span class="go">Some(10)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">option</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span> <span class="o">&gt;&gt;</span> <span class="p">(</span><span class="k">lambda</span> <span class="n">_</span><span class="p">:</span> <span class="n">option</span><span class="p">(</span><span class="mi">2</span><span class="p">)))</span>
+<span class="go">Some(2)</span>
+</pre></div>
+</div>
+<p>Following scala&#8217;s monadic handling of nulls, the option(...) function can be
+used to inject computations that can return None into the Option monad:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">option</span><span class="p">(</span><span class="kc">None</span><span class="p">))</span>
+<span class="go">Nothing()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pets</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;cat&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;dog&#39;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="s1">&#39;bird&#39;</span><span class="p">:</span> <span class="mi">3</span><span class="p">}</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">option</span><span class="p">(</span><span class="n">pets</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;dog&#39;</span><span class="p">)))</span>
+<span class="go">Some(2)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">option</span><span class="p">(</span><span class="n">pets</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;iguana&#39;</span><span class="p">)))</span>
+<span class="go">Nothing()</span>
+</pre></div>
+</div>
+<p>## Requirements
+* Python 3: <a class="reference external" href="https://www.python.org">https://www.python.org</a>
+* pony: <a class="reference external" href="https://pypi.python.org/pypi/pony">https://pypi.python.org/pypi/pony</a></p>
+<p>## Todo
+* variable assignment in generator functions
+* optional Haskell nomenclature
+* type annotations of the monads
+* Either[A,B] and other monads
+* Try.or_else(recover)</p>
+<p>## License
+This project is licensed under theGNU Affero General Public License v3 (AGPLv3).</p>
+<p>## References
+[1] <a class="reference external" href="http://stackoverflow.com/questions/16115713/how-pony-orm-does-its-tricks">http://stackoverflow.com/questions/16115713/how-pony-orm-does-its-tricks</a>
+[2] <a class="reference external" href="http://docs.scala-lang.org/tutorials/FAQ/yield.html">http://docs.scala-lang.org/tutorials/FAQ/yield.html</a>
+[3] <a class="reference external" href="https://www.blogger.com/profile/08974372500960094990">https://www.blogger.com/profile/08974372500960094990</a>
+[4] <a class="reference external" href="http://blog.sigfpe.com/2012/03/overloading-python-list-comprehension.html">http://blog.sigfpe.com/2012/03/overloading-python-list-comprehension.html</a></p>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/README.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2016, Eric Nichols.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4.6</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.9</a>
+      
+      |
+      <a href="_sources/README.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
