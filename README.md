@@ -76,13 +76,12 @@ Nothing()
 ## Todo
 * variable assignment in generator functions
 * optional Haskell nomenclature
-* type annotations of the monads
 * Either[A,B] and other monads
 * Try.or_else(recover)
 
 
 ## License
-This project is licensed under theGNU Affero General Public License v3 (AGPLv3).
+This project is licensed under the GNU Affero General Public License v3 (AGPLv3).
 
 
 ## References

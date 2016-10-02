@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Welcome to GenMonads’s documentation! &mdash; GenMonads 0.0.1 documentation</title>
+  <title>GenMonads: Python monads with generator-based syntax &mdash; GenMonads 0.1 documentation</title>
   
 
   
@@ -30,7 +30,7 @@
   
 
   
-    <link rel="top" title="GenMonads 0.0.1 documentation" href="#"/> 
+    <link rel="top" title="GenMonads 0.1 documentation" href="#"/> 
 
   
   <script src="_static/js/modernizr.min.js"></script>
@@ -58,7 +58,7 @@
             
             
               <div class="version">
-                0.0.1
+                0.1
               </div>
             
           
@@ -81,7 +81,14 @@
             
                 <!-- Local TOC -->
                 <div class="local-toc"><ul>
-<li><a class="reference internal" href="#">Welcome to GenMonads&#8217;s documentation!</a></li>
+<li><a class="reference internal" href="#">GenMonads: Python monads with generator-based syntax</a><ul>
+<li><a class="reference internal" href="#features">Features</a></li>
+<li><a class="reference internal" href="#requirements">Requirements</a></li>
+<li><a class="reference internal" href="#todo">Todo</a></li>
+<li><a class="reference internal" href="#license">License</a></li>
+<li><a class="reference internal" href="#references">References</a></li>
+</ul>
+</li>
 <li><a class="reference internal" href="#indices-and-tables">Indices and tables</a></li>
 </ul>
 </div>
@@ -113,7 +120,7 @@
   <ul class="wy-breadcrumbs">
     <li><a href="#">Docs</a> &raquo;</li>
       
-    <li>Welcome to GenMonads&#8217;s documentation!</li>
+    <li>GenMonads: Python monads with generator-based syntax</li>
       <li class="wy-breadcrumbs-aside">
         
           
@@ -127,10 +134,108 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="welcome-to-genmonads-s-documentation">
-<h1>Welcome to GenMonads&#8217;s documentation!<a class="headerlink" href="#welcome-to-genmonads-s-documentation" title="Permalink to this headline">¶</a></h1>
-<p>Contents:</p>
+  <div class="section" id="genmonads-python-monads-with-generator-based-syntax">
+<h1>GenMonads: Python monads with generator-based syntax<a class="headerlink" href="#genmonads-python-monads-with-generator-based-syntax" title="Permalink to this headline">¶</a></h1>
+<p>Author: Eric Nichols &lt;<a class="reference external" href="mailto:underspecified&#37;&#52;&#48;gmail&#46;com">underspecified<span>&#64;</span>gmail<span>&#46;</span>com</a>&gt;</p>
+<p>This module contains python implementations of some scala-style monads.</p>
+<p>It provides a generator-based syntax using a decompilation trick from
+Pony [1] to translate generators into nested calls to a monad&#8217;s
+flat_map, map, and filter functions, in a similar fashion to scala&#8217;s
+for comprehensions [2].</p>
+<p>The idea was inspired by a comment by Shin no Noir [3] on a post on A
+Neighborhood of Infinity [4].</p>
+<div class="section" id="features">
+<h2>Features<a class="headerlink" href="#features" title="Permalink to this headline">¶</a></h2>
+<p>GenMonads supports do-notation-like syntax by using a special function
+to evaluate a generator over monads (the functions is named &#8220;mfor,&#8221;
+short for &#8220;monadic for comprehension,&#8221; as it is modeled after scala&#8217;s
+for comprehensions, but the synonym &#8220;do&#8221; is also available):</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">genmonads.Option</span> <span class="k">import</span> <span class="o">*</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">mfor</span><span class="p">(</span><span class="n">x</span> <span class="o">+</span> <span class="n">y</span>
+<span class="go">          for x in option(2)</span>
+<span class="go">          if x &lt; 10</span>
+<span class="go">          for y in option(5)</span>
+<span class="go">          if y % 2 != 0))</span>
+<span class="go">Some(7)</span>
+</pre></div>
+</div>
+<p>The above generator is automatically translated into the following at
+run-time:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">option</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+<span class="go">              .filter(lambda x: x &lt; 10)</span>
+<span class="go">              .flat_map(lambda x: option(5)</span>
+<span class="go">                  .filter(lambda y: y % 2 != 0)</span>
+<span class="go">                  .map(lambda y: x + y)))</span>
+<span class="go">Some(7)</span>
+</pre></div>
+</div>
+<p>Both generator expressions and generator functions are supported, though
+variable assignment in generator function bodies is not currently
+implemented:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="k">def</span> <span class="nf">make_gen</span><span class="p">():</span>
+<span class="go">        for x in option(4):</span>
+<span class="go">            if x &gt; 2:</span>
+<span class="go">                for y in option(10):</span>
+<span class="go">                    if y % 2 == 0:</span>
+<span class="go">                        yield x - y</span>
+<span class="go">&gt;&gt;&gt;&gt; print(mfor(make\_gen()))</span>
+<span class="go">Some(-6)</span>
+</pre></div>
+</div>
+<p>Monad chaining with the bind operator is also supported (&gt;&gt;= and &gt;&gt; are
+combined into a single &gt;&gt; operator due to syntactic limitations in
+overloading &gt;&gt;= in python):</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">option</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span> <span class="o">&gt;&gt;</span> <span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">option</span><span class="p">(</span><span class="n">x</span> <span class="o">*</span> <span class="mi">2</span><span class="p">))</span>
+<span class="go">Some(10)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">option</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span> <span class="o">&gt;&gt;</span> <span class="p">(</span><span class="k">lambda</span> <span class="n">_</span><span class="p">:</span> <span class="n">option</span><span class="p">(</span><span class="mi">2</span><span class="p">)))</span>
+<span class="go">Some(2)</span>
+</pre></div>
+</div>
+<p>Following scala&#8217;s monadic handling of nulls, the option(...) function
+can be used to inject computations that can return None into the Option
+monad:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">option</span><span class="p">(</span><span class="kc">None</span><span class="p">))</span>
+<span class="go">Nothing()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pets</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;cat&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;dog&#39;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="s1">&#39;bird&#39;</span><span class="p">:</span> <span class="mi">3</span><span class="p">}</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">option</span><span class="p">(</span><span class="n">pets</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;dog&#39;</span><span class="p">)))</span>
+<span class="go">Some(2)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">option</span><span class="p">(</span><span class="n">pets</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;iguana&#39;</span><span class="p">)))</span>
+<span class="go">Nothing()</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="requirements">
+<h2>Requirements<a class="headerlink" href="#requirements" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Python 3: <a class="reference external" href="https://www.python.org">https://www.python.org</a></li>
+<li>pony: <a class="reference external" href="https://pypi.python.org/pypi/pony">https://pypi.python.org/pypi/pony</a></li>
+</ul>
+</div>
+<div class="section" id="todo">
+<h2>Todo<a class="headerlink" href="#todo" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>variable assignment in generator functions</li>
+<li>optional Haskell nomenclature</li>
+<li>Either[A,B] and other monads</li>
+<li>Try.or_else(recover)</li>
+</ul>
+</div>
+<div class="section" id="license">
+<h2>License<a class="headerlink" href="#license" title="Permalink to this headline">¶</a></h2>
+<p>This project is licensed under the GNU Affero General Public License v3
+(AGPLv3).</p>
+</div>
+<div class="section" id="references">
+<h2>References<a class="headerlink" href="#references" title="Permalink to this headline">¶</a></h2>
+<div class="line-block">
+<div class="line">[1] <a class="reference external" href="http://stackoverflow.com/questions/16115713/how-pony-orm-does-its-tricks">http://stackoverflow.com/questions/16115713/how-pony-orm-does-its-tricks</a></div>
+<div class="line">[2] <a class="reference external" href="http://docs.scala-lang.org/tutorials/FAQ/yield.html">http://docs.scala-lang.org/tutorials/FAQ/yield.html</a></div>
+<div class="line">[3] <a class="reference external" href="https://www.blogger.com/profile/08974372500960094990">https://www.blogger.com/profile/08974372500960094990</a></div>
+<div class="line">[4] <a class="reference external" href="http://blog.sigfpe.com/2012/03/overloading-python-list-comprehension.html">http://blog.sigfpe.com/2012/03/overloading-python-list-comprehension.html</a></div>
+<div class="line"><br /></div>
+</div>
 <div class="toctree-wrapper compound">
+</div>
 </div>
 </div>
 <div class="section" id="indices-and-tables">
@@ -174,7 +279,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'0.0.1',
+            VERSION:'0.1',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true
