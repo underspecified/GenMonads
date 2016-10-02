@@ -93,7 +93,7 @@ This project is licensed under the GNU Affero General Public License v3 (AGPLv3)
 
 
 ## References
-[1] http://stackoverflow.com/questions/16115713/how-pony-orm-does-its-tricks
-[2] http://docs.scala-lang.org/tutorials/FAQ/yield.html
-[3] https://www.blogger.com/profile/08974372500960094990
-[4] http://blog.sigfpe.com/2012/03/overloading-python-list-comprehension.html
+[1] http://stackoverflow.com/questions/16115713/how-pony-orm-does-its-tricks  
+[2] http://docs.scala-lang.org/tutorials/FAQ/yield.html  
+[3] https://www.blogger.com/profile/08974372500960094990  
+[4] http://blog.sigfpe.com/2012/03/overloading-python-list-comprehension.html  
