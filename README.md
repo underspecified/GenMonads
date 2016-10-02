@@ -1,5 +1,5 @@
 # GenMonads: Python monads with generator-based syntax
-Author: Eric Nichols <underspecified@gmail.com>
+Author: Eric Nichols <<underspecified@gmail.com>>
 
 This module contains python implementations of some scala-style monads.
 
