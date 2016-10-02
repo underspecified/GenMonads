@@ -100,7 +100,7 @@ GenMonads can be installed from the GitHub project page https://github.com/under
 
 .. code:: bash
 
-    > pip3 install --upgrade git+https://git@github.com/underspecified/GenMonads.git
+    > pip3 install git+https://git@github.com/underspecified/GenMonads.git
 
 Documentation
 -------------
