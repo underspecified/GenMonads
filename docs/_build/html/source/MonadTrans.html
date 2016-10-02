@@ -132,8 +132,8 @@
 <dt id="MonadTrans.MonadTranslator">
 <em class="property">class </em><code class="descclassname">MonadTrans.</code><code class="descname">MonadTranslator</code><span class="sig-paren">(</span><em>translator</em>, <em>tree</em><span class="sig-paren">)</span><a class="headerlink" href="#MonadTrans.MonadTranslator" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">pony.orm.asttranslation.PythonTranslator</span></code></p>
-<p>The translator class that converts the AST of a generator over monads into a series of nested calls to flat_map,
-map, and filter.</p>
+<p>The translator class that converts the AST of a generator over monads into a series of nested calls to
+<cite>flat_map()</cite>, <cite>map()</cite>, and <cite>filter()</cite>.</p>
 <p>For example, consider the following generator:</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">genmonads.Option</span> <span class="k">import</span> <span class="o">*</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">mfor</span><span class="p">(</span><span class="n">x</span> <span class="o">+</span> <span class="n">y</span>
@@ -156,8 +156,8 @@ map, and filter.</p>
 <dl class="method">
 <dt id="MonadTrans.MonadTranslator.postGenExpr">
 <code class="descname">postGenExpr</code><span class="sig-paren">(</span><em>node</em><span class="sig-paren">)</span><a class="headerlink" href="#MonadTrans.MonadTranslator.postGenExpr" title="Permalink to this definition">¶</a></dt>
-<dd><p>Converts the AST node for the full generator expression into its code representation. Responsible for
-discarding the parentheses around the generator expression.</p>
+<dd><p>Converts the AST node for the full generator expression into its code representation.</p>
+<p>Responsible for discarding the parentheses around the generator expression.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -175,8 +175,8 @@ discarding the parentheses around the generator expression.</p>
 <dl class="method">
 <dt id="MonadTrans.MonadTranslator.postGenExprFor">
 <code class="descname">postGenExprFor</code><span class="sig-paren">(</span><em>node</em><span class="sig-paren">)</span><a class="headerlink" href="#MonadTrans.MonadTranslator.postGenExprFor" title="Permalink to this definition">¶</a></dt>
-<dd><p>Converts the AST node for the body of a generator&#8217;s for statements into its code representation.
-Responsible for converting if statements into calls to filter and &#8220;for x in y&#8221; in to calls to flat_map.</p>
+<dd><p>Converts the AST node for the body of a generator&#8217;s <cite>for</cite> statements into its code representation.</p>
+<p>Responsible for converting <cite>if</cite> statements into calls to <cite>filter</cite> and <cite>for x in y</cite> in to calls to <cite>flat_map</cite>.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -194,8 +194,8 @@ Responsible for converting if statements into calls to filter and &#8220;for x i
 <dl class="method">
 <dt id="MonadTrans.MonadTranslator.postGenExprInner">
 <code class="descname">postGenExprInner</code><span class="sig-paren">(</span><em>node</em><span class="sig-paren">)</span><a class="headerlink" href="#MonadTrans.MonadTranslator.postGenExprInner" title="Permalink to this definition">¶</a></dt>
-<dd><p>Converts the AST node for the generator&#8217;s inner expression into its code representation. Responsible for
-converting the final flat_map call into a call to map and adding closing parentheses.</p>
+<dd><p>Converts the AST node for the generator&#8217;s inner expression into its code representation.</p>
+<p>Responsible for converting the final <cite>flat_map</cite> call into a call to <cite>map</cite> and adding closing parentheses.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -233,8 +233,8 @@ converting the final flat_map call into a call to map and adding closing parenth
 <dl class="function">
 <dt id="MonadTrans.ast2src">
 <code class="descclassname">MonadTrans.</code><code class="descname">ast2src</code><span class="sig-paren">(</span><em>tree</em><span class="sig-paren">)</span><a class="headerlink" href="#MonadTrans.ast2src" title="Permalink to this definition">¶</a></dt>
-<dd><p>Converts an AST into python source, replacing generator expressions into a series of nested calls to flat_map,
-map, and filter by applying the MonadTranslator to an AST.</p>
+<dd><p>Converts an AST into python source, replacing generator expressions into a series of nested calls to <cite>flat_map</cite>,
+<cite>map</cite>, and <cite>filter</cite> by applying the <cite>MonadTranslator</cite> to an AST.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />

@@ -133,13 +133,14 @@
 <em class="property">class </em><code class="descclassname">Monad.</code><code class="descname">Monad</code><a class="headerlink" href="#Monad.Monad" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
 <p>A base class for representing monads.</p>
-<p>Monadic computing is supported with map, flat_map, and flatten functions, and for-comprehensions can be formed by
-evaluating generators over monads with the mfor function.</p>
+<p>Monadic computing is supported with <cite>map()</cite>, <cite>flat_map()</cite>, and <cite>flatten()</cite> functions, and for-comprehensions
+can be formed by evaluating generators over monads with the <cite>mfor()</cite> function.</p>
 <dl class="method">
 <dt id="Monad.Monad.flat_map">
 <code class="descname">flat_map</code><span class="sig-paren">(</span><em>f</em><span class="sig-paren">)</span><a class="headerlink" href="#Monad.Monad.flat_map" title="Permalink to this definition">¶</a></dt>
 <dd><p>Applies a function that produces an Monad from unwrapped values to an Monad&#8217;s inner value and flattens the
-nested result. Equivalent to self.map(f).flatten()</p>
+nested result.</p>
+<p>Equivalent to <cite>self.map(f).flatten()</cite>.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -223,8 +224,8 @@ nested result. Equivalent to self.map(f).flatten()</p>
 <dl class="function">
 <dt id="Monad.do">
 <code class="descclassname">Monad.</code><code class="descname">do</code><span class="sig-paren">(</span><em>gen</em>, <em>frame_depth=5</em><span class="sig-paren">)</span><a class="headerlink" href="#Monad.do" title="Permalink to this definition">¶</a></dt>
-<dd><p>A synonym for mfor
-Evaluates a generator over a monadic value, translating it into the equivalent for-comprehension.</p>
+<dd><p>A synonym for <cite>mfor</cite>.</p>
+<p>Evaluates a generator over a monadic value, translating it into the equivalent for-comprehension.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
