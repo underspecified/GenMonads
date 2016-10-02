@@ -4,19 +4,19 @@ Author: Eric Nichols <underspecified@gmail.com>
 This module contains python implementations of some scala-style monads.
 
 It provides a generator-based syntax using a decompilation trick from Pony [1]
-to translate generators into nested calls to a monad's flat_map, map, and
-filter functions, in a similar fashion to scala's for comprehensions [2].
+to translate generators into nested calls to a monad's `flat_map()`, `map()`,
+and `filter()` functions, in a similar fashion to scala's for comprehensions [2].
 
 The idea was inspired by a comment by Shin no Noir [3] on a post on A
 Neighborhood of Infinity [4].
 
 
-## Features
+## Monad Syntax
 
-GenMonads supports do-notation-like syntax by using a special function to
-evaluate a generator over monads (the functions is named "mfor," short for
-"monadic for comprehension," as it is modeled after scala's for comprehensions,
-but the synonym "do" is also available):
+GenMonads supports syntax like scala for-comprehensions by using a special
+function to evaluate a generator over monads (the functions is named `mfor()`,
+short for "monadic for comprehension," as it is modeled after scala's for
+comprehensions, but the synonym `do()` is also available):
 
 ```python
 >>> from genmonads.Option import *
@@ -53,27 +53,29 @@ variable assignment in generator function bodies is not currently implemented:
 Some(-6)
 ```
 
-Monad chaining with the bind operator is also supported (>>= and >> are
-combined into a single >> operator due to syntactic limitations in
-overloading >>= in python):
+Monad chaining with the bind operator is also supported (`>>=` and `>>` are
+combined into a single `>>` operator due to syntactic limitations in
+overloading `>>=` in python):
 
 ```python
 >>> print(option(5) >> (lambda x: option(x * 2)))
 Some(10)
 >>> print(option(5) >> (lambda _: option(2)))
 Some(2)
+>>> print(option(5) >> Nothing())
+Nothing
 ```
-Following scala's monadic handling of nulls, the option(...) function can be
+Following scala's monadic handling of `NULL`, the `option()` function can be
 used to inject computations that can return None into the Option monad:
 
 ```python
 >>> print(option(None))
-Nothing()
+Nothing
 >>> pets = {'cat': 1, 'dog': 2, 'bird': 3}
 >>> print(option(pets.get('dog')))
 Some(2)
 >>> print(option(pets.get('iguana')))
-Nothing()
+Nothing
 ```
 
 ## Requirements
@@ -84,8 +86,8 @@ Nothing()
 ## Todo
 * variable assignment in generator functions
 * optional Haskell nomenclature
-* Either[A,B] and other monads
-* Try.or_else(recover)
+* `Either[A,B]` and other monads
+* `Try.or_else(recover)`
 
 
 ## License
