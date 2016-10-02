@@ -226,7 +226,7 @@ class Some(Option):
 
 def some(value):
     """
-    Constructs an `Some` instance from `value`.
+    Constructs a `Some` instance from `value`.
 
     Args:
         value (T): the value
