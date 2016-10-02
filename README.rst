@@ -86,6 +86,13 @@ the Option monad:
     >>> print(option(pets.get('iguana')))
     Nothing
 
+Requirements
+------------
+
+-  Python 3: https://www.python.org
+-  pony: https://pypi.python.org/pypi/pony
+
+
 Installation
 ------------
 
@@ -99,12 +106,6 @@ Documentation
 -------------
 
 See the project's Read the Docs page at https://underspecified.github.io/GenMonads/
-
-Requirements
-------------
-
--  Python 3: https://www.python.org
--  pony: https://pypi.python.org/pypi/pony
 
 Todo
 ----
