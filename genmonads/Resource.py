@@ -4,8 +4,14 @@
 import gzip
 # noinspection PyUnresolvedReferences
 import sys
+# noinspection PyUnresolvedReferences
+from typing import TypeVar
 
 from genmonads.Monad import *
+
+A = TypeVar('A')
+B = TypeVar('B')
+T = TypeVar('T')
 
 
 class Resource(Monad):
@@ -38,9 +44,6 @@ class Resource(Monad):
         elif hasattr(self._resource, '__exit__'):
             return self._resource.__exit__(exc_type, exc_val, exc_tb)
 
-    def __iter__(self):
-        return MonadIter(self)
-
     def __str__(self):
         return 'Resource(%s)' % self._resource
 
@@ -55,6 +58,10 @@ class Resource(Monad):
 
     def map(self, f):
         return Resource(self._resource, lambda r: f(self._op(r)), self._enter, self._exit)
+
+    @staticmethod
+    def pure(value):
+        return Resource(value)
 
     def run(self):
         self.__enter__()
