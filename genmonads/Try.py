@@ -101,6 +101,18 @@ class Try(MonadFilter):
         """
         raise NotImplementedError
 
+    def or_else(self, default):
+        """
+        Returns the `Try` if an instance of `Success` or `default` if an instance of `Failure` .
+
+        Args:
+            default (Try[B]): the monad to return for `Failure[T]` instances
+
+        Returns:
+            Try[B]: the resulting `Try`
+        """
+        raise NotImplementedError
+
     @staticmethod
     def pure(thunk):
         """
@@ -118,6 +130,34 @@ class Try(MonadFilter):
             return Success(thunk())
         except Exception as ex:
             return Failure(ex)
+
+    def recover(self, f):
+        """
+        Recovers from a failed computation by applying `f` to the exception.
+
+        Essentially, a map on the `Failure` instance.
+
+        Args:
+            f (Callable[[Exception],B): the function to call on the `Failure[T]`'s exception
+
+        Returns:
+            Try[B]: the resulting `Try`
+        """
+        raise NotImplementedError
+
+    def recover_with(self, f):
+        """
+        Recovers from a failed computation by applying `f` to the exception.
+
+        Essentially, a flat_map on the `Failure` instance.
+
+        Args:
+            f (Callable[[Exception],Try[B]): the function to call on the `Failure[T]`'s exception
+
+        Returns:
+            Try[B]: the resulting `Try`
+        """
+        raise NotImplementedError
 
     def to_option(self):
         """
@@ -209,6 +249,18 @@ class Success(Try):
         """
         return Try.pure(lambda: f(self.get()))
 
+    def or_else(self, default):
+        """
+        Returns the `Try` if an instance of `Success` or `default` if an instance of `Failure` .
+
+        Args:
+            default (Try[B]): the monad to return for `Failure[T]` instances
+
+        Returns:
+            Try[B]: the resulting `Try`
+        """
+        return self
+
     @staticmethod
     def pure(result):
         """
@@ -221,6 +273,34 @@ class Success(Try):
             Try[T]: the resulting `Try`
         """
         return Success(result)
+
+    def recover(self, f):
+        """
+        Recovers from a failed computation by applying `f` to the exception.
+
+        Essentially, a map on the `Failure` instance.
+
+        Args:
+            f (Callable[[Exception],B): the function to call on the `Failure[T]`'s exception
+
+        Returns:
+            Try[B]: the resulting `Try`
+        """
+        return self
+
+    def recover_with(self, f):
+        """
+        Recovers from a failed computation by applying `f` to the exception.
+
+        Essentially, a flat_map on the `Failure` instance.
+
+        Args:
+            f (Callable[[Exception],Try[B]): the function to call on the `Failure[T]`'s exception
+
+        Returns:
+            Try[B]: the resulting `Try`
+        """
+        return self
 
     def to_option(self):
         """
@@ -308,6 +388,18 @@ class Failure(Try):
         """
         return self
 
+    def or_else(self, default):
+        """
+        Returns the `Try` if an instance of `Success` or `default` if an instance of `Failure` .
+
+        Args:
+            default (Try[B]): the monad to return for `Failure[T]` instances
+
+        Returns:
+            Try[B]: the resulting `Try`
+        """
+        return default
+
     def raise_ex(self):
         """
         Raises this `Failure` instance's exception.
@@ -316,6 +408,34 @@ class Failure(Try):
             Exception: the exception
         """
         raise self.get()
+
+    def recover(self, f):
+        """
+        Recovers from a failed computation by applying `f` to the exception.
+
+        Essentially, a map on the `Failure` instance.
+
+        Args:
+            f (Callable[[Exception],B): the function to call on the `Failure[T]`'s exception
+
+        Returns:
+            Try[B]: the resulting `Try`
+        """
+        return Try.pure(lambda: f(self.get()))
+
+    def recover_with(self, f):
+        """
+        Recovers from a failed computation by applying `f` to the exception.
+
+        Essentially, a flat_map on the `Failure` instance.
+
+        Args:
+            f (Callable[[Exception],Try[B]): the function to call on the `Failure[T]`'s exception
+
+        Returns:
+            Try[B]: the resulting `Try`
+        """
+        return self.recover(f).flatten()
 
     def to_option(self):
         """
@@ -364,8 +484,10 @@ def main():
     print(mfor(make_gen()))
 
     print((try_to(lambda: 5) >> try_to(lambda: 2)))
-
     print(try_to(lambda: 1 / 0).map(lambda x: x * 2))
+    print(try_to(lambda: 1 / 0).or_else(Success(0.0)))
+    print(try_to(lambda: 1 / 0).recover(lambda _: 0.0))
+    print(try_to(lambda: 1 / 0).recover_with(lambda _: Success(0.0)))
 
 
 if __name__ == '__main__':
