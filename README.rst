@@ -113,7 +113,6 @@ Todo
 -  variable assignment in generator functions
 -  optional Haskell nomenclature
 -  ``Either[A,B]`` and other monads
--  ``Try.or_else(recover)``
 
 License
 -------
