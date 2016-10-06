@@ -2,15 +2,15 @@
 from typing import TypeVar
 
 # noinspection PyUnresolvedReferences
-from genmonads.MonadFilter import *
-from genmonads.Option import *
+from genmonads import monadfilter, option
+from genmonads.monad import mfor
 
 A = TypeVar('A')
 B = TypeVar('B')
 T = TypeVar('T')
 
 
-class Try(MonadFilter):
+class Try(monadfilter.MonadFilter):
     """
     A type that represents a failable computation.
 
@@ -311,7 +311,7 @@ class Success(Try):
         Returns:
             Option[T]: the corresponding `Option`
         """
-        return Some(self._result)
+        return option.Some(self._result)
 
 
 def success(result):
@@ -446,7 +446,7 @@ class Failure(Try):
         Returns:
             Option[T]: the corresponding `Option`
         """
-        return Nothing()
+        return option.Nothing()
 
 
 def failure(ex):

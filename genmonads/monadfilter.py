@@ -1,6 +1,6 @@
 # noinspection PyUnresolvedReferences
 from typing import TypeVar
-from genmonads.Monad import *
+from genmonads import monad
 
 A = TypeVar('A')
 B = TypeVar('B')
@@ -8,7 +8,7 @@ T = TypeVar('T')
 
 
 # noinspection PyAbstractClass
-class MonadFilter(Monad):
+class MonadFilter(monad.Monad):
     """
     A base class for monads that can implement a `filter()` function.
 

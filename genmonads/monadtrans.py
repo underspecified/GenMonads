@@ -1,4 +1,4 @@
-from pony.orm.asttranslation import *
+from pony.orm.asttranslation import PythonTranslator
 # noinspection PyUnresolvedReferences
 from pony.thirdparty.compiler.ast import *
 

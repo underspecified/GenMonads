@@ -4,7 +4,7 @@ from typing import TypeVar
 
 from pony.orm.decompiling import decompile
 
-from genmonads.MonadTrans import ast2src
+from genmonads.monadtrans import ast2src
 
 A = TypeVar('A')
 B = TypeVar('B')

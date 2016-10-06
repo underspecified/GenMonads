@@ -1,14 +1,15 @@
 # noinspection PyUnresolvedReferences
 from typing import TypeVar
 
-from genmonads.MonadFilter import *
+from genmonads import monadfilter
+from genmonads.monad import mfor
 
 A = TypeVar('A')
 B = TypeVar('B')
 T = TypeVar('T')
 
 
-class Option(MonadFilter):
+class Option(monadfilter.MonadFilter):
     """
     A type that represents an optional value.
 
