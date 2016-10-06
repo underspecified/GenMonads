@@ -153,7 +153,8 @@ special function to evaluate a generator over monads (the functions is
 named <code class="docutils literal"><span class="pre">mfor()</span></code>, short for &#8220;monadic for comprehension,&#8221; as it is
 modeled after scala&#8217;s for comprehensions, but the synonym <code class="docutils literal"><span class="pre">do()</span></code> is
 also available):</p>
-<div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">genmonads.Option</span> <span class="k">import</span> <span class="o">*</span>
+<div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">genmonads.monad</span> <span class="k">import</span> <span class="n">mfor</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">genmonads.option</span> <span class="k">import</span> <span class="o">*</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">mfor</span><span class="p">(</span><span class="n">x</span> <span class="o">+</span> <span class="n">y</span>
 <span class="go">               for x in option(2)</span>
 <span class="go">               if x &lt; 10</span>
@@ -233,7 +234,6 @@ the Option monad:</p>
 <li>variable assignment in generator functions</li>
 <li>optional Haskell nomenclature</li>
 <li><code class="docutils literal"><span class="pre">Either[A,B]</span></code> and other monads</li>
-<li><code class="docutils literal"><span class="pre">Try.or_else(recover)</span></code></li>
 </ul>
 </div>
 <div class="section" id="license">

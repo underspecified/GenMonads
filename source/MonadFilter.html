@@ -126,52 +126,8 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="module-MonadFilter">
-<span id="monadfilter-module"></span><h1>MonadFilter module<a class="headerlink" href="#module-MonadFilter" title="Permalink to this headline">¶</a></h1>
-<dl class="class">
-<dt id="MonadFilter.MonadFilter">
-<em class="property">class </em><code class="descclassname">MonadFilter.</code><code class="descname">MonadFilter</code><a class="headerlink" href="#MonadFilter.MonadFilter" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">genmonads.Monad.Monad</span></code></p>
-<p>A base class for monads that can implement a <cite>filter()</cite> function.</p>
-<p>The monad must define an empty instance of the monad that is returned when <cite>filter()</cite> fails and represents a
-<cite>False</cite> value for the monad.</p>
-<dl class="staticmethod">
-<dt id="MonadFilter.MonadFilter.empty">
-<em class="property">static </em><code class="descname">empty</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#MonadFilter.MonadFilter.empty" title="Permalink to this definition">¶</a></dt>
-<dd><table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">the empty instance for this monad</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">MonadFilter[T]</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
-<dt id="MonadFilter.MonadFilter.filter">
-<code class="descname">filter</code><span class="sig-paren">(</span><em>f</em><span class="sig-paren">)</span><a class="headerlink" href="#MonadFilter.MonadFilter.filter" title="Permalink to this definition">¶</a></dt>
-<dd><p>Filters this monad by applying the predicate <cite>f</cite> to the monad&#8217;s inner value.
-Returns this monad if the predicate is <cite>True</cite>, this monad&#8217;s empty instance otherwise.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>f</strong> (<em>Callable[[T],bool]</em>) &#8211; the predicate</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">this instance if the predicate is <cite>True</cite> when applied to its inner value, the monad&#8217;s empty
-instance otherwise</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">MonadTrans[T]</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-</dd></dl>
-
+  <div class="section" id="monadfilter-module">
+<h1>MonadFilter module<a class="headerlink" href="#monadfilter-module" title="Permalink to this headline">¶</a></h1>
 </div>
 
 
