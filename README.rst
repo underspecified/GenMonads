@@ -24,7 +24,8 @@ also available):
 
 .. code:: python
 
-    >>> from genmonads.Option import *
+    >>> from genmonads.monad import mfor
+    >>> from genmonads.option import *
     >>> print(mfor(x + y
                    for x in option(2)
                    if x < 10
