@@ -18,7 +18,7 @@ class Try(monadfilter.MonadFilter):
     For lazy computations, see the `Task` monad (under construction).
 
     Instances of `Try[T]` are constructed by passing a computation wrapped in a thunk (i.e. a lambda expression
-    with no arguments) to either the `try_to()` or `Try.pure()` or functions. The thunk is evaluated immediately,
+    with no arguments) to either the `mtry()` or `Try.pure()` or functions. The thunk is evaluated immediately,
     and successful computations return the result wrapped in `Success`, while computations that raise an exception
     return that exception wrapped in `Failure[T]`.
 
@@ -171,7 +171,7 @@ class Try(monadfilter.MonadFilter):
         raise NotImplementedError
 
 
-def try_to(thunk):
+def mtry(thunk):
     """
     Evaluates a delayed computation in the `Try` monad.
 
@@ -463,31 +463,31 @@ def failure(ex):
 
 
 def main():
-    print(try_to(lambda: 2)
+    print(mtry(lambda: 2)
           .filter(lambda x: x < 10)
-          .flat_map(lambda x: try_to(lambda: 5)
+          .flat_map(lambda x: mtry(lambda: 5)
                     .filter(lambda y: y % 2 != 0)
                     .map(lambda y: x + y)))
 
     print(mfor(x + y
-               for x in try_to(lambda: 2)
+               for x in mtry(lambda: 2)
                if x < 10
-               for y in try_to(lambda: 5)
+               for y in mtry(lambda: 5)
                if y % 2 != 0))
 
     def make_gen():
-        for x in try_to(lambda: 4):
+        for x in mtry(lambda: 4):
             if x > 2:
-                for y in try_to(lambda: 10):
+                for y in mtry(lambda: 10):
                     if y % 2 == 0:
                         yield x - y
     print(mfor(make_gen()))
 
-    print((try_to(lambda: 5) >> try_to(lambda: 2)))
-    print(try_to(lambda: 1 / 0).map(lambda x: x * 2))
-    print(try_to(lambda: 1 / 0).or_else(Success(0.0)))
-    print(try_to(lambda: 1 / 0).recover(lambda _: 0.0))
-    print(try_to(lambda: 1 / 0).recover_with(lambda _: Success(0.0)))
+    print((mtry(lambda: 5) >> mtry(lambda: 2)))
+    print(mtry(lambda: 1 / 0).map(lambda x: x * 2))
+    print(mtry(lambda: 1 / 0).or_else(Success(0.0)))
+    print(mtry(lambda: 1 / 0).recover(lambda _: 0.0))
+    print(mtry(lambda: 1 / 0).recover_with(lambda _: Success(0.0)))
 
 
 if __name__ == '__main__':
