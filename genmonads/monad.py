@@ -144,8 +144,12 @@ def mfor(gen, frame_depth=5):
                 globals = sys._getframe(i).f_globals
                 locals = sys._getframe(i).f_locals
                 locals['monad'] = monad
+                #print('code:', code, file=sys.stderr)
+                #print('globals:', globals, file=sys.stderr)
+                #print('locals:', locals, file=sys.stderr)
                 return eval(code, globals, locals)
-            except Exception:
+            except Exception as ex:
+                #print(type(ex), ex, file=sys.stderr)
                 i -= 1
         if i < 0:
             raise ValueError("Monad not found in generator locals at frame depth %d!" % frame_depth)
