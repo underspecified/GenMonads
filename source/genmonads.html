@@ -1,0 +1,1845 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>genmonads package &mdash; GenMonads 0.2 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="GenMonads 0.2 documentation" href="../index.html"/> 
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> GenMonads
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.2
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <!-- Local TOC -->
+                <div class="local-toc"><ul>
+<li><a class="reference internal" href="#">genmonads package</a><ul>
+<li><a class="reference internal" href="#submodules">Submodules</a></li>
+<li><a class="reference internal" href="#module-genmonads.mlist">genmonads.mlist module</a></li>
+<li><a class="reference internal" href="#module-genmonads.monad">genmonads.monad module</a></li>
+<li><a class="reference internal" href="#module-genmonads.monadfilter">genmonads.monadfilter module</a></li>
+<li><a class="reference internal" href="#module-genmonads.monadtrans">genmonads.monadtrans module</a></li>
+<li><a class="reference internal" href="#module-genmonads.mtry">genmonads.mtry module</a></li>
+<li><a class="reference internal" href="#module-genmonads.option">genmonads.option module</a></li>
+<li><a class="reference internal" href="#module-genmonads">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</div>
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../index.html">GenMonads</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+ 
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../index.html">Docs</a> &raquo;</li>
+      
+    <li>genmonads package</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="../_sources/source/genmonads.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="genmonads-package">
+<h1>genmonads package<a class="headerlink" href="#genmonads-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-genmonads.mlist">
+<span id="genmonads-mlist-module"></span><h2>genmonads.mlist module<a class="headerlink" href="#module-genmonads.mlist" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="genmonads.mlist.List">
+<em class="property">class </em><code class="descclassname">genmonads.mlist.</code><code class="descname">List</code><span class="sig-paren">(</span><em>*values</em><span class="sig-paren">)</span><a class="headerlink" href="#genmonads.mlist.List" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#genmonads.monadfilter.MonadFilter" title="genmonads.monadfilter.MonadFilter"><code class="xref py py-class docutils literal"><span class="pre">genmonads.monadfilter.MonadFilter</span></code></a></p>
+<p>A type that represents list of values of the same type.</p>
+<p>Instances are either of type <cite>List[T]</cite> or <cite>Nil[T]</cite>.</p>
+<p>Monadic computing is supported with <cite>map()</cite>, <cite>flat_map()</cite>, <cite>flatten()</cite>, and <cite>filter()</cite> functions, and
+for-comprehensions can be formed by evaluating generators over monads with the <cite>mfor()</cite> function.</p>
+<dl class="staticmethod">
+<dt id="genmonads.mlist.List.empty">
+<em class="property">static </em><code class="descname">empty</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#genmonads.mlist.List.empty" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><cite>Nil</cite>, the empty instance for this monad</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">List[T]</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="genmonads.mlist.List.flatten">
+<code class="descname">flatten</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#genmonads.mlist.List.flatten" title="Permalink to this definition">¶</a></dt>
+<dd><p>Flattens nested instances of <cite>List</cite>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">the flattened monad</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">List[T]</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="genmonads.mlist.List.head">
+<code class="descname">head</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#genmonads.mlist.List.head" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the first item in the list.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">the first item</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">T</td>
+</tr>
+</tbody>
+</table>
+<dl class="docutils">
+<dt>Throws:</dt>
+<dd>IndexError: if the list is empty</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="genmonads.mlist.List.head_option">
+<code class="descname">head_option</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#genmonads.mlist.List.head_option" title="Permalink to this definition">¶</a></dt>
+<dd><p>Safely returns the first item in the list by wrapping the attempt in <cite>Option</cite>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">the first item wrapped in <cite>Some</cite>, or <cite>Nothing</cite> if the list is empty</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">Option[T]</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="genmonads.mlist.List.last">
+<code class="descname">last</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#genmonads.mlist.List.last" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the last item in the list.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">the last item</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">T</td>
+</tr>
+</tbody>
+</table>
+<dl class="docutils">
+<dt>Throws:</dt>
+<dd>IndexError: if the list is empty</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="genmonads.mlist.List.last_option">
+<code class="descname">last_option</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#genmonads.mlist.List.last_option" title="Permalink to this definition">¶</a></dt>
+<dd><p>Safely returns the last item in the list by wrapping the attempt in <cite>Option</cite>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">the first item wrapped in <cite>Some</cite>, or <cite>Nothing</cite> if the list is empty</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">Option[T]</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="genmonads.mlist.List.map">
+<code class="descname">map</code><span class="sig-paren">(</span><em>f</em><span class="sig-paren">)</span><a class="headerlink" href="#genmonads.mlist.List.map" title="Permalink to this definition">¶</a></dt>
+<dd><p>Applies a function to the inner value of an <cite>List</cite>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>f</strong> (<em>Callable[[A],B]</em>) &#8211; the function to apply</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">the resulting List</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">List[B]</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="genmonads.mlist.List.pure">
+<em class="property">static </em><code class="descname">pure</code><span class="sig-paren">(</span><em>*values</em><span class="sig-paren">)</span><a class="headerlink" href="#genmonads.mlist.List.pure" title="Permalink to this definition">¶</a></dt>
+<dd><p>Injects a value into the <cite>List</cite> monad.</p>
+<p>This function should be used instead of calling <cite>List.__init__()</cite> directly.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>*values</strong> (<em>T</em>) &#8211; the values</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">the resulting <cite>List</cite></td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">List[T]</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="genmonads.mlist.List.to_list">
+<code class="descname">to_list</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#genmonads.mlist.List.to_list" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts the <cite>Option</cite> into a list.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">the resulting python list</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">List[A]</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="genmonads.mlist.List.to_mlist">
+<code class="descname">to_mlist</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#genmonads.mlist.List.to_mlist" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts the <cite>Option</cite> into a <cite>List</cite> monad.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">the resulting List monad</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">List[A]</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="genmonads.mlist.Nil">
+<em class="property">class </em><code class="descclassname">genmonads.mlist.</code><code class="descname">Nil</code><a class="headerlink" href="#genmonads.mlist.Nil" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#genmonads.mlist.List" title="genmonads.mlist.List"><code class="xref py py-class docutils literal"><span class="pre">genmonads.mlist.List</span></code></a></p>
+<p>A type that represents the absence of an optional value.</p>
+<p>Forms the <cite>List</cite> monad together with <cite>Some</cite>.</p>
+<dl class="method">
+<dt id="genmonads.mlist.Nil.flatten">
+<code class="descname">flatten</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#genmonads.mlist.Nil.flatten" title="Permalink to this definition">¶</a></dt>
+<dd><p>Flattens nested instances of <cite>List</cite>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">the flattened monad</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">List[T]</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="genmonads.mlist.Nil.map">
+<code class="descname">map</code><span class="sig-paren">(</span><em>f</em><span class="sig-paren">)</span><a class="headerlink" href="#genmonads.mlist.Nil.map" title="Permalink to this definition">¶</a></dt>
+<dd><p>Applies a function to the inner value of an <cite>List</cite>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>f</strong> (<em>Callable[[A],B]</em>) &#8211; the function to apply</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">the resulting <cite>List</cite></td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">List[B]</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="genmonads.mlist.main">
+<code class="descclassname">genmonads.mlist.</code><code class="descname">main</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#genmonads.mlist.main" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="genmonads.mlist.mlist">
+<code class="descclassname">genmonads.mlist.</code><code class="descname">mlist</code><span class="sig-paren">(</span><em>*values</em><span class="sig-paren">)</span><a class="headerlink" href="#genmonads.mlist.mlist" title="Permalink to this definition">¶</a></dt>
+<dd><p>Constructs an <cite>List</cite> instance from a value.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>values</strong> (<em>T</em>) &#8211; the values</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">the resulting <cite>List</cite></td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">List[T]</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="genmonads.mlist.nil">
+<code class="descclassname">genmonads.mlist.</code><code class="descname">nil</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#genmonads.mlist.nil" title="Permalink to this definition">¶</a></dt>
+<dd><p>Constructs a <cite>Nil</cite> instance.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">the resulting <cite>Nil</cite></td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">Nil[T]</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="module-genmonads.monad">
+<span id="genmonads-monad-module"></span><h2>genmonads.monad module<a class="headerlink" href="#module-genmonads.monad" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="genmonads.monad.Monad">
+<em class="property">class </em><code class="descclassname">genmonads.monad.</code><code class="descname">Monad</code><a class="headerlink" href="#genmonads.monad.Monad" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>A base class for representing monads.</p>
+<p>Monadic computing is supported with <cite>map()</cite>, <cite>flat_map()</cite>, and <cite>flatten()</cite> functions, and for-comprehensions
+can be formed by evaluating generators over monads with the <cite>mfor()</cite> function.</p>
+<dl class="method">
+<dt id="genmonads.monad.Monad.flat_map">
+<code class="descname">flat_map</code><span class="sig-paren">(</span><em>f</em><span class="sig-paren">)</span><a class="headerlink" href="#genmonads.monad.Monad.flat_map" title="Permalink to this definition">¶</a></dt>
+<dd><p>Applies a function that produces an Monad from unwrapped values to an Monad&#8217;s inner value and flattens the
+nested result.</p>
+<p>Equivalent to <cite>self.map(f).flatten()</cite>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>f</strong> (<em>Callable[[A],Monad[B]]</em>) &#8211; the function to apply</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">the resulting monad</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">Monad[B]</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="genmonads.monad.Monad.flatten">
+<code class="descname">flatten</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#genmonads.monad.Monad.flatten" title="Permalink to this definition">¶</a></dt>
+<dd><p>Flattens nested instances of Monad.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">the flattened monad</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">Monad[T]</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="genmonads.monad.Monad.map">
+<code class="descname">map</code><span class="sig-paren">(</span><em>f</em><span class="sig-paren">)</span><a class="headerlink" href="#genmonads.monad.Monad.map" title="Permalink to this definition">¶</a></dt>
+<dd><p>Applies a function to the inner value of a monad.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>f</strong> (<em>Callable[[A],B]</em>) &#8211; the function to apply</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">the resulting monad</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">Monad[B]</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="genmonads.monad.Monad.pure">
+<em class="property">static </em><code class="descname">pure</code><span class="sig-paren">(</span><em>value</em><span class="sig-paren">)</span><a class="headerlink" href="#genmonads.monad.Monad.pure" title="Permalink to this definition">¶</a></dt>
+<dd><p>Injects a value into the monad.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>value</strong> (<em>T</em>) &#8211; the value</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">the monadic value</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">Monad[T]</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="genmonads.monad.MonadIter">
+<em class="property">class </em><code class="descclassname">genmonads.monad.</code><code class="descname">MonadIter</code><span class="sig-paren">(</span><em>monad</em><span class="sig-paren">)</span><a class="headerlink" href="#genmonads.monad.MonadIter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>An iterator wrapper class over the content of the monad to support usage in generators</p>
+<dl class="method">
+<dt id="genmonads.monad.MonadIter.next">
+<code class="descname">next</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#genmonads.monad.MonadIter.next" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="genmonads.monad.do">
+<code class="descclassname">genmonads.monad.</code><code class="descname">do</code><span class="sig-paren">(</span><em>gen</em>, <em>frame_depth=5</em><span class="sig-paren">)</span><a class="headerlink" href="#genmonads.monad.do" title="Permalink to this definition">¶</a></dt>
+<dd><p>A synonym for <cite>mfor</cite>.</p>
+<p>Evaluates a generator over a monadic value, translating it into the equivalent for-comprehension.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>gen</strong> (<em>Generator[T, None, None]</em>) &#8211; a generator over a monadic value</li>
+<li><strong>frame_depth</strong> (<em>int</em>) &#8211; the frame depth of which to search for the outermost monad</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">the for-comprehension that corresponds to the generator</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">Monad[T]</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="genmonads.monad.mfor">
+<code class="descclassname">genmonads.monad.</code><code class="descname">mfor</code><span class="sig-paren">(</span><em>gen</em>, <em>frame_depth=5</em><span class="sig-paren">)</span><a class="headerlink" href="#genmonads.monad.mfor" title="Permalink to this definition">¶</a></dt>
+<dd><p>The monadic for-comprehension
+Evaluates a generator over a monadic value, translating it into the equivalent for-comprehension.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>gen</strong> (<em>Generator[T, None, None]</em>) &#8211; a generator over a monadic value</li>
+<li><strong>frame_depth</strong> (<em>int</em>) &#8211; the frame depth of which to search for the outermost monad</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">the for-comprehension that corresponds to the generator</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">Monad[T]</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="module-genmonads.monadfilter">
+<span id="genmonads-monadfilter-module"></span><h2>genmonads.monadfilter module<a class="headerlink" href="#module-genmonads.monadfilter" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="genmonads.monadfilter.MonadFilter">
+<em class="property">class </em><code class="descclassname">genmonads.monadfilter.</code><code class="descname">MonadFilter</code><a class="headerlink" href="#genmonads.monadfilter.MonadFilter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#genmonads.monad.Monad" title="genmonads.monad.Monad"><code class="xref py py-class docutils literal"><span class="pre">genmonads.monad.Monad</span></code></a></p>
+<p>A base class for monads that can implement a <cite>filter()</cite> function.</p>
+<p>The monad must define an empty instance of the monad that is returned when <cite>filter()</cite> fails and represents a
+<cite>False</cite> value for the monad.</p>
+<dl class="method">
+<dt id="genmonads.monadfilter.MonadFilter.collect">
+<code class="descname">collect</code><span class="sig-paren">(</span><em>f</em><span class="sig-paren">)</span><a class="headerlink" href="#genmonads.monadfilter.MonadFilter.collect" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="staticmethod">
+<dt id="genmonads.monadfilter.MonadFilter.empty">
+<em class="property">static </em><code class="descname">empty</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#genmonads.monadfilter.MonadFilter.empty" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">the empty instance for this monad</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">MonadFilter[T]</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="genmonads.monadfilter.MonadFilter.filter">
+<code class="descname">filter</code><span class="sig-paren">(</span><em>f</em><span class="sig-paren">)</span><a class="headerlink" href="#genmonads.monadfilter.MonadFilter.filter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Filters this monad by applying the predicate <cite>f</cite> to the monad&#8217;s inner value.
+Returns this monad if the predicate is <cite>True</cite>, this monad&#8217;s empty instance otherwise.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>f</strong> (<em>Callable[[T],bool]</em>) &#8211; the predicate</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">this instance if the predicate is <cite>True</cite> when applied to its inner value, the monad&#8217;s empty
+instance otherwise</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">MonadTrans[T]</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-genmonads.monadtrans">
+<span id="genmonads-monadtrans-module"></span><h2>genmonads.monadtrans module<a class="headerlink" href="#module-genmonads.monadtrans" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="genmonads.monadtrans.MonadTranslator">
+<em class="property">class </em><code class="descclassname">genmonads.monadtrans.</code><code class="descname">MonadTranslator</code><span class="sig-paren">(</span><em>translator</em>, <em>tree</em><span class="sig-paren">)</span><a class="headerlink" href="#genmonads.monadtrans.MonadTranslator" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">pony.orm.asttranslation.PythonTranslator</span></code></p>
+<p>The translator class that converts the AST of a generator over monads into a series of nested calls to
+<cite>flat_map()</cite>, <cite>map()</cite>, and <cite>filter()</cite>.</p>
+<p>For example, consider the following generator:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">genmonads.Option</span> <span class="k">import</span> <span class="o">*</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">mfor</span><span class="p">(</span><span class="n">x</span> <span class="o">+</span> <span class="n">y</span>
+<span class="go">          for x in option(2)</span>
+<span class="go">          if x &lt; 10</span>
+<span class="go">          for y in option(5)</span>
+<span class="go">          if y % 2 != 0))</span>
+<span class="go">Some(7)</span>
+</pre></div>
+</div>
+<p>The above generator is automatically translated into the following at run-time:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">option</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+<span class="go">              .filter(lambda x: x &lt; 10)</span>
+<span class="go">              .flat_map(lambda x: option(5)</span>
+<span class="go">                  .filter(lambda y: y % 2 != 0)</span>
+<span class="go">                  .map(lambda y: x + y)))</span>
+<span class="go">Some(7)</span>
+</pre></div>
+</div>
+<dl class="method">
+<dt id="genmonads.monadtrans.MonadTranslator.postGenExpr">
+<code class="descname">postGenExpr</code><span class="sig-paren">(</span><em>node</em><span class="sig-paren">)</span><a class="headerlink" href="#genmonads.monadtrans.MonadTranslator.postGenExpr" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts the AST node for the full generator expression into its code representation.</p>
+<p>Responsible for discarding the parentheses around the generator expression.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>node</strong> (<em>GenExpr</em>) &#8211; the AST node</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">the source code representation</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">str</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="genmonads.monadtrans.MonadTranslator.postGenExprFor">
+<code class="descname">postGenExprFor</code><span class="sig-paren">(</span><em>node</em><span class="sig-paren">)</span><a class="headerlink" href="#genmonads.monadtrans.MonadTranslator.postGenExprFor" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts the AST node for the body of a generator&#8217;s <cite>for</cite> statements into its code representation.</p>
+<p>Responsible for converting <cite>if</cite> statements into calls to <cite>filter</cite> and <cite>for x in y</cite> in to calls to <cite>flat_map</cite>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>node</strong> (<em>GenExprFor</em>) &#8211; the AST node</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">the source code representation</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">str</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="genmonads.monadtrans.MonadTranslator.postGenExprInner">
+<code class="descname">postGenExprInner</code><span class="sig-paren">(</span><em>node</em><span class="sig-paren">)</span><a class="headerlink" href="#genmonads.monadtrans.MonadTranslator.postGenExprInner" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts the AST node for the generator&#8217;s inner expression into its code representation.</p>
+<p>Responsible for converting the final <cite>flat_map</cite> call into a call to <cite>map</cite> and adding closing parentheses.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>node</strong> (<em>GenExprInner</em>) &#8211; the AST node</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">the source code representation</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">str</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="genmonads.monadtrans.MonadTranslator.postLambda">
+<code class="descname">postLambda</code><span class="sig-paren">(</span><em>node</em><span class="sig-paren">)</span><a class="headerlink" href="#genmonads.monadtrans.MonadTranslator.postLambda" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts the AST node for a lambda expression into its code representation</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>node</strong> (<em>Lambda</em>) &#8211; the AST node</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">the source code representation</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">str</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="genmonads.monadtrans.ast2src">
+<code class="descclassname">genmonads.monadtrans.</code><code class="descname">ast2src</code><span class="sig-paren">(</span><em>tree</em><span class="sig-paren">)</span><a class="headerlink" href="#genmonads.monadtrans.ast2src" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts an AST into python source, replacing generator expressions into a series of nested calls to <cite>flat_map</cite>,
+<cite>map</cite>, and <cite>filter</cite> by applying the <cite>MonadTranslator</cite> to an AST.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>tree</strong> (<em>GenExpr</em>) &#8211; the AST node of a generator expression</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">the source code representation</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">str</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="module-genmonads.mtry">
+<span id="genmonads-mtry-module"></span><h2>genmonads.mtry module<a class="headerlink" href="#module-genmonads.mtry" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="genmonads.mtry.Failure">
+<em class="property">class </em><code class="descclassname">genmonads.mtry.</code><code class="descname">Failure</code><span class="sig-paren">(</span><em>ex</em><span class="sig-paren">)</span><a class="headerlink" href="#genmonads.mtry.Failure" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#genmonads.mtry.Try" title="genmonads.mtry.Try"><code class="xref py py-class docutils literal"><span class="pre">genmonads.mtry.Try</span></code></a></p>
+<dl class="method">
+<dt id="genmonads.mtry.Failure.flatten">
+<code class="descname">flatten</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#genmonads.mtry.Failure.flatten" title="Permalink to this definition">¶</a></dt>
+<dd><p>Flattens nested instances of <cite>Try</cite>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">the flattened monad</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">Try[T]</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="genmonads.mtry.Failure.get">
+<code class="descname">get</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#genmonads.mtry.Failure.get" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the <cite>Try</cite>&#8216;s inner value.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">the inner value</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">Union[T,Exception]</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="genmonads.mtry.Failure.get_or_else">
+<code class="descname">get_or_else</code><span class="sig-paren">(</span><em>default</em><span class="sig-paren">)</span><a class="headerlink" href="#genmonads.mtry.Failure.get_or_else" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the <cite>Try</cite>&#8216;s inner value if an instance of <cite>Success</cite> or <cite>default</cite> if instance of <cite>Failure</cite>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>default</strong> &#8211; the value to return for <cite>Failure[T]</cite> instances</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">the <cite>Try</cite>&#8216;s inner value if an instance of <cite>Success</cite> or <cite>default</cite> if instance of <cite>Failure</cite></td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">T</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="genmonads.mtry.Failure.map">
+<code class="descname">map</code><span class="sig-paren">(</span><em>f</em><span class="sig-paren">)</span><a class="headerlink" href="#genmonads.mtry.Failure.map" title="Permalink to this definition">¶</a></dt>
+<dd><p>Applies a function to the inner value of a <cite>Try</cite>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>f</strong> (<em>Callable[[A],B]</em>) &#8211; the function to apply</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">the resulting <cite>Try</cite></td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">Try[B]</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="genmonads.mtry.Failure.or_else">
+<code class="descname">or_else</code><span class="sig-paren">(</span><em>default</em><span class="sig-paren">)</span><a class="headerlink" href="#genmonads.mtry.Failure.or_else" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the <cite>Try</cite> if an instance of <cite>Success</cite> or <cite>default</cite> if an instance of <cite>Failure</cite> .</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>default</strong> (<em>Try[B]</em>) &#8211; the monad to return for <cite>Failure[T]</cite> instances</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">the resulting <cite>Try</cite></td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">Try[B]</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="genmonads.mtry.Failure.raise_ex">
+<code class="descname">raise_ex</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#genmonads.mtry.Failure.raise_ex" title="Permalink to this definition">¶</a></dt>
+<dd><p>Raises this <cite>Failure</cite> instance&#8217;s exception.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Raises:</th><td class="field-body"><code class="xref py py-exc docutils literal"><span class="pre">Exception</span></code> &#8211; the exception</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="genmonads.mtry.Failure.recover">
+<code class="descname">recover</code><span class="sig-paren">(</span><em>f</em><span class="sig-paren">)</span><a class="headerlink" href="#genmonads.mtry.Failure.recover" title="Permalink to this definition">¶</a></dt>
+<dd><p>Recovers from a failed computation by applying <cite>f</cite> to the exception.</p>
+<p>Essentially, a map on the <cite>Failure</cite> instance.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>f</strong> (<em>Callable[[Exception],B</em>) &#8211; the function to call on the <cite>Failure[T]</cite>&#8216;s exception</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">the resulting <cite>Try</cite></td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">Try[B]</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="genmonads.mtry.Failure.recover_with">
+<code class="descname">recover_with</code><span class="sig-paren">(</span><em>f</em><span class="sig-paren">)</span><a class="headerlink" href="#genmonads.mtry.Failure.recover_with" title="Permalink to this definition">¶</a></dt>
+<dd><p>Recovers from a failed computation by applying <cite>f</cite> to the exception.</p>
+<p>Essentially, a flat_map on the <cite>Failure</cite> instance.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>f</strong> (<em>Callable[[Exception],Try[B]</em>) &#8211; the function to call on the <cite>Failure[T]</cite>&#8216;s exception</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">the resulting <cite>Try</cite></td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">Try[B]</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="genmonads.mtry.Failure.to_option">
+<code class="descname">to_option</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#genmonads.mtry.Failure.to_option" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts an instance of <cite>Try[T]</cite> to <cite>Option[T]</cite>.</p>
+<p><cite>Success[T]</cite> is mapped to <cite>Some[T]</cite>, and <cite>Failure[T]</cite> is mapped to <cite>Nothing[T]</cite>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">the corresponding <cite>Option</cite></td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">Option[T]</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="genmonads.mtry.Success">
+<em class="property">class </em><code class="descclassname">genmonads.mtry.</code><code class="descname">Success</code><span class="sig-paren">(</span><em>result</em><span class="sig-paren">)</span><a class="headerlink" href="#genmonads.mtry.Success" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#genmonads.mtry.Try" title="genmonads.mtry.Try"><code class="xref py py-class docutils literal"><span class="pre">genmonads.mtry.Try</span></code></a></p>
+<dl class="method">
+<dt id="genmonads.mtry.Success.flatten">
+<code class="descname">flatten</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#genmonads.mtry.Success.flatten" title="Permalink to this definition">¶</a></dt>
+<dd><p>Flattens nested instances of <cite>Try</cite>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Try[T]</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="genmonads.mtry.Success.get">
+<code class="descname">get</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#genmonads.mtry.Success.get" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the <cite>Try</cite>&#8216;s inner value.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">the inner value</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">Union[T,Exception]</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="genmonads.mtry.Success.get_or_else">
+<code class="descname">get_or_else</code><span class="sig-paren">(</span><em>default</em><span class="sig-paren">)</span><a class="headerlink" href="#genmonads.mtry.Success.get_or_else" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the <cite>Try</cite>&#8216;s inner value if an instance of <cite>Success</cite> or default if instance of <cite>Failure[T]</cite>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>default</strong> &#8211; the value to return for Failure instances</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">the <cite>Try</cite>&#8216;s inner value if an instance of <cite>Success</cite> or default if instance of <cite>Failure[T]</cite></td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">T</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="genmonads.mtry.Success.map">
+<code class="descname">map</code><span class="sig-paren">(</span><em>f</em><span class="sig-paren">)</span><a class="headerlink" href="#genmonads.mtry.Success.map" title="Permalink to this definition">¶</a></dt>
+<dd><p>Applies a function to the inner value of a <cite>Try</cite>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>f</strong> (<em>Callable[[A],B]</em>) &#8211; the function to apply</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">the resulting <cite>Try</cite></td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">Try[B]</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="genmonads.mtry.Success.or_else">
+<code class="descname">or_else</code><span class="sig-paren">(</span><em>default</em><span class="sig-paren">)</span><a class="headerlink" href="#genmonads.mtry.Success.or_else" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the <cite>Try</cite> if an instance of <cite>Success</cite> or <cite>default</cite> if an instance of <cite>Failure</cite> .</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>default</strong> (<em>Try[B]</em>) &#8211; the monad to return for <cite>Failure[T]</cite> instances</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">the resulting <cite>Try</cite></td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">Try[B]</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="genmonads.mtry.Success.pure">
+<em class="property">static </em><code class="descname">pure</code><span class="sig-paren">(</span><em>result</em><span class="sig-paren">)</span><a class="headerlink" href="#genmonads.mtry.Success.pure" title="Permalink to this definition">¶</a></dt>
+<dd><p>Injects a result into the <cite>Success</cite> monad.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>result</strong> (<em>T</em>) &#8211; the result</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">the resulting <cite>Try</cite></td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">Try[T]</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="genmonads.mtry.Success.recover">
+<code class="descname">recover</code><span class="sig-paren">(</span><em>f</em><span class="sig-paren">)</span><a class="headerlink" href="#genmonads.mtry.Success.recover" title="Permalink to this definition">¶</a></dt>
+<dd><p>Recovers from a failed computation by applying <cite>f</cite> to the exception.</p>
+<p>Essentially, a map on the <cite>Failure</cite> instance.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>f</strong> (<em>Callable[[Exception],B</em>) &#8211; the function to call on the <cite>Failure[T]</cite>&#8216;s exception</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">the resulting <cite>Try</cite></td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">Try[B]</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="genmonads.mtry.Success.recover_with">
+<code class="descname">recover_with</code><span class="sig-paren">(</span><em>f</em><span class="sig-paren">)</span><a class="headerlink" href="#genmonads.mtry.Success.recover_with" title="Permalink to this definition">¶</a></dt>
+<dd><p>Recovers from a failed computation by applying <cite>f</cite> to the exception.</p>
+<p>Essentially, a flat_map on the <cite>Failure</cite> instance.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>f</strong> (<em>Callable[[Exception],Try[B]</em>) &#8211; the function to call on the <cite>Failure[T]</cite>&#8216;s exception</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">the resulting <cite>Try</cite></td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">Try[B]</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="genmonads.mtry.Success.to_option">
+<code class="descname">to_option</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#genmonads.mtry.Success.to_option" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts an instance of <cite>Try[T]</cite> to <cite>Option[T]</cite>.</p>
+<p><cite>Success[T]</cite> is mapped to <cite>Some[T]</cite>, and <cite>Failure[T]</cite> is mapped to <cite>Nothing[T]</cite>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">the corresponding <cite>Option</cite></td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">Option[T]</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="genmonads.mtry.Try">
+<em class="property">class </em><code class="descclassname">genmonads.mtry.</code><code class="descname">Try</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#genmonads.mtry.Try" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#genmonads.monadfilter.MonadFilter" title="genmonads.monadfilter.MonadFilter"><code class="xref py py-class docutils literal"><span class="pre">genmonads.monadfilter.MonadFilter</span></code></a></p>
+<p>A type that represents a failable computation.</p>
+<p>Instances of type <cite>Try[T]</cite> are either instances of <cite>Success[T]</cite> or <cite>Failure[T]</cite>. This monad uses eager evaluation.
+For lazy computations, see the <cite>Task</cite> monad (under construction).</p>
+<p>Instances of <cite>Try[T]</cite> are constructed by passing a computation wrapped in a thunk (i.e. a lambda expression
+with no arguments) to either the <cite>mtry()</cite> or <cite>Try.pure()</cite> or functions. The thunk is evaluated immediately,
+and successful computations return the result wrapped in <cite>Success</cite>, while computations that raise an exception
+return that exception wrapped in <cite>Failure[T]</cite>.</p>
+<p>Monadic computing is supported with <cite>map</cite>, <cite>flat_map()</cite>, <cite>flatten()</cite>, and <cite>filter()</cite> functions, and
+for-comprehensions can be formed by evaluating generators over monads with the <cite>mfor()</cite> function.</p>
+<dl class="staticmethod">
+<dt id="genmonads.mtry.Try.empty">
+<em class="property">static </em><code class="descname">empty</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#genmonads.mtry.Try.empty" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><cite>Failure[T]</cite> with a <cite>ValueError</cite>, the empty instance for this monad</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">Try[T]</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="genmonads.mtry.Try.flatten">
+<code class="descname">flatten</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#genmonads.mtry.Try.flatten" title="Permalink to this definition">¶</a></dt>
+<dd><p>Flattens nested instances of <cite>Try</cite>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">the flattened monad</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">Try[T]</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="genmonads.mtry.Try.get">
+<code class="descname">get</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#genmonads.mtry.Try.get" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the Try&#8217;s inner value.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">the inner value</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">Union[T,Exception]</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="genmonads.mtry.Try.get_or_else">
+<code class="descname">get_or_else</code><span class="sig-paren">(</span><em>default</em><span class="sig-paren">)</span><a class="headerlink" href="#genmonads.mtry.Try.get_or_else" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the <cite>Try</cite>&#8216;s inner value if an instance of <cite>Success</cite> or <cite>default</cite> if instance of <cite>Failure</cite>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>default</strong> &#8211; the value to return for <cite>Failure[T]</cite> instances</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">the <cite>Try</cite>&#8216;s inner value if an instance of <cite>Success</cite> or <cite>default</cite> if instance of <cite>Failure</cite></td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">T</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="genmonads.mtry.Try.map">
+<code class="descname">map</code><span class="sig-paren">(</span><em>f</em><span class="sig-paren">)</span><a class="headerlink" href="#genmonads.mtry.Try.map" title="Permalink to this definition">¶</a></dt>
+<dd><p>Applies a function to the inner value of a <cite>Try</cite>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>f</strong> (<em>Callable[[A],B]</em>) &#8211; the function to apply</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">the resulting <cite>Try</cite></td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">Try[B]</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="genmonads.mtry.Try.or_else">
+<code class="descname">or_else</code><span class="sig-paren">(</span><em>default</em><span class="sig-paren">)</span><a class="headerlink" href="#genmonads.mtry.Try.or_else" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the <cite>Try</cite> if an instance of <cite>Success</cite> or <cite>default</cite> if an instance of <cite>Failure</cite> .</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>default</strong> (<em>Try[B]</em>) &#8211; the monad to return for <cite>Failure[T]</cite> instances</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">the resulting <cite>Try</cite></td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">Try[B]</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="genmonads.mtry.Try.pure">
+<em class="property">static </em><code class="descname">pure</code><span class="sig-paren">(</span><em>thunk</em><span class="sig-paren">)</span><a class="headerlink" href="#genmonads.mtry.Try.pure" title="Permalink to this definition">¶</a></dt>
+<dd><p>Evaluates a failable computation in the <cite>Try</cite> monad.</p>
+<p>This function should be used instead of calling <cite>Try.__init__()</cite> directly.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>thunk</strong> (<em>Callable[[None],T]</em>) &#8211; the computation</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">the resulting <cite>Try</cite></td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">Try[T]</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="genmonads.mtry.Try.recover">
+<code class="descname">recover</code><span class="sig-paren">(</span><em>f</em><span class="sig-paren">)</span><a class="headerlink" href="#genmonads.mtry.Try.recover" title="Permalink to this definition">¶</a></dt>
+<dd><p>Recovers from a failed computation by applying <cite>f</cite> to the exception.</p>
+<p>Essentially, a map on the <cite>Failure</cite> instance.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>f</strong> (<em>Callable[[Exception],B</em>) &#8211; the function to call on the <cite>Failure[T]</cite>&#8216;s exception</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">the resulting <cite>Try</cite></td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">Try[B]</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="genmonads.mtry.Try.recover_with">
+<code class="descname">recover_with</code><span class="sig-paren">(</span><em>f</em><span class="sig-paren">)</span><a class="headerlink" href="#genmonads.mtry.Try.recover_with" title="Permalink to this definition">¶</a></dt>
+<dd><p>Recovers from a failed computation by applying <cite>f</cite> to the exception.</p>
+<p>Essentially, a flat_map on the <cite>Failure</cite> instance.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>f</strong> (<em>Callable[[Exception],Try[B]</em>) &#8211; the function to call on the <cite>Failure[T]</cite>&#8216;s exception</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">the resulting <cite>Try</cite></td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">Try[B]</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="genmonads.mtry.Try.to_option">
+<code class="descname">to_option</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#genmonads.mtry.Try.to_option" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts an instance of <cite>Try[T]</cite> to <cite>Option[T]</cite>.</p>
+<p><cite>Success[T]</cite> is mapped to <cite>Some[T]</cite>, and <cite>Failure[T]</cite> is mapped to <cite>Nothing[T]</cite>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">the corresponding <cite>Option</cite></td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">Option[T]</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="genmonads.mtry.failure">
+<code class="descclassname">genmonads.mtry.</code><code class="descname">failure</code><span class="sig-paren">(</span><em>ex</em><span class="sig-paren">)</span><a class="headerlink" href="#genmonads.mtry.failure" title="Permalink to this definition">¶</a></dt>
+<dd><p>Injects an exception into the <cite>Failure</cite> monad.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>ex</strong> (<em>Exception</em>) &#8211; the exception</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">the resulting <cite>Failure</cite></td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">Failure[T]</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="genmonads.mtry.main">
+<code class="descclassname">genmonads.mtry.</code><code class="descname">main</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#genmonads.mtry.main" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="genmonads.mtry.mtry">
+<code class="descclassname">genmonads.mtry.</code><code class="descname">mtry</code><span class="sig-paren">(</span><em>thunk</em><span class="sig-paren">)</span><a class="headerlink" href="#genmonads.mtry.mtry" title="Permalink to this definition">¶</a></dt>
+<dd><p>Evaluates a delayed computation in the <cite>Try</cite> monad.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>thunk</strong> (<em>Callable[[None],T]</em>) &#8211; the delayed computation</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">the resulting <cite>Try</cite></td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">Try[T]</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="genmonads.mtry.success">
+<code class="descclassname">genmonads.mtry.</code><code class="descname">success</code><span class="sig-paren">(</span><em>result</em><span class="sig-paren">)</span><a class="headerlink" href="#genmonads.mtry.success" title="Permalink to this definition">¶</a></dt>
+<dd><p>Injects a value into the <cite>Success</cite> monad.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>result</strong> (<em>T</em>) &#8211; the result</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">the resulting monad</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">Try[T]</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="module-genmonads.option">
+<span id="genmonads-option-module"></span><h2>genmonads.option module<a class="headerlink" href="#module-genmonads.option" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="genmonads.option.Nothing">
+<em class="property">class </em><code class="descclassname">genmonads.option.</code><code class="descname">Nothing</code><a class="headerlink" href="#genmonads.option.Nothing" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#genmonads.option.Option" title="genmonads.option.Option"><code class="xref py py-class docutils literal"><span class="pre">genmonads.option.Option</span></code></a></p>
+<p>A type that represents the absence of an optional value.</p>
+<p>Forms the <cite>Option</cite> monad together with <cite>Some</cite>.</p>
+<dl class="method">
+<dt id="genmonads.option.Nothing.flatten">
+<code class="descname">flatten</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#genmonads.option.Nothing.flatten" title="Permalink to this definition">¶</a></dt>
+<dd><p>Flattens nested instances of <cite>Option</cite>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">the flattened monad</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">Option[T]</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="genmonads.option.Nothing.get">
+<code class="descname">get</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#genmonads.option.Nothing.get" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the <cite>Option</cite>&#8216;s inner value. Raises a <cite>ValueError</cite> for instances of <cite>Nothing</cite>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">the inner value</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">T</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="genmonads.option.Nothing.get_or_else">
+<code class="descname">get_or_else</code><span class="sig-paren">(</span><em>default</em><span class="sig-paren">)</span><a class="headerlink" href="#genmonads.option.Nothing.get_or_else" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the <cite>Option</cite>&#8216;s inner value if an instance of <cite>Some</cite> or <cite>default</cite> if instance of <cite>Nothing</cite>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>default</strong> &#8211; the value to return for <cite>Nothing[T]</cite> instances</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">the <cite>Option</cite>&#8216;s inner value if an instance of <cite>Some</cite> or <cite>default</cite> if instance of <cite>Nothing</cite></td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">T</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="genmonads.option.Nothing.get_or_none">
+<code class="descname">get_or_none</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#genmonads.option.Nothing.get_or_none" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the <cite>Option</cite>&#8216;s inner value if an instance of <cite>Some</cite> or <cite>None</cite> if instance of <cite>Nothing</cite>.</p>
+<p>Provided as interface to code that expects <cite>None</cite> values.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">the <cite>Option</cite>&#8216;s inner value if an instance of <cite>Some</cite> or <cite>None</cite> if instance of <cite>Nothing</cite></td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">Union[T,None]</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="genmonads.option.Nothing.map">
+<code class="descname">map</code><span class="sig-paren">(</span><em>f</em><span class="sig-paren">)</span><a class="headerlink" href="#genmonads.option.Nothing.map" title="Permalink to this definition">¶</a></dt>
+<dd><p>Applies a function to the inner value of an <cite>Option</cite>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>f</strong> (<em>Callable[[A],B]</em>) &#8211; the function to apply</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">the resulting <cite>Option</cite></td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">Option[B]</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="genmonads.option.Nothing.to_list">
+<code class="descname">to_list</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#genmonads.option.Nothing.to_list" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts the <cite>Option</cite> into a list.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">the resulting python list</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">List[A]</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="genmonads.option.Nothing.to_mlist">
+<code class="descname">to_mlist</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#genmonads.option.Nothing.to_mlist" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts the <cite>Option</cite> into a <cite>List</cite> monad.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">the resulting List monad</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">List[A]</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="genmonads.option.Option">
+<em class="property">class </em><code class="descclassname">genmonads.option.</code><code class="descname">Option</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#genmonads.option.Option" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#genmonads.monadfilter.MonadFilter" title="genmonads.monadfilter.MonadFilter"><code class="xref py py-class docutils literal"><span class="pre">genmonads.monadfilter.MonadFilter</span></code></a></p>
+<p>A type that represents an optional value.</p>
+<p>Instances of type <cite>Option[T]</cite> are either an instance of <cite>Some[T]</cite> or <cite>Nothing[T]</cite>.</p>
+<p>Monadic computing is supported with <cite>map()</cite>, <cite>flat_map()</cite>, <cite>flatten()</cite>, and <cite>filter()</cite> functions, and
+for-comprehensions can  be formed by evaluating generators over monads with the <cite>mfor()</cite> function.</p>
+<dl class="staticmethod">
+<dt id="genmonads.option.Option.empty">
+<em class="property">static </em><code class="descname">empty</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#genmonads.option.Option.empty" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><cite>Nothing</cite>, the empty instance for this monad</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">Option[T]</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="genmonads.option.Option.flatten">
+<code class="descname">flatten</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#genmonads.option.Option.flatten" title="Permalink to this definition">¶</a></dt>
+<dd><p>Flattens nested instances of <cite>Option</cite>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">the flattened monad</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">Option[T]</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="genmonads.option.Option.get">
+<code class="descname">get</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#genmonads.option.Option.get" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the <cite>Option</cite>&#8216;s inner value. Raises a <cite>ValueError</cite> for instances of <cite>Nothing[T]</cite>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">the inner value</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">T</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="genmonads.option.Option.get_or_else">
+<code class="descname">get_or_else</code><span class="sig-paren">(</span><em>default</em><span class="sig-paren">)</span><a class="headerlink" href="#genmonads.option.Option.get_or_else" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the <cite>Option</cite>&#8216;s inner value if an instance of <cite>Some</cite> or <cite>default</cite> if instance of <cite>Nothing</cite>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>default</strong> (<em>T</em>) &#8211; the value to return for <cite>Nothing[T]</cite> instances</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">the <cite>Option</cite>&#8216;s inner value if an instance of <cite>Some</cite> or <cite>default</cite> if instance of <cite>Nothing</cite></td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">T</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="genmonads.option.Option.get_or_none">
+<code class="descname">get_or_none</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#genmonads.option.Option.get_or_none" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the <cite>Option</cite>&#8216;s inner value if an instance of <cite>Some</cite> or <cite>None</cite> if instance of <cite>Nothing</cite>.</p>
+<p>Provided as interface to code that expects <cite>None</cite> values.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">the <cite>Option</cite>&#8216;s inner value if an instance of <cite>Some</cite> or <cite>None</cite> if instance of <cite>Nothing</cite></td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">Union[T,None]</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="genmonads.option.Option.map">
+<code class="descname">map</code><span class="sig-paren">(</span><em>f</em><span class="sig-paren">)</span><a class="headerlink" href="#genmonads.option.Option.map" title="Permalink to this definition">¶</a></dt>
+<dd><p>Applies a function to the inner value of an <cite>Option</cite>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>f</strong> (<em>Callable[[A],B]</em>) &#8211; the function to apply</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">the resulting Option</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">Option[B]</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="genmonads.option.Option.pure">
+<em class="property">static </em><code class="descname">pure</code><span class="sig-paren">(</span><em>value</em><span class="sig-paren">)</span><a class="headerlink" href="#genmonads.option.Option.pure" title="Permalink to this definition">¶</a></dt>
+<dd><p>Injects a value into the <cite>Option</cite> monad.</p>
+<p>This function should be used instead of calling <cite>Option.__init__()</cite> directly.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>value</strong> (<em>T</em>) &#8211; the value</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">the resulting <cite>Option</cite></td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">Option[T]</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="genmonads.option.Option.to_list">
+<code class="descname">to_list</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#genmonads.option.Option.to_list" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts the <cite>Option</cite> into a list.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">the resulting python list</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">List[A]</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="genmonads.option.Option.to_mlist">
+<code class="descname">to_mlist</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#genmonads.option.Option.to_mlist" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts the <cite>Option</cite> into a <cite>List</cite> monad.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">the resulting List monad</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">List[A]</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="genmonads.option.Some">
+<em class="property">class </em><code class="descclassname">genmonads.option.</code><code class="descname">Some</code><span class="sig-paren">(</span><em>value</em><span class="sig-paren">)</span><a class="headerlink" href="#genmonads.option.Some" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#genmonads.option.Option" title="genmonads.option.Option"><code class="xref py py-class docutils literal"><span class="pre">genmonads.option.Option</span></code></a></p>
+<p>A type that represents the presence of an optional value.</p>
+<p>Forms the <cite>Option</cite> monad together with <cite>Nothing[T]</cite>.</p>
+<dl class="method">
+<dt id="genmonads.option.Some.flatten">
+<code class="descname">flatten</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#genmonads.option.Some.flatten" title="Permalink to this definition">¶</a></dt>
+<dd><p>Flattens nested instances of <cite>Option</cite>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">the flattened monad</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">Option[T]</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="genmonads.option.Some.get">
+<code class="descname">get</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#genmonads.option.Some.get" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the <cite>Option</cite>&#8216;s inner value. Raises a <cite>ValueError</cite> for instances of <cite>Nothing[T]</cite>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">the inner value</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">T</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="genmonads.option.Some.get_or_else">
+<code class="descname">get_or_else</code><span class="sig-paren">(</span><em>default</em><span class="sig-paren">)</span><a class="headerlink" href="#genmonads.option.Some.get_or_else" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the <cite>Option</cite>&#8216;s inner value if an instance of <cite>Some</cite> or <cite>default</cite> if instance of <cite>Nothing</cite>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>default</strong> &#8211; the value to return for <cite>Nothing[T]</cite> instances</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">the <cite>Option</cite>&#8216;s inner value if an instance of <cite>Some</cite> or <cite>default</cite> if instance of <cite>Nothing</cite></td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">T</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="genmonads.option.Some.get_or_none">
+<code class="descname">get_or_none</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#genmonads.option.Some.get_or_none" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the <cite>Option</cite>&#8216;s inner value if an instance of <cite>Some</cite> or <cite>None</cite> if instance of <cite>Nothing</cite>.</p>
+<p>Provided as interface to code that expects <cite>None</cite> values.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">the <cite>Option</cite>&#8216;s inner value if an instance of <cite>Some</cite> or <cite>None</cite> if instance of <cite>Nothing</cite></td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">Union[T,None]</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="genmonads.option.Some.map">
+<code class="descname">map</code><span class="sig-paren">(</span><em>f</em><span class="sig-paren">)</span><a class="headerlink" href="#genmonads.option.Some.map" title="Permalink to this definition">¶</a></dt>
+<dd><p>Applies a function to the inner value of an <cite>Option</cite>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>f</strong> (<em>Callable[[A],B]</em>) &#8211; the function to apply</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">the resulting <cite>Option</cite></td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">Option[B]</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="genmonads.option.Some.to_list">
+<code class="descname">to_list</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#genmonads.option.Some.to_list" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts the <cite>Option</cite> into a list.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">the resulting python list</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">List[A]</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="genmonads.option.Some.to_mlist">
+<code class="descname">to_mlist</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#genmonads.option.Some.to_mlist" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts the <cite>Option</cite> into a <cite>List</cite> monad.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">the resulting List monad</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">List[A]</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="genmonads.option.main">
+<code class="descclassname">genmonads.option.</code><code class="descname">main</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#genmonads.option.main" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="genmonads.option.nothing">
+<code class="descclassname">genmonads.option.</code><code class="descname">nothing</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#genmonads.option.nothing" title="Permalink to this definition">¶</a></dt>
+<dd><p>Constructs a <cite>Nothing</cite> instance.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">the resulting <cite>Nothing</cite></td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">Nothing[T]</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="genmonads.option.option">
+<code class="descclassname">genmonads.option.</code><code class="descname">option</code><span class="sig-paren">(</span><em>value</em><span class="sig-paren">)</span><a class="headerlink" href="#genmonads.option.option" title="Permalink to this definition">¶</a></dt>
+<dd><p>Constructs an <cite>Option</cite> instance from a value.</p>
+<p>This function converts <cite>None</cite> into an instance of <cite>Nothing[T]</cite>. If this behavior is undesired, use
+<cite>Option.pure()</cite> instead.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>value</strong> (<em>T</em>) &#8211; the value</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">the resulting <cite>Option</cite></td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">Option[T]</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="genmonads.option.some">
+<code class="descclassname">genmonads.option.</code><code class="descname">some</code><span class="sig-paren">(</span><em>value</em><span class="sig-paren">)</span><a class="headerlink" href="#genmonads.option.some" title="Permalink to this definition">¶</a></dt>
+<dd><p>Constructs a <cite>Some</cite> instance from <cite>value</cite>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>value</strong> (<em>T</em>) &#8211; the value</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">the resulting <cite>Some</cite></td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">Some[T]</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="module-genmonads">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-genmonads" title="Permalink to this headline">¶</a></h2>
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2016, Eric Nichols.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../',
+            VERSION:'0.2',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="../_static/jquery.js"></script>
+      <script type="text/javascript" src="../_static/underscore.js"></script>
+      <script type="text/javascript" src="../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>
