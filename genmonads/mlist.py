@@ -217,6 +217,10 @@ class Nil(List):
         """
         Flattens nested instances of `List`.
 
+        If the inner values can be converted to an instance of `List` by having an implementation of `to_mlist()`,
+        the inner values will be converted to `List` before flattening. This allows for flattening of
+        `List[Option[T]]` into `List[T]`, as is done in Scala.
+
         Returns:
             List[T]: the flattened monad
         """
