@@ -55,7 +55,7 @@ class Try(monadfilter.MonadFilter):
     def empty():
         """
         Returns:
-            Try[T]: `Failure[T]` with a `ValueError`, the empty instance for this monad
+            Try[T]: `Failure[T]` with a `ValueError`, the empty instance for this `MonadFilter`
         """
         return Failure(ValueError("This Try instance is empty!"))
 

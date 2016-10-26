@@ -1,7 +1,7 @@
 # noinspection PyUnresolvedReferences
 from typing import TypeVar
 
-from genmonads import monadfilter
+from genmonads import monadfilter, mlist
 from genmonads.monad import mfor
 
 A = TypeVar('A')
@@ -46,7 +46,7 @@ class Option(monadfilter.MonadFilter):
     def empty():
         """
         Returns:
-            Option[T]: `Nothing`, the empty instance for this monad
+            Option[T]: `Nothing`, the empty instance for this `MonadFilter`
         """
         return Nothing()
 
@@ -117,6 +117,24 @@ class Option(monadfilter.MonadFilter):
             Option[T]: the resulting `Option`
         """
         return Some(value)
+
+    def to_mlist(self):
+        """
+        Converts the `Option` into a `List` monad.
+
+        Returns:
+            List[A]: the resulting List monad
+        """
+        raise NotImplementedError
+
+    def to_list(self):
+        """
+        Converts the `Option` into a list.
+
+        Returns:
+            List[A]: the resulting python list
+        """
+        raise NotImplementedError
 
 
 def option(value):
@@ -224,6 +242,24 @@ class Some(Option):
         """
         return Some(f(self.get()))
 
+    def to_mlist(self):
+        """
+        Converts the `Option` into a `List` monad.
+
+        Returns:
+            List[A]: the resulting List monad
+        """
+        return mlist.List.pure(self.get())
+
+    def to_list(self):
+        """
+        Converts the `Option` into a list.
+
+        Returns:
+            List[A]: the resulting python list
+        """
+        return [self.get(), ]
+
 
 def some(value):
     """
@@ -321,6 +357,24 @@ class Nothing(Option):
             Option[B]: the resulting `Option`
         """
         return self
+
+    def to_mlist(self):
+        """
+        Converts the `Option` into a `List` monad.
+
+        Returns:
+            List[A]: the resulting List monad
+        """
+        return mlist.List.empty()
+
+    def to_list(self):
+        """
+        Converts the `Option` into a list.
+
+        Returns:
+            List[A]: the resulting python list
+        """
+        return []
 
 
 def nothing():

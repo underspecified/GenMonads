@@ -3,7 +3,7 @@ import itertools
 from typing import TypeVar
 
 
-from genmonads import monadfilter
+from genmonads import monadfilter, mtry
 from genmonads.monad import mfor
 
 A = TypeVar('A')
@@ -18,7 +18,7 @@ class List(monadfilter.MonadFilter):
     Instances are either of type `List[T]` or `Nil[T]`.
 
     Monadic computing is supported with `map()`, `flat_map()`, `flatten()`, and `filter()` functions, and
-    for-comprehensions can  be formed by evaluating generators over monads with the `mfor()` function.
+    for-comprehensions can be formed by evaluating generators over monads with the `mfor()` function.
     """
 
     def __init__(self, *values):
@@ -26,7 +26,7 @@ class List(monadfilter.MonadFilter):
         #     """Tried to call the constructor of abstract base class List.
         #        Use the mlist() or List.pure() functions instead."""
         # )
-        self.values = values
+        self.values = list(values)
 
     def __eq__(self, other):
         """
@@ -58,7 +58,7 @@ class List(monadfilter.MonadFilter):
     def empty():
         """
         Returns:
-            List[T]: `Nil`, the empty instance for this monad
+            List[T]: `Nil`, the empty instance for this `MonadFilter`
         """
         return Nil()
 
@@ -66,13 +66,59 @@ class List(monadfilter.MonadFilter):
         """
         Flattens nested instances of `List`.
 
+        If the inner values can be converted to an instance of `List` by having an implementation of `to_mlist()`,
+        the inner values will be converted to `List` before flattening. This allows for flattening of
+        `List[Option[T]]` into `List[T]`, as is done in Scala.
+
         Returns:
             List[T]: the flattened monad
         """
-        if self and isinstance(self.values[0], List):
-            return List.pure(*[v for vs in self.values for v in vs.values])
+        if self and hasattr(self.values[0], 'to_mlist'):
+            return List.pure(*[v for vs in self.values for v in vs.to_mlist().values])
         else:
             return self
+
+    def head(self):
+        """
+        Returns the first item in the list.
+
+        Returns:
+            T: the first item
+
+        Throws:
+            IndexError: if the list is empty
+        """
+        return self.values[0]
+
+    def head_option(self):
+        """
+        Safely returns the first item in the list by wrapping the attempt in `Option`.
+
+        Returns:
+            Option[T]: the first item wrapped in `Some`, or `Nothing` if the list is empty
+        """
+        return mtry.mtry(self.head).to_option()
+
+    def last(self):
+        """
+        Returns the last item in the list.
+
+        Returns:
+            T: the last item
+
+        Throws:
+            IndexError: if the list is empty
+        """
+        return self.values[-1]
+
+    def last_option(self):
+        """
+        Safely returns the last item in the list by wrapping the attempt in `Option`.
+
+        Returns:
+            Option[T]: the first item wrapped in `Some`, or `Nothing` if the list is empty
+        """
+        return mtry.mtry(self.last).to_option()
 
     def map(self, f):
         """
@@ -104,6 +150,24 @@ class List(monadfilter.MonadFilter):
         else:
             return Nil()
 
+    def to_mlist(self):
+        """
+        Converts the `Option` into a `List` monad.
+
+        Returns:
+            List[A]: the resulting List monad
+        """
+        return self
+
+    def to_list(self):
+        """
+        Converts the `Option` into a list.
+
+        Returns:
+            List[A]: the resulting python list
+        """
+        return self.values
+
 
 def mlist(*values):
     """
@@ -128,7 +192,7 @@ class Nil(List):
 
     # noinspection PyInitNewSignature
     def __init__(self):
-        pass
+        self.values = []
 
     def __eq__(self, other):
         """
@@ -202,6 +266,7 @@ def main():
 
     print(nil().map(lambda x: x * 2))
 
+    print(mlist(mlist(1, 2, 3, 4, 5), mlist(5, 4, 3, 2, 1)).flat_map(lambda x: x.last_option()))
 
 if __name__ == '__main__':
     main()
