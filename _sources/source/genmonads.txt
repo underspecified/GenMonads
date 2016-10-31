@@ -44,6 +44,14 @@ genmonads.mtry module
     :undoc-members:
     :show-inheritance:
 
+genmonads.nel module
+--------------------
+
+.. automodule:: genmonads.nel
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 genmonads.option module
 -----------------------
 

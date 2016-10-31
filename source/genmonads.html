@@ -88,6 +88,7 @@
 <li><a class="reference internal" href="#module-genmonads.monadfilter">genmonads.monadfilter module</a></li>
 <li><a class="reference internal" href="#module-genmonads.monadtrans">genmonads.monadtrans module</a></li>
 <li><a class="reference internal" href="#module-genmonads.mtry">genmonads.mtry module</a></li>
+<li><a class="reference internal" href="#module-genmonads.nel">genmonads.nel module</a></li>
 <li><a class="reference internal" href="#module-genmonads.option">genmonads.option module</a></li>
 <li><a class="reference internal" href="#module-genmonads">Module contents</a></li>
 </ul>
@@ -158,7 +159,7 @@ for-comprehensions can be formed by evaluating generators over monads with the <
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><cite>Nil</cite>, the empty instance for this monad</td>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><cite>Nil</cite>, the empty instance for this <cite>MonadFilter</cite></td>
 </tr>
 <tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">List[T]</td>
 </tr>
@@ -170,6 +171,9 @@ for-comprehensions can be formed by evaluating generators over monads with the <
 <dt id="genmonads.mlist.List.flatten">
 <code class="descname">flatten</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#genmonads.mlist.List.flatten" title="Permalink to this definition">¶</a></dt>
 <dd><p>Flattens nested instances of <cite>List</cite>.</p>
+<p>If the inner values can be converted to an instance of <cite>List</cite> by having an implementation of
+<cite>to_mlist()</cite>, the inner values will be converted to <cite>List</cite> before flattening. This allows for
+flattening of <cite>List[Option[T]]</cite> into <cite>List[T]</cite>, as is done in Scala.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -272,11 +276,26 @@ for-comprehensions can be formed by evaluating generators over monads with the <
 </table>
 </dd></dl>
 
+<dl class="method">
+<dt id="genmonads.mlist.List.mtail">
+<code class="descname">mtail</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#genmonads.mlist.List.mtail" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the tail of the list as a monadic List.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">the rest of the nel</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">List[T]</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
 <dl class="staticmethod">
 <dt id="genmonads.mlist.List.pure">
 <em class="property">static </em><code class="descname">pure</code><span class="sig-paren">(</span><em>*values</em><span class="sig-paren">)</span><a class="headerlink" href="#genmonads.mlist.List.pure" title="Permalink to this definition">¶</a></dt>
 <dd><p>Injects a value into the <cite>List</cite> monad.</p>
-<p>This function should be used instead of calling <cite>List.__init__()</cite> directly.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -292,6 +311,22 @@ for-comprehensions can be formed by evaluating generators over monads with the <
 </dd></dl>
 
 <dl class="method">
+<dt id="genmonads.mlist.List.tail">
+<code class="descname">tail</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#genmonads.mlist.List.tail" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the tail of the list.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">the tail of the list</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">typing.List[T]</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
 <dt id="genmonads.mlist.List.to_list">
 <code class="descname">to_list</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#genmonads.mlist.List.to_list" title="Permalink to this definition">¶</a></dt>
 <dd><p>Converts the <cite>Option</cite> into a list.</p>
@@ -301,7 +336,7 @@ for-comprehensions can be formed by evaluating generators over monads with the <
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">the resulting python list</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">List[A]</td>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">typing.List[A]</td>
 </tr>
 </tbody>
 </table>
@@ -335,6 +370,9 @@ for-comprehensions can be formed by evaluating generators over monads with the <
 <dt id="genmonads.mlist.Nil.flatten">
 <code class="descname">flatten</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#genmonads.mlist.Nil.flatten" title="Permalink to this definition">¶</a></dt>
 <dd><p>Flattens nested instances of <cite>List</cite>.</p>
+<p>If the inner values can be converted to an instance of <cite>List</cite> by having an implementation of
+<cite>to_mlist()</cite>, the inner values will be converted to <cite>List</cite> before flattening. This allows for
+flattening of <cite>List[Option[T]]</cite> into <cite>List[T]</cite>, as is done in Scala.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -375,12 +413,12 @@ for-comprehensions can be formed by evaluating generators over monads with the <
 <dl class="function">
 <dt id="genmonads.mlist.mlist">
 <code class="descclassname">genmonads.mlist.</code><code class="descname">mlist</code><span class="sig-paren">(</span><em>*values</em><span class="sig-paren">)</span><a class="headerlink" href="#genmonads.mlist.mlist" title="Permalink to this definition">¶</a></dt>
-<dd><p>Constructs an <cite>List</cite> instance from a value.</p>
+<dd><p>Constructs a <cite>List</cite> instance from a tuple of values.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>values</strong> (<em>T</em>) &#8211; the values</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>values</strong> (<em>Tuple[T]</em>) &#8211; the values</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">the resulting <cite>List</cite></td>
 </tr>
@@ -562,11 +600,6 @@ Evaluates a generator over a monadic value, translating it into the equivalent f
 <p>A base class for monads that can implement a <cite>filter()</cite> function.</p>
 <p>The monad must define an empty instance of the monad that is returned when <cite>filter()</cite> fails and represents a
 <cite>False</cite> value for the monad.</p>
-<dl class="method">
-<dt id="genmonads.monadfilter.MonadFilter.collect">
-<code class="descname">collect</code><span class="sig-paren">(</span><em>f</em><span class="sig-paren">)</span><a class="headerlink" href="#genmonads.monadfilter.MonadFilter.collect" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
 <dl class="staticmethod">
 <dt id="genmonads.monadfilter.MonadFilter.empty">
 <em class="property">static </em><code class="descname">empty</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#genmonads.monadfilter.MonadFilter.empty" title="Permalink to this definition">¶</a></dt>
@@ -596,7 +629,7 @@ Returns this monad if the predicate is <cite>True</cite>, this monad&#8217;s emp
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">this instance if the predicate is <cite>True</cite> when applied to its inner value, the monad&#8217;s empty
 instance otherwise</td>
 </tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">MonadTrans[T]</td>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">MonadFilter[T]</td>
 </tr>
 </tbody>
 </table>
@@ -1075,7 +1108,7 @@ for-comprehensions can be formed by evaluating generators over monads with the <
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><cite>Failure[T]</cite> with a <cite>ValueError</cite>, the empty instance for this monad</td>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><cite>Failure[T]</cite> with a <cite>ValueError</cite>, the empty instance for this <cite>MonadFilter</cite></td>
 </tr>
 <tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">Try[T]</td>
 </tr>
@@ -1305,6 +1338,226 @@ for-comprehensions can be formed by evaluating generators over monads with the <
 </dd></dl>
 
 </div>
+<div class="section" id="module-genmonads.nel">
+<span id="genmonads-nel-module"></span><h2>genmonads.nel module<a class="headerlink" href="#module-genmonads.nel" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="genmonads.nel.NonEmptyList">
+<em class="property">class </em><code class="descclassname">genmonads.nel.</code><code class="descname">NonEmptyList</code><span class="sig-paren">(</span><em>*values</em><span class="sig-paren">)</span><a class="headerlink" href="#genmonads.nel.NonEmptyList" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#genmonads.monad.Monad" title="genmonads.monad.Monad"><code class="xref py py-class docutils literal"><span class="pre">genmonads.monad.Monad</span></code></a></p>
+<p>A type that represents a non-empty list of a single type.</p>
+<p>Monadic computing is supported with <cite>map()</cite>, <cite>flat_map()</cite>, <cite>flatten()</cite>, and <cite>filter()</cite> functions, and
+for-comprehensions can be formed by evaluating generators over monads with the <cite>mfor()</cite> function.</p>
+<dl class="method">
+<dt id="genmonads.nel.NonEmptyList.filter">
+<code class="descname">filter</code><span class="sig-paren">(</span><em>f</em><span class="sig-paren">)</span><a class="headerlink" href="#genmonads.nel.NonEmptyList.filter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Filters this monad by applying the predicate <cite>f</cite> to the monad&#8217;s inner value.
+Returns this monad if the predicate is <cite>True</cite>, this monad&#8217;s empty instance otherwise.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>f</strong> (<em>Callable[[T],bool]</em>) &#8211; the predicate</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">a list containing all inner values where the predicate is <cite>True</cite></td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">List[T]</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="genmonads.nel.NonEmptyList.flatten">
+<code class="descname">flatten</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#genmonads.nel.NonEmptyList.flatten" title="Permalink to this definition">¶</a></dt>
+<dd><p>Flattens nested instances of <cite>NonEmptyList</cite>.</p>
+<p>If the inner values can be converted to an instance of <cite>NonEmptyList</cite> by having an implementation of
+<cite>to_nel()</cite>, the inner values will be converted to <cite>NonEmptyList</cite> before flattening.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">the flattened monad</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">NonEmptyList[T]</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="genmonads.nel.NonEmptyList.head">
+<code class="descname">head</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#genmonads.nel.NonEmptyList.head" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the first item in the nel.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">the first item</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">T</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="genmonads.nel.NonEmptyList.last">
+<code class="descname">last</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#genmonads.nel.NonEmptyList.last" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the last item in the nel.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">the last item</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">T</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="genmonads.nel.NonEmptyList.map">
+<code class="descname">map</code><span class="sig-paren">(</span><em>f</em><span class="sig-paren">)</span><a class="headerlink" href="#genmonads.nel.NonEmptyList.map" title="Permalink to this definition">¶</a></dt>
+<dd><p>Applies a function to the inner value of a nel.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>f</strong> (<em>Callable[[A],B]</em>) &#8211; the function to apply</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">the resulting NonEmptyList</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">NonEmptyList[B]</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="genmonads.nel.NonEmptyList.mtail">
+<code class="descname">mtail</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#genmonads.nel.NonEmptyList.mtail" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the tail of the nel as a monadic List.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">the rest of the nel</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">List[T]</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="genmonads.nel.NonEmptyList.pure">
+<em class="property">static </em><code class="descname">pure</code><span class="sig-paren">(</span><em>*values</em><span class="sig-paren">)</span><a class="headerlink" href="#genmonads.nel.NonEmptyList.pure" title="Permalink to this definition">¶</a></dt>
+<dd><p>Injects a value into the <cite>NonEmptyList</cite> monad.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>*values</strong> (<em>T</em>) &#8211; the values</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">the resulting <cite>NonEmptyList</cite></td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">NonEmptyList[T]</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="genmonads.nel.NonEmptyList.tail">
+<code class="descname">tail</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#genmonads.nel.NonEmptyList.tail" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the tail of the nel.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">the tail of the nel</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">typing.List[T]</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="genmonads.nel.NonEmptyList.to_list">
+<code class="descname">to_list</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#genmonads.nel.NonEmptyList.to_list" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts the <cite>NonEmptyList</cite> into a list.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">the resulting python list</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">typing.List[T]</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="genmonads.nel.NonEmptyList.to_mlist">
+<code class="descname">to_mlist</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#genmonads.nel.NonEmptyList.to_mlist" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts the <cite>NonEmptyList</cite> into a <cite>List</cite> monad.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">the resulting List monad</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">List[T]</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="genmonads.nel.NonEmptyList.to_nel">
+<code class="descname">to_nel</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#genmonads.nel.NonEmptyList.to_nel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts the <cite>NonEmptyList</cite> into a <cite>NonEmptyList</cite>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">the resulting nel</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">NonEmptyList[T]</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="genmonads.nel.main">
+<code class="descclassname">genmonads.nel.</code><code class="descname">main</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#genmonads.nel.main" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="genmonads.nel.nel">
+<code class="descclassname">genmonads.nel.</code><code class="descname">nel</code><span class="sig-paren">(</span><em>*values</em><span class="sig-paren">)</span><a class="headerlink" href="#genmonads.nel.nel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Constructs a <cite>NonEmptyList</cite> instance from a tuple of values.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>values</strong> (<em>Tuple[T]</em>) &#8211; the values</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">the resulting <cite>NonEmptyList</cite></td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">NonEmptyList[T]</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
 <div class="section" id="module-genmonads.option">
 <span id="genmonads-option-module"></span><h2>genmonads.option module<a class="headerlink" href="#module-genmonads.option" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
@@ -1408,7 +1661,7 @@ for-comprehensions can be formed by evaluating generators over monads with the <
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">the resulting python list</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">List[A]</td>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">typing.List[A]</td>
 </tr>
 </tbody>
 </table>
@@ -1447,7 +1700,7 @@ for-comprehensions can  be formed by evaluating generators over monads with the 
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><cite>Nothing</cite>, the empty instance for this monad</td>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><cite>Nothing</cite>, the empty instance for this <cite>MonadFilter</cite></td>
 </tr>
 <tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">Option[T]</td>
 </tr>
@@ -1569,7 +1822,7 @@ for-comprehensions can  be formed by evaluating generators over monads with the 
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">the resulting python list</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">List[A]</td>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">typing.List[A]</td>
 </tr>
 </tbody>
 </table>
@@ -1694,7 +1947,7 @@ for-comprehensions can  be formed by evaluating generators over monads with the 
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">the resulting python list</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">List[A]</td>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">typing.List[A]</td>
 </tr>
 </tbody>
 </table>
