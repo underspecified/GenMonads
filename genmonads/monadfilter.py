@@ -40,7 +40,7 @@ class MonadFilter(monad.Monad):
             f (Callable[[T],bool]): the predicate
 
         Returns:
-            MonadTrans[T]: this instance if the predicate is `True` when applied to its inner value, the monad's empty
+            MonadFilter[T]: this instance if the predicate is `True` when applied to its inner value, the monad's empty
             instance otherwise
         """
         return self.flat_map(lambda x: self.pure(x) if f(x) else self.empty())
