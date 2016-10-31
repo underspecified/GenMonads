@@ -22,10 +22,6 @@ class List(monadfilter.MonadFilter):
     """
 
     def __init__(self, *values):
-        # raise ValueError(
-        #     """Tried to call the constructor of abstract base class List.
-        #        Use the mlist() or List.pure() functions instead."""
-        # )
         self.values = list(values)
 
     def __eq__(self, other):
@@ -66,9 +62,9 @@ class List(monadfilter.MonadFilter):
         """
         Flattens nested instances of `List`.
 
-        If the inner values can be converted to an instance of `List` by having an implementation of `to_mlist()`,
-        the inner values will be converted to `List` before flattening. This allows for flattening of
-        `List[Option[T]]` into `List[T]`, as is done in Scala.
+        If the inner values can be converted to an instance of `List` by having an implementation of
+        `to_mlist()`,the inner values will be converted to `List` before flattening. This allows for
+        flattening of `List[Option[T]]` into `List[T]`, as is done in Scala.
 
         Returns:
             List[T]: the flattened monad
@@ -132,6 +128,15 @@ class List(monadfilter.MonadFilter):
         """
         return List.pure(*(f(v) for v in self.values))
 
+    def mtail(self):
+        """
+        Returns the tail of the list as a monadic List.
+
+        Returns:
+            List[T]: the rest of the nel
+        """
+        return List.pure(*self.values[1:])
+
     @staticmethod
     def pure(*values):
         """
@@ -150,14 +155,14 @@ class List(monadfilter.MonadFilter):
         else:
             return Nil()
 
-    def to_mlist(self):
+    def tail(self):
         """
-        Converts the `Option` into a `List` monad.
+        Returns the tail of the list.
 
         Returns:
-            List[A]: the resulting List monad
+            List[T]: the tail of the list
         """
-        return self
+        return self.values[1:]
 
     def to_list(self):
         """
@@ -168,13 +173,22 @@ class List(monadfilter.MonadFilter):
         """
         return self.values
 
+    def to_mlist(self):
+        """
+        Converts the `Option` into a `List` monad.
+
+        Returns:
+            List[A]: the resulting List monad
+        """
+        return self
+
 
 def mlist(*values):
     """
-    Constructs an `List` instance from a value.
+    Constructs a `List` instance from a tuple of values.
 
     Args:
-        values (T): the values
+        values (Tuple[T]): the values
 
     Returns:
         List[T]: the resulting `List`
@@ -217,9 +231,9 @@ class Nil(List):
         """
         Flattens nested instances of `List`.
 
-        If the inner values can be converted to an instance of `List` by having an implementation of `to_mlist()`,
-        the inner values will be converted to `List` before flattening. This allows for flattening of
-        `List[Option[T]]` into `List[T]`, as is done in Scala.
+        If the inner values can be converted to an instance of `List` by having an implementation of
+        `to_mlist()`, the inner values will be converted to `List` before flattening. This allows for
+        flattening of `List[Option[T]]` into `List[T]`, as is done in Scala.
 
         Returns:
             List[T]: the flattened monad
