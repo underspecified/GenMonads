@@ -1,12 +1,10 @@
-# noinspection PyUnresolvedReferences
-from typing import TypeVar
-
+import typing
 from genmonads import monadfilter, mlist
 from genmonads.monad import mfor
 
-A = TypeVar('A')
-B = TypeVar('B')
-T = TypeVar('T')
+A = typing.TypeVar('A')
+B = typing.TypeVar('B')
+T = typing.TypeVar('T')
 
 
 class Option(monadfilter.MonadFilter):
@@ -132,7 +130,7 @@ class Option(monadfilter.MonadFilter):
         Converts the `Option` into a list.
 
         Returns:
-            List[A]: the resulting python list
+            typing.List[A]: the resulting python list
         """
         raise NotImplementedError
 
@@ -256,7 +254,7 @@ class Some(Option):
         Converts the `Option` into a list.
 
         Returns:
-            List[A]: the resulting python list
+            typing.List[A]: the resulting python list
         """
         return [self.get(), ]
 
@@ -372,7 +370,7 @@ class Nothing(Option):
         Converts the `Option` into a list.
 
         Returns:
-            List[A]: the resulting python list
+            typing.List[A]: the resulting python list
         """
         return []
 

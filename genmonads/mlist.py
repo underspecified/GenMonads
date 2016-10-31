@@ -1,14 +1,11 @@
-# noinspection PyUnresolvedReferences
-import itertools
-from typing import TypeVar
-
+import typing
 
 from genmonads import monadfilter, mtry
 from genmonads.monad import mfor
 
-A = TypeVar('A')
-B = TypeVar('B')
-T = TypeVar('T')
+A = typing.TypeVar('A')
+B = typing.TypeVar('B')
+T = typing.TypeVar('T')
 
 
 class List(monadfilter.MonadFilter):
@@ -63,7 +60,7 @@ class List(monadfilter.MonadFilter):
         Flattens nested instances of `List`.
 
         If the inner values can be converted to an instance of `List` by having an implementation of
-        `to_mlist()`,the inner values will be converted to `List` before flattening. This allows for
+        `to_mlist()`, the inner values will be converted to `List` before flattening. This allows for
         flattening of `List[Option[T]]` into `List[T]`, as is done in Scala.
 
         Returns:
@@ -158,7 +155,7 @@ class List(monadfilter.MonadFilter):
         Returns the tail of the list.
 
         Returns:
-            List[T]: the tail of the list
+            typing.List[T]: the tail of the list
         """
         return self.values[1:]
 
@@ -167,7 +164,7 @@ class List(monadfilter.MonadFilter):
         Converts the `Option` into a list.
 
         Returns:
-            List[A]: the resulting python list
+            typing.List[A]: the resulting python list
         """
         return self.values
 

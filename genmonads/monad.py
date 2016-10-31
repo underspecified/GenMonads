@@ -1,14 +1,14 @@
 import re
 import sys
-from typing import TypeVar
+import typing
 
 from pony.orm.decompiling import decompile
 
 from genmonads.monadtrans import ast2src
 
-A = TypeVar('A')
-B = TypeVar('B')
-T = TypeVar('T')
+A = typing.TypeVar('A')
+B = typing.TypeVar('B')
+T = typing.TypeVar('T')
 
 
 class Monad(object):

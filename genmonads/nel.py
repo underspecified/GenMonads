@@ -1,14 +1,11 @@
-# noinspection PyUnresolvedReferences
-import itertools
-from typing import TypeVar
-
+import typing
 
 from genmonads import monad, mlist, mtry
 from genmonads.monad import mfor
 
-A = TypeVar('A')
-B = TypeVar('B')
-T = TypeVar('T')
+A = typing.TypeVar('A')
+B = typing.TypeVar('B')
+T = typing.TypeVar('T')
 
 
 class NonEmptyList(monad.Monad):
@@ -142,7 +139,7 @@ class NonEmptyList(monad.Monad):
         Returns the tail of the nel.
 
         Returns:
-            List[T]: the tail of the nel
+            typing.List[T]: the tail of the nel
         """
         return self.values[1:]
 
@@ -151,7 +148,7 @@ class NonEmptyList(monad.Monad):
         Converts the `NonEmptyList` into a list.
 
         Returns:
-            List[T]: the resulting python list
+            typing.List[T]: the resulting python list
         """
         return self.values
 

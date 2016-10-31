@@ -1,10 +1,9 @@
-# noinspection PyUnresolvedReferences
-from typing import TypeVar
+import typing
 from genmonads import monad
 
-A = TypeVar('A')
-B = TypeVar('B')
-T = TypeVar('T')
+A = typing.TypeVar('A')
+B = typing.TypeVar('B')
+T = typing.TypeVar('T')
 
 
 # noinspection PyAbstractClass

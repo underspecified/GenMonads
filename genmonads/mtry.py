@@ -1,13 +1,11 @@
-# noinspection PyUnresolvedReferences
-from typing import TypeVar
+import typing
 
-# noinspection PyUnresolvedReferences
 from genmonads import monadfilter, option
 from genmonads.monad import mfor
 
-A = TypeVar('A')
-B = TypeVar('B')
-T = TypeVar('T')
+A = typing.TypeVar('A')
+B = typing.TypeVar('B')
+T = typing.TypeVar('T')
 
 
 class Try(monadfilter.MonadFilter):
