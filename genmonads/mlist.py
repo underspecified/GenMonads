@@ -142,8 +142,6 @@ class List(monadfilter.MonadFilter):
         """
         Injects a value into the `List` monad.
 
-        This function should be used instead of calling `List.__init__()` directly.
-
         Args:
             *values (T): the values
 

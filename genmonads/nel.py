@@ -78,7 +78,7 @@ class NonEmptyList(monad.Monad):
         `to_nel()`, the inner values will be converted to `NonEmptyList` before flattening.
 
         Returns:
-            NonEmptyList: the flattened monad
+            NonEmptyList[T]: the flattened monad
         """
         if hasattr(self.values[0], 'to_nel'):
             return NonEmptyList.pure(*[v for vs in self.values for v in vs.to_mlist().values])
@@ -128,8 +128,6 @@ class NonEmptyList(monad.Monad):
     def pure(*values):
         """
         Injects a value into the `NonEmptyList` monad.
-
-        This function should be used instead of calling `NonEmptyList.__init__()` directly.
 
         Args:
             *values (T): the values
