@@ -1,14 +1,15 @@
 import typing
 
-from genmonads import monad, mlist, mtry
-from genmonads.monad import mfor
+from genmonads.mlist import mlist
+from genmonads.monad import Monad, mfor
+from genmonads.mtry import *
 
 A = typing.TypeVar('A')
 B = typing.TypeVar('B')
 T = typing.TypeVar('T')
 
 
-class NonEmptyList(monad.Monad):
+class NonEmptyList(Monad):
     """
     A type that represents a non-empty list of a single type.
 
@@ -19,7 +20,7 @@ class NonEmptyList(monad.Monad):
     def __init__(self, *values):
         if not values:
             raise ValueError('Tried to construct an empty NonEmptyList!')
-        self.values = list(values)
+        self._values = list(values)
 
     def __bool__(self):
         """
@@ -37,7 +38,7 @@ class NonEmptyList(monad.Monad):
             bool: `True` if other is an instance of `List` and inner values are equivalent, `False` otherwise
         """
         if isinstance(other, NonEmptyList):
-            return self.values.__eq__(other.values)
+            return self._values.__eq__(other._values)
         return False
 
     def __mname__(self):
@@ -52,7 +53,7 @@ class NonEmptyList(monad.Monad):
         Returns:
             str: a string representation of the List
         """
-        return 'NonEmptyList(%s)' % ', '.join(str(v) for v in self.values)
+        return 'NonEmptyList(%s)' % ', '.join(str(v) for v in self._values)
 
     def filter(self, f):
         """
@@ -77,8 +78,9 @@ class NonEmptyList(monad.Monad):
         Returns:
             NonEmptyList[T]: the flattened monad
         """
-        if hasattr(self.values[0], 'to_nel'):
-            return NonEmptyList.pure(*[v for vs in self.values for v in vs.to_mlist().values])
+        if hasattr(self._values[0], 'to_nel'):
+            # noinspection PyProtectedMember
+            return NonEmptyList.pure(*[v for vs in self._values for v in vs.to_mlist()._values])
         else:
             return self
 
@@ -89,7 +91,7 @@ class NonEmptyList(monad.Monad):
         Returns:
             T: the first item
         """
-        return self.values[0]
+        return self._values[0]
 
     def last(self):
         """
@@ -98,7 +100,7 @@ class NonEmptyList(monad.Monad):
         Returns:
             T: the last item
         """
-        return self.values[-1]
+        return self._values[-1]
 
     def map(self, f):
         """
@@ -110,7 +112,7 @@ class NonEmptyList(monad.Monad):
         Returns:
             NonEmptyList[B]: the resulting NonEmptyList
         """
-        return NonEmptyList.pure(*(f(v) for v in self.values))
+        return NonEmptyList.pure(*(f(v) for v in self._values))
 
     def mtail(self):
         """
@@ -119,7 +121,7 @@ class NonEmptyList(monad.Monad):
         Returns:
             List[T]: the rest of the nel
         """
-        return mlist.mlist(*self.values[1:])
+        return mlist(*self._values[1:])
 
     @staticmethod
     def pure(*values):
@@ -141,7 +143,7 @@ class NonEmptyList(monad.Monad):
         Returns:
             typing.List[T]: the tail of the nel
         """
-        return self.values[1:]
+        return self._values[1:]
 
     def to_list(self):
         """
@@ -150,7 +152,7 @@ class NonEmptyList(monad.Monad):
         Returns:
             typing.List[T]: the resulting python list
         """
-        return self.values
+        return self._values
 
     def to_mlist(self):
         """
@@ -159,7 +161,7 @@ class NonEmptyList(monad.Monad):
         Returns:
             List[T]: the resulting List monad
         """
-        return mlist.mlist(*self.values)
+        return mlist(*self._values)
 
     def to_nel(self):
         """
@@ -203,7 +205,7 @@ def main():
 
     print(nel(5) >> (lambda x: nel(x * 2)))
 
-    print(mtry.mtry(lambda: nel().map(lambda x: x * 2)))
+    print(mtry(lambda: nel().map(lambda x: x * 2)))
 
     print(nel(nel(1, 2, 3, 4, 5), nel(5, 4, 3, 2, 1)).flatten())
 

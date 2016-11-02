@@ -1,14 +1,15 @@
 import typing
 
-from genmonads import monadfilter, option
 from genmonads.monad import mfor
+from genmonads.monadfilter import MonadFilter
+from genmonads.option import *
 
 A = typing.TypeVar('A')
 B = typing.TypeVar('B')
 T = typing.TypeVar('T')
 
 
-class Try(monadfilter.MonadFilter):
+class Try(MonadFilter):
     """
     A type that represents a failable computation.
 
@@ -309,7 +310,7 @@ class Success(Try):
         Returns:
             Option[T]: the corresponding `Option`
         """
-        return option.Some(self._result)
+        return Some(self._result)
 
 
 def success(result):
@@ -438,13 +439,13 @@ class Failure(Try):
     def to_option(self):
         """
         Converts an instance of `Try[T]` to `Option[T]`.
-        
+
         `Success[T]` is mapped to `Some[T]`, and `Failure[T]` is mapped to `Nothing[T]`.
 
         Returns:
             Option[T]: the corresponding `Option`
         """
-        return option.Nothing()
+        return Nothing()
 
 
 def failure(ex):

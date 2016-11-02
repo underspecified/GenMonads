@@ -1,14 +1,15 @@
 import typing
 
-from genmonads import monadfilter, mtry
 from genmonads.monad import mfor
+from genmonads.monadfilter import MonadFilter
+from genmonads.mtry import *
 
 A = typing.TypeVar('A')
 B = typing.TypeVar('B')
 T = typing.TypeVar('T')
 
 
-class List(monadfilter.MonadFilter):
+class List(MonadFilter):
     """
     A type that represents list of values of the same type.
 
@@ -19,7 +20,7 @@ class List(monadfilter.MonadFilter):
     """
 
     def __init__(self, *values):
-        self.values = list(values)
+        self._values = list(values)
 
     def __eq__(self, other):
         """
@@ -30,7 +31,7 @@ class List(monadfilter.MonadFilter):
             bool: `True` if other is an instance of `List` and inner values are equivalent, `False` otherwise
         """
         if isinstance(other, List) and not isinstance(other, Nil):
-            return self.values.__eq__(other.values)
+            return self._values.__eq__(other._values)
         return False
 
     def __mname__(self):
@@ -45,7 +46,7 @@ class List(monadfilter.MonadFilter):
         Returns:
             str: a string representation of the List
         """
-        return 'List(%s)' % ', '.join(str(v) for v in self.values)
+        return 'List(%s)' % ', '.join(str(v) for v in self._values)
 
     @staticmethod
     def empty():
@@ -66,8 +67,9 @@ class List(monadfilter.MonadFilter):
         Returns:
             List[T]: the flattened monad
         """
-        if self and hasattr(self.values[0], 'to_mlist'):
-            return List.pure(*[v for vs in self.values for v in vs.to_mlist().values])
+        if self and hasattr(self._values[0], 'to_mlist'):
+            # noinspection PyProtectedMember
+            return List.pure(*[v for vs in self._values for v in vs.to_mlist()._values])
         else:
             return self
 
@@ -81,7 +83,7 @@ class List(monadfilter.MonadFilter):
         Throws:
             IndexError: if the list is empty
         """
-        return self.values[0]
+        return self._values[0]
 
     def head_option(self):
         """
@@ -90,7 +92,7 @@ class List(monadfilter.MonadFilter):
         Returns:
             Option[T]: the first item wrapped in `Some`, or `Nothing` if the list is empty
         """
-        return mtry.mtry(self.head).to_option()
+        return mtry(self.head).to_option()
 
     def last(self):
         """
@@ -102,7 +104,7 @@ class List(monadfilter.MonadFilter):
         Throws:
             IndexError: if the list is empty
         """
-        return self.values[-1]
+        return self._values[-1]
 
     def last_option(self):
         """
@@ -111,7 +113,7 @@ class List(monadfilter.MonadFilter):
         Returns:
             Option[T]: the first item wrapped in `Some`, or `Nothing` if the list is empty
         """
-        return mtry.mtry(self.last).to_option()
+        return mtry(self.last).to_option()
 
     def map(self, f):
         """
@@ -123,7 +125,7 @@ class List(monadfilter.MonadFilter):
         Returns:
             List[B]: the resulting List
         """
-        return List.pure(*(f(v) for v in self.values))
+        return List.pure(*(f(v) for v in self._values))
 
     def mtail(self):
         """
@@ -132,7 +134,7 @@ class List(monadfilter.MonadFilter):
         Returns:
             List[T]: the rest of the nel
         """
-        return List.pure(*self.values[1:])
+        return List.pure(*self._values[1:])
 
     @staticmethod
     def pure(*values):
@@ -157,7 +159,7 @@ class List(monadfilter.MonadFilter):
         Returns:
             typing.List[T]: the tail of the list
         """
-        return self.values[1:]
+        return self._values[1:]
 
     def to_list(self):
         """
@@ -166,7 +168,7 @@ class List(monadfilter.MonadFilter):
         Returns:
             typing.List[A]: the resulting python list
         """
-        return self.values
+        return self._values
 
     def to_mlist(self):
         """

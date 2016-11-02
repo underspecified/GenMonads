@@ -1,13 +1,15 @@
 import typing
-from genmonads import monadfilter, mlist
+
+from genmonads.mlist import *
 from genmonads.monad import mfor
+from genmonads.monadfilter import MonadFilter
 
 A = typing.TypeVar('A')
 B = typing.TypeVar('B')
 T = typing.TypeVar('T')
 
 
-class Option(monadfilter.MonadFilter):
+class Option(MonadFilter):
     """
     A type that represents an optional value.
 
@@ -163,7 +165,7 @@ class Some(Option):
     """
 
     def __init__(self, value):
-        self.value = value
+        self._value = value
 
     def __eq__(self, other):
         """
@@ -174,7 +176,7 @@ class Some(Option):
             bool: `True` if other is an instance of `Some` and inner values are equivalent, `False` otherwise
         """
         if isinstance(other, Some):
-            return self.value.__eq__(other.value)
+            return self._value.__eq__(other._value)
         return False
 
     def __str__(self):
@@ -182,7 +184,7 @@ class Some(Option):
         Returns:
             str: a string representation of the Option
         """
-        return 'Some(%s)' % self.value
+        return 'Some(%s)' % self._value
 
     def flatten(self):
         """
@@ -203,7 +205,7 @@ class Some(Option):
         Returns:
             T: the inner value
         """
-        return self.value
+        return self._value
 
     def get_or_else(self, default):
         """
@@ -215,7 +217,7 @@ class Some(Option):
         Returns:
             T: the `Option`'s inner value if an instance of `Some` or `default` if instance of `Nothing`
         """
-        return self.value
+        return self._value
 
     def get_or_none(self):
         """
@@ -226,7 +228,7 @@ class Some(Option):
         Returns:
             Union[T,None]: the `Option`'s inner value if an instance of `Some` or `None` if instance of `Nothing`
         """
-        return self.value
+        return self._value
 
     def map(self, f):
         """
@@ -247,7 +249,7 @@ class Some(Option):
         Returns:
             List[A]: the resulting List monad
         """
-        return mlist.List.pure(self.get())
+        return List.pure(self.get())
 
     def to_list(self):
         """
@@ -363,7 +365,7 @@ class Nothing(Option):
         Returns:
             List[A]: the resulting List monad
         """
-        return mlist.List.empty()
+        return List.empty()
 
     def to_list(self):
         """
