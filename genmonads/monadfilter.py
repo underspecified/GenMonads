@@ -1,5 +1,6 @@
 import typing
-from genmonads import monad
+
+from genmonads.monad import Monad
 
 A = typing.TypeVar('A')
 B = typing.TypeVar('B')
@@ -7,7 +8,7 @@ T = typing.TypeVar('T')
 
 
 # noinspection PyAbstractClass
-class MonadFilter(monad.Monad):
+class MonadFilter(Monad):
     """
     A base class for monads that can implement a `filter()` function.
 
@@ -30,6 +31,18 @@ class MonadFilter(monad.Monad):
         """
         raise NotImplementedError
 
+    def exists(self, f):
+        """
+        Checks if the predicate is `True` for any of this monad's inner values .
+
+        Args:
+            f (Callable[[T],bool]): the predicate
+
+        Returns:
+            bool: True if the predicate is `True` for any of this monad's inner values
+        """
+        return True if self.filter(f) else False
+
     def filter(self, f):
         """
         Filters this monad by applying the predicate `f` to the monad's inner value.
@@ -39,7 +52,7 @@ class MonadFilter(monad.Monad):
             f (Callable[[T],bool]): the predicate
 
         Returns:
-            MonadFilter[T]: this instance if the predicate is `True` when applied to its inner value, the monad's empty
-            instance otherwise
+            MonadFilter[T]: this instance if the predicate is `True` when applied to its inner value,
+            otherwise the monad's empty instance
         """
         return self.flat_map(lambda x: self.pure(x) if f(x) else self.empty())
