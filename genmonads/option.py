@@ -1,4 +1,3 @@
-# noinspection PyUnresolvedReferences
 import typing
 
 from genmonads.mlist import *
@@ -34,9 +33,9 @@ class Option(MonadFilter):
         Returns:
             bool: `True` if other is an instance of `Some` and inner values are equivalent, `False` otherwise
         """
-        if self and other:
+        if isinstance(self, Some) and isinstance(other, Some):
             return self.get().__eq__(other.get())
-        elif not self and not other:
+        elif isinstance(self, Nothing) and isinstance(other, Nothing):
             return True
         else:
             return False
@@ -111,7 +110,7 @@ class Option(MonadFilter):
         Returns:
             Option[B]: the resulting Option
         """
-        return Some.pure(f(self.get())) if self else Option.empty()
+        return Some(f(self.get())) if self else Nothing()
 
     @staticmethod
     def pure(value):
