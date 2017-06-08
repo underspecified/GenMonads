@@ -1,3 +1,4 @@
+# noinspection PyUnresolvedReferences
 import typing
 
 from genmonads.mlist import *
@@ -33,7 +34,12 @@ class Option(MonadFilter):
         Returns:
             bool: `True` if other is an instance of `Some` and inner values are equivalent, `False` otherwise
         """
-        raise NotImplementedError
+        if self and other:
+            return self.get().__eq__(other.get())
+        elif not self and not other:
+            return True
+        else:
+            return False
 
     def __mname__(self):
         """
@@ -57,7 +63,11 @@ class Option(MonadFilter):
         Returns:
             Option[T]: the flattened monad
         """
-        raise NotImplementedError
+        if self:
+            x = self.get()
+            return x if isinstance(x, Some) else Some(x)
+        else:
+            return Nothing()
 
     def get(self):
         """
@@ -78,7 +88,7 @@ class Option(MonadFilter):
         Returns:
             T: the `Option`'s inner value if an instance of `Some` or `default` if instance of `Nothing`
         """
-        raise NotImplementedError
+        return self.get() if self else default
 
     def get_or_none(self):
         """
@@ -89,7 +99,7 @@ class Option(MonadFilter):
         Returns:
             Union[T,None]: the `Option`'s inner value if an instance of `Some` or `None` if instance of `Nothing`
         """
-        raise NotImplementedError
+        return self.get_or_else(None)
 
     def map(self, f):
         """
@@ -101,7 +111,7 @@ class Option(MonadFilter):
         Returns:
             Option[B]: the resulting Option
         """
-        raise NotImplementedError
+        return Some.pure(f(self.get())) if self else Option.empty()
 
     @staticmethod
     def pure(value):
@@ -125,7 +135,7 @@ class Option(MonadFilter):
         Returns:
             List[A]: the resulting List monad
         """
-        raise NotImplementedError
+        return List.pure(self.to_list())
 
     def to_list(self):
         """
@@ -134,7 +144,7 @@ class Option(MonadFilter):
         Returns:
             typing.List[A]: the resulting python list
         """
-        raise NotImplementedError
+        return [self.get(), ] if self else []
 
 
 def option(value):
@@ -167,36 +177,12 @@ class Some(Option):
     def __init__(self, value):
         self._value = value
 
-    def __eq__(self, other):
-        """
-        Args:
-            other (Option[T]): the value to compare against
-
-        Returns:
-            bool: `True` if other is an instance of `Some` and inner values are equivalent, `False` otherwise
-        """
-        if isinstance(other, Some):
-            return self._value.__eq__(other._value)
-        return False
-
     def __str__(self):
         """
         Returns:
             str: a string representation of the Option
         """
         return 'Some(%s)' % self._value
-
-    def flatten(self):
-        """
-        Flattens nested instances of `Option`.
-
-        Returns:
-            Option[T]: the flattened monad
-        """
-        if isinstance(self.get(), Option):
-            return self.get()
-        else:
-            return self
 
     def get(self):
         """
@@ -206,59 +192,6 @@ class Some(Option):
             T: the inner value
         """
         return self._value
-
-    def get_or_else(self, default):
-        """
-        Returns the `Option`'s inner value if an instance of `Some` or `default` if instance of `Nothing`.
-
-        Args:
-            default: the value to return for `Nothing[T]` instances
-
-        Returns:
-            T: the `Option`'s inner value if an instance of `Some` or `default` if instance of `Nothing`
-        """
-        return self._value
-
-    def get_or_none(self):
-        """
-        Returns the `Option`'s inner value if an instance of `Some` or `None` if instance of `Nothing`.
-
-        Provided as interface to code that expects `None` values.
-
-        Returns:
-            Union[T,None]: the `Option`'s inner value if an instance of `Some` or `None` if instance of `Nothing`
-        """
-        return self._value
-
-    def map(self, f):
-        """
-        Applies a function to the inner value of an `Option`.
-
-        Args:
-            f (Callable[[A],B]): the function to apply
-
-        Returns:
-            Option[B]: the resulting `Option`
-        """
-        return Some(f(self.get()))
-
-    def to_mlist(self):
-        """
-        Converts the `Option` into a `List` monad.
-
-        Returns:
-            List[A]: the resulting List monad
-        """
-        return List.pure(self.get())
-
-    def to_list(self):
-        """
-        Converts the `Option` into a list.
-
-        Returns:
-            typing.List[A]: the resulting python list
-        """
-        return [self.get(), ]
 
 
 def some(value):
@@ -286,33 +219,12 @@ class Nothing(Option):
     def __init__(self):
         pass
 
-    def __eq__(self, other):
-        """
-        Args:
-            other (Option[T]): the value to compare against
-
-        Returns:
-            bool: `True` if other is instance of `Nothing`, `False` otherwise
-        """
-        if isinstance(other, Nothing):
-            return True
-        return False
-
     def __str__(self):
         """
         Returns:
             str: a string representation of the `Option`
         """
         return 'Nothing'
-
-    def flatten(self):
-        """
-        Flattens nested instances of `Option`.
-
-        Returns:
-            Option[T]: the flattened monad
-        """
-        return self
 
     def get(self):
         """
@@ -322,59 +234,6 @@ class Nothing(Option):
             T: the inner value
         """
         raise ValueError("Tried to access the non-existent inner value of a Nothing instance")
-
-    def get_or_else(self, default):
-        """
-        Returns the `Option`'s inner value if an instance of `Some` or `default` if instance of `Nothing`.
-
-        Args:
-            default: the value to return for `Nothing[T]` instances
-
-        Returns:
-            T: the `Option`'s inner value if an instance of `Some` or `default` if instance of `Nothing`
-        """
-        return default
-
-    def get_or_none(self):
-        """
-        Returns the `Option`'s inner value if an instance of `Some` or `None` if instance of `Nothing`.
-
-        Provided as interface to code that expects `None` values.
-
-        Returns:
-            Union[T,None]: the `Option`'s inner value if an instance of `Some` or `None` if instance of `Nothing`
-        """
-        return None
-
-    def map(self, f):
-        """
-        Applies a function to the inner value of an `Option`.
-
-        Args:
-            f (Callable[[A],B]): the function to apply
-
-        Returns:
-            Option[B]: the resulting `Option`
-        """
-        return self
-
-    def to_mlist(self):
-        """
-        Converts the `Option` into a `List` monad.
-
-        Returns:
-            List[A]: the resulting List monad
-        """
-        return List.empty()
-
-    def to_list(self):
-        """
-        Converts the `Option` into a list.
-
-        Returns:
-            typing.List[A]: the resulting python list
-        """
-        return []
 
 
 def nothing():
