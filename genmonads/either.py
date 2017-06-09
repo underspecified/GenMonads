@@ -49,6 +49,15 @@ class Either(Monad):
         """
         return 'Either'
 
+    def contains(self, elem):
+        return self.exists(lambda b: b == elem)
+
+    def exists(self, p):
+        return True if self.is_right() and p(self.get()) else False
+
+    def filter_or_else(self, p, zero):
+        return self if self.exists(p) else Left(zero)
+
     def flatten(self):
         """
         Flattens nested instances of `Either`.
@@ -62,12 +71,18 @@ class Either(Monad):
         else:
             return self
 
+    def fold(self, fa, fb):
+        return Right(fb(self.get())) if self.is_right() else Left(fa(self.get()))
+
+    def forall(self, p):
+        return True if self.is_left() or p(self.get()) else False
+
     def get(self):
         """
-        Returns the `Either`'s inner value. Raises a `ValueError` for instances of `Left[A]`.
+        Returns the `Either`'s inner value.
 
         Returns:
-            B: the inner value
+            Union[A,B]: the inner value
         """
         raise NotImplementedError
 
@@ -97,14 +112,14 @@ class Either(Monad):
     def is_left(self):
         """
         Returns:
-            bool: `True` if instance of Left, `False` otherwise
+            bool: `True` if instance of `Left`, `False` otherwise
         """
         return isinstance(self, Left)
 
     def is_right(self):
         """
         Returns:
-            bool: `True` if instance of Left, `False` otherwise
+            bool: `True` if instance of `Right`, `False` otherwise
         """
         return isinstance(self, Right)
 
@@ -135,6 +150,15 @@ class Either(Monad):
         """
         return Right(value)
 
+    def swap(self):
+        """
+        Converts a `Left` monad to `Right` and vice versa.
+
+        Returns:
+            Either[B,A]: the swapped `Either`
+        """
+        return Left(self.get()) if self.is_right() else Right(self.get())
+
     def to_mlist(self):
         """
         Converts the `Either` into a `List` monad.
@@ -155,12 +179,22 @@ class Either(Monad):
 
     def to_option(self):
         """
-        Converts the `Either` into an `Option` monad.
+        Converts the `Either` into `Some` if an instance of `Right` and `Nothing` if an instance of `Left`.
 
         Returns:
-            Option[B]: the resulting python list
+            Option[B]: the resulting `Option`
         """
         return Some(self.get()) if self.is_right() else Nothing()
+
+    def to_try(self, ex):
+        """
+        Converts the `Either` into `Success` if an instance of `Right` and `ex` wrapped in `Failure`
+        if an instance of `Left`.
+
+        Returns:
+            Try[B]: the resulting `Try`
+        """
+        return Success(self.get()) if self.is_right() else Failure(ex)
 
 
 # noinspection PyMissingConstructor

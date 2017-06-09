@@ -1,3 +1,4 @@
+# noinspection PyUnresolvedReferences
 import typing
 
 from genmonads.mlist import *
@@ -33,9 +34,9 @@ class Option(MonadFilter):
         Returns:
             bool: `True` if other is an instance of `Some` and inner values are equivalent, `False` otherwise
         """
-        if isinstance(self, Some) and isinstance(other, Some):
-            return self.get().__eq__(other.get())
-        elif isinstance(self, Nothing) and isinstance(other, Nothing):
+        if self.is_defined() and other.is_defined():
+            return self.get() == other.get()
+        elif self.is_empty() and other.is_empty():
             return True
         else:
             return False
@@ -62,9 +63,9 @@ class Option(MonadFilter):
         Returns:
             Option[T]: the flattened monad
         """
-        if self:
+        if self.is_defined():
             x = self.get()
-            return x if isinstance(x, Some) else Some(x)
+            return x if x.is_defined() else Some(x)
         else:
             return Nothing()
 
@@ -87,7 +88,7 @@ class Option(MonadFilter):
         Returns:
             T: the `Option`'s inner value if an instance of `Some` or `default` if instance of `Nothing`
         """
-        return self.get() if self else default
+        return self.get() if self.is_defined() else default
 
     def get_or_none(self):
         """
@@ -100,6 +101,12 @@ class Option(MonadFilter):
         """
         return self.get_or_else(None)
 
+    def fold(self, default, f):
+        return Some(f(self.get())) if self.is_defined() else default
+
+    def forall(self, p):
+        return True if self.is_defined() or p(self.get()) else False
+
     def map(self, f):
         """
         Applies a function to the inner value of an `Option`.
@@ -110,7 +117,13 @@ class Option(MonadFilter):
         Returns:
             Option[B]: the resulting Option
         """
-        return Some(f(self.get())) if self else Nothing()
+        return Some(f(self.get())) if self.is_defined() else Nothing()
+
+    def is_defined(self):
+        return True if isinstance(self, Some) else False
+
+    def is_empty(self):
+        return not self.is_defined()
 
     @staticmethod
     def pure(value):
@@ -134,7 +147,7 @@ class Option(MonadFilter):
         Returns:
             List[A]: the resulting List monad
         """
-        return List.pure(self.to_list())
+        return List(self.to_list())
 
     def to_list(self):
         """
@@ -143,7 +156,7 @@ class Option(MonadFilter):
         Returns:
             typing.List[A]: the resulting python list
         """
-        return [self.get(), ] if self else []
+        return [self.get(), ] if self.is_defined() else []
 
 
 def option(value):
