@@ -5,9 +5,10 @@ from genmonads.mlist import *
 from genmonads.monad import Monad, mfor
 
 A = typing.TypeVar('A')
+AA = typing.TypeVar('AA')
 B = typing.TypeVar('B')
+BB = typing.TypeVar('BB')
 C = typing.TypeVar('C')
-T = typing.TypeVar('T')
 
 
 class Either(Monad):
@@ -29,12 +30,17 @@ class Either(Monad):
     def __eq__(self, other):
         """
         Args:
-            other (Either[A,B]): the value to compare against
+            other (Either[AA,BB]): the value to compare against
 
         Returns:
             bool: `True` if outer type and inner values are equivalent, `False` otherwise
         """
-        raise NotImplementedError
+        if self.is_left() and other.is_left():
+            return self.get().__eq__(other.get())
+        elif self.is_right() and other.is_right():
+            return self.get().__eq__(other.get())
+        else:
+            return False
 
     def __mname__(self):
         """
@@ -43,22 +49,18 @@ class Either(Monad):
         """
         return 'Either'
 
-    @staticmethod
-    def empty():
-        """
-        Returns:
-            Either[A,B]: `Nothing`, the empty instance for this `MonadFilter`
-        """
-        return NotImplementedError
-
     def flatten(self):
         """
         Flattens nested instances of `Either`.
 
         Returns:
-            Either[A,B]: the flattened monad
+            Union[Either[A,B],Either[AA,BB]]: the flattened monad
         """
-        raise NotImplementedError
+        if self.is_right():
+            b = self.get()
+            return b if b.is_right() or b.is_left() else self
+        else:
+            return self
 
     def get(self):
         """
@@ -74,12 +76,12 @@ class Either(Monad):
         Returns the `Either`'s inner value if an instance of `Right` or `default` if instance of `Left`.
 
         Args:
-            default (A): the value to return for `Left[A]` instances
+            default (C): the value to return for `Left[A]` instances
 
         Returns:
-            Union[A,B]: the `Either`'s inner value if an instance of `Right` or `default` if instance of `Left`
+            Union[B,C]: the `Either`'s inner value if an instance of `Right` or `default` if instance of `Left`
         """
-        raise NotImplementedError
+        return self.get() if self.is_right() else default
 
     def get_or_none(self):
         """
@@ -90,54 +92,38 @@ class Either(Monad):
         Returns:
             Union[B,None]: the `Either`'s inner value if an instance of `Right` or `None` if instance of `Left`
         """
-        raise NotImplementedError
+        return self.get_or_else(None)
 
-    @staticmethod
-    def left(value):
+    def is_left(self):
         """
-        Injects a value into the `Left` monad.
-
-        This function should be used instead of calling `Left.__init__()` directly.
-
-        Args:
-            value (A): the value
-
         Returns:
-            Left[A]: the resulting `Left`
+            bool: `True` if instance of Left, `False` otherwise
         """
-        return Right(value)
+        return isinstance(self, Left)
+
+    def is_right(self):
+        """
+        Returns:
+            bool: `True` if instance of Left, `False` otherwise
+        """
+        return isinstance(self, Right)
 
     def map(self, f):
         """
         Applies a function to the inner value of an `Either`.
 
         Args:
-            f (Callable[[A],C]): the function to apply
+            f (Callable[[B],C]): the function to apply
 
         Returns:
             Either[A,C]: the resulting Either
         """
-        raise NotImplementedError
+        return Right(f(self.get())) if self.is_right() else self
 
     @staticmethod
     def pure(value):
         """
         Injects a value into the `Either` monad.
-
-        This function should be used instead of calling `Either.__init__()` directly.
-
-        Args:
-            value (B): the value
-
-        Returns:
-            Right[B]: the resulting `Right`
-        """
-        return Right(value)
-
-    @staticmethod
-    def right(value):
-        """
-        Injects a value into the `Right` monad.
 
         This function should be used instead of calling `Either.__init__()` directly.
 
@@ -156,7 +142,7 @@ class Either(Monad):
         Returns:
             List[B]: the resulting List monad
         """
-        raise NotImplementedError
+        return List(*self.to_list())
 
     def to_list(self):
         """
@@ -165,7 +151,16 @@ class Either(Monad):
         Returns:
             List[B]: the resulting python list
         """
-        raise NotImplementedError
+        return [self.get(), ] if self.is_right() else []
+
+    def to_option(self):
+        """
+        Converts the `Either` into an `Option` monad.
+
+        Returns:
+            Option[B]: the resulting python list
+        """
+        return Some(self.get()) if self.is_right() else Nothing()
 
 
 # noinspection PyMissingConstructor
@@ -173,23 +168,12 @@ class Left(Either):
     """
     A type that represents the presence of the leftmost type in a disjoint union.
 
-    Forms the `Either` monad together with `Right[B]`.
+    Forms the `Either` monad together with `Right[B]`. Idiomatically, Left[A] is
+    used to represent computations that failed.
     """
 
     def __init__(self, value):
         self._value = value
-
-    def __eq__(self, other):
-        """
-        Args:
-            other (Either[A,B]): the value to compare against
-
-        Returns:
-            bool: `True` if other is an instance of `Left` and inner values are equivalent, `False` otherwise
-        """
-        if isinstance(other, Left):
-            return self._value.__eq__(other._value)
-        return False
 
     def __str__(self):
         """
@@ -197,18 +181,6 @@ class Left(Either):
             str: a string representation of the Either
         """
         return 'Left(%s)' % self._value
-
-    def flatten(self):
-        """
-        Flattens nested instances of `Either`.
-
-        Returns:
-            Either[A,B]: the flattened monad
-        """
-        if isinstance(self.get(), Either):
-            return self.get()
-        else:
-            return self
 
     def get(self):
         """
@@ -219,204 +191,77 @@ class Left(Either):
         """
         return self._value
 
-    def get_or_else(self, default):
-        """
-        Returns the `Either`'s inner value if an instance of `Some` or `default` if instance of `Nothing`.
 
-        Args:
-            default: the value to return for `Nothing[T]` instances
-
-        Returns:
-            T: the `Either`'s inner value if an instance of `Some` or `default` if instance of `Nothing`
-        """
-        return self._value
-
-    def get_or_none(self):
-        """
-        Returns the `Either`'s inner value if an instance of `Some` or `None` if instance of `Nothing`.
-
-        Provided as interface to code that expects `None` values.
-
-        Returns:
-            Union[T,None]: the `Either`'s inner value if an instance of `Some` or `None` if instance of `Nothing`
-        """
-        return self._value
-
-    def map(self, f):
-        """
-        Applies a function to the inner value of an `Either`.
-
-        Args:
-            f (Callable[[A],B]): the function to apply
-
-        Returns:
-            Either[B]: the resulting `Either`
-        """
-        return Some(f(self.get()))
-
-    def to_mlist(self):
-        """
-        Converts the `Either` into a `List` monad.
-
-        Returns:
-            List[A]: the resulting List monad
-        """
-        return List.pure(self.get())
-
-    def to_list(self):
-        """
-        Converts the `Either` into a python list.
-
-        Returns:
-            typing.List[A]: the resulting python list
-        """
-        return [self.get(), ]
-
-
-def some(value):
+def left(value):
     """
-    Constructs a `Some` instance from `value`.
+    Constructs a `Left` instance from `value`.
 
     Args:
-        value (T): the value
+        value (A): the value
 
     Returns:
-        Some[T]: the resulting `Some`
+        Left[A]: the resulting `Left`
     """
-    return Some(value)
+    return Left(value)
 
 
 # noinspection PyMissingConstructor,PyPep8Naming
-class Nothing(Either):
+class Right(Either):
     """
-    A type that represents the absence of an eitheral value.
+    A type that represents the presence of the rightmost type in a disjoint union.
 
-    Forms the `Either` monad together with `Some`.
+    Forms the `Either` monad together with `Left[A]`. Idiomatically, Right[B] is
+    used to represent computations that succeeded.
     """
 
     # noinspection PyInitNewSignature
-    def __init__(self):
-        pass
-
-    def __eq__(self, other):
-        """
-        Args:
-            other (Either[A,B]): the value to compare against
-
-        Returns:
-            bool: `True` if other is instance of `Nothing`, `False` otherwise
-        """
-        if isinstance(other, Nothing):
-            return True
-        return False
+    def __init__(self, value):
+        self._value = value
 
     def __str__(self):
         """
         Returns:
             str: a string representation of the `Either`
         """
-        return 'Nothing'
-
-    def flatten(self):
-        """
-        Flattens nested instances of `Either`.
-
-        Returns:
-            Either[A,B]: the flattened monad
-        """
-        return self
+        return 'Right(%s)' % self._value
 
     def get(self):
         """
-        Returns the `Either`'s inner value. Raises a `ValueError` for instances of `Nothing`.
+        Returns the `Either`'s inner value.
 
         Returns:
-            T: the inner value
+            B: the inner value
         """
-        raise ValueError("Tried to access the non-existent inner value of a Nothing instance")
-
-    def get_or_else(self, default):
-        """
-        Returns the `Either`'s inner value if an instance of `Some` or `default` if instance of `Nothing`.
-
-        Args:
-            default: the value to return for `Nothing[T]` instances
-
-        Returns:
-            T: the `Either`'s inner value if an instance of `Some` or `default` if instance of `Nothing`
-        """
-        return default
-
-    def get_or_none(self):
-        """
-        Returns the `Either`'s inner value if an instance of `Some` or `None` if instance of `Nothing`.
-
-        Provided as interface to code that expects `None` values.
-
-        Returns:
-            Union[T,None]: the `Either`'s inner value if an instance of `Some` or `None` if instance of `Nothing`
-        """
-        return None
-
-    def map(self, f):
-        """
-        Applies a function to the inner value of an `Either`.
-
-        Args:
-            f (Callable[[A],B]): the function to apply
-
-        Returns:
-            Either[B]: the resulting `Either`
-        """
-        return self
-
-    def to_mlist(self):
-        """
-        Converts the `Either` into a `List` monad.
-
-        Returns:
-            List[A]: the resulting List monad
-        """
-        return List.empty()
-
-    def to_list(self):
-        """
-        Converts the `Either` into a list.
-
-        Returns:
-            typing.List[A]: the resulting python list
-        """
-        return []
+        return self._value
 
 
-def nothing():
+def right(value):
     """
-    Constructs a `Nothing` instance.
+    Constructs a `Right` instance from `value`.
+
+    Args:
+        value (B): the value
 
     Returns:
-        Nothing[T]: the resulting `Nothing`
+        Right[B]: the resulting `Right`
     """
-    return Nothing()
+    return Right(value)
 
 
 def main():
     print(mfor(x + y
-               for x in either(2)
-               if x < 10
-               for y in either(5)
-               if y % 2 != 0))
+               for x in right(2)
+               for y in right(5)))
 
     def make_gen():
-        for x in either(4):
-            if x > 2:
-                for y in either(10):
-                    if y % 2 == 0:
-                        yield x - y
+        for x in right(4):
+            for y in left('oops'):
+                yield x - y
     print(mfor(make_gen()))
 
-    print(either(5) >> (lambda x: either(x * 2)))
+    print(right(5) >> (lambda x: right(x * 2)))
 
-    print(either(None).map(lambda x: x * 2))
+    print(left('error').map(lambda x: x * 2))
 
 
 if __name__ == '__main__':
