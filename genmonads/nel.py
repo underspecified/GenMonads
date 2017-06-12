@@ -1,8 +1,8 @@
 # noinspection PyUnresolvedReferences
 import typing
 
-from genmonads.mlist import mlist
-from genmonads.monad import Monad
+from genmonads.mlist import *
+from genmonads.monad import *
 from genmonads.mtry import *
 
 A = typing.TypeVar('A')
@@ -56,18 +56,20 @@ class NonEmptyList(Monad):
         """
         return 'NonEmptyList(%s)' % ', '.join(str(v) for v in self.get())
 
-    def filter(self, f):
+    def filter(self, p):
         """
         Filters this monad by applying the predicate `f` to the monad's inner value.
         Returns this monad if the predicate is `True`, this monad's empty instance otherwise.
 
         Args:
-            f (Callable[[T],bool]): the predicate
+            p (Callable[[T],bool]): the predicate
 
         Returns:
-            List[T]: a list containing all inner values where the predicate is `True`
+            Union[List[T]|Nel[T]]: a list containing all inner values where the predicate is `True`
         """
-        return self.to_mlist().filter(f)
+        res = self.to_mlist().filter(p)
+        print("res:", res, res.to_nel())
+        return res.to_nel().get_or_else(res)
 
     def flatten(self):
         """
@@ -125,7 +127,7 @@ class NonEmptyList(Monad):
         Returns:
             NonEmptyList[B]: the resulting NonEmptyList
         """
-        return NonEmptyList.pure(*(f(v) for v in self.get()))
+        return NonEmptyList(*(f(v) for v in self.get()))
 
     def mtail(self):
         """
@@ -160,7 +162,7 @@ class NonEmptyList(Monad):
 
     def to_list(self):
         """
-        Converts the `NonEmptyList` into a list.
+        Converts the `NonEmptyList` into a python list.
 
         Returns:
             typing.List[T]: the resulting python list

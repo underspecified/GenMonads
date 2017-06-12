@@ -92,11 +92,14 @@ class Option(MonadFilter):
         """
         return Some(f(self.get())) if self.is_gettable() else Nothing()
 
-    def is_gettable(self):
-        return isinstance(self, Some)
+    def is_defined(self):
+        return self.is_gettable()
 
     def is_empty(self):
         return not self.is_gettable()
+
+    def is_gettable(self):
+        return isinstance(self, Some)
 
     @staticmethod
     def pure(value):

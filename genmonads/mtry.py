@@ -39,8 +39,9 @@ class Try(MonadFilter):
             bool: `True` if inner values are equivalent, `False` otherwise
         """
         if isinstance(other, Try):
-            return self.get().__eq__(other.get())
-        return False
+            return self.get() == other.get()
+        else:
+            return False
 
     def __mname__(self):
         """
@@ -350,7 +351,7 @@ class Failure(Try):
         Returns:
             str: a string representation of the monad
         """
-        return 'Failure(%s)' % self.get()
+        return 'Failure(%s)' % repr(self.get())
 
     def __mname__(self):
         """

@@ -2,6 +2,7 @@
 import typing
 
 from genmonads.mtry import *
+from genmonads.monadfilter import *
 
 A = typing.TypeVar('A')
 B = typing.TypeVar('B')
@@ -175,7 +176,7 @@ class List(MonadFilter):
 
     def to_list(self):
         """
-        Converts the `Option` into a list.
+        Converts the `List` into a python list.
 
         Returns:
             typing.List[A]: the resulting python list
@@ -184,12 +185,19 @@ class List(MonadFilter):
 
     def to_mlist(self):
         """
-        Converts the `Option` into a `List` monad.
+        Converts the `List` into a `List` monad.
 
         Returns:
             List[A]: the resulting List monad
         """
         return self
+
+    def to_nel(self):
+        from genmonads.nel import nel
+        print("self.get():", self.get())
+        try_nel = mtry(nel(*self.get()))
+        print("try_nel:", try_nel)
+        return try_nel
 
 
 def mlist(*values):
@@ -225,7 +233,8 @@ class Nil(List):
         """
         if isinstance(other, Nil):
             return True
-        return False
+        else:
+            return False
 
     def __str__(self):
         """
