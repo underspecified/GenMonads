@@ -5,13 +5,14 @@ import typing
 from pony.orm.decompiling import decompile
 
 from genmonads.monadtrans import ast2src
+from genmonads.gettable import Gettable
 
 A = typing.TypeVar('A')
 B = typing.TypeVar('B')
 T = typing.TypeVar('T')
 
 
-class Monad(object):
+class Monad(Gettable):
     """
     A base class for representing monads.
 
@@ -68,6 +69,17 @@ class Monad(object):
         Returns:
             Monad[T]: the flattened monad
         """
+        raise NotImplementedError
+
+    def get(self):
+        """
+        Returns the `Monad`'s inner value.
+        Returns:
+            T: the inner value
+        """
+        raise NotImplementedError
+
+    def is_gettable(self):
         raise NotImplementedError
 
     def map(self, f):
@@ -128,7 +140,7 @@ def mfor(gen, frame_depth=5):
         #print('external_names:', external_names, file=sys.stderr)
         #print('globals:', gen.gi_frame.f_globals, file=sys.stderr)
 
-        # for generator expressions, the outmost monad is evaluated, converting it into a MonadIter
+        # for generator expressions, the out-most monad is evaluated, converting it into a MonadIter
         # it is referred to by the symbol .0 in the generator's bytecode, so we need to retrieve the original monad
         # for generator functions, the original monad is preserved in unevaluated form, so we use the monad class as
         # a dummy value
@@ -139,7 +151,7 @@ def mfor(gen, frame_depth=5):
         # next we insert the original monad into the code's locals and return the results of its evaluation
         i = frame_depth
         while i >= 0:
-            # noinspection PyBroadException
+            # noinspection PyBroadException,PyUnusedLocal
             try:
                 globals = sys._getframe(i).f_globals
                 locals = sys._getframe(i).f_locals

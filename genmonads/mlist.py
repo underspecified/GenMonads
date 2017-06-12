@@ -1,7 +1,6 @@
+# noinspection PyUnresolvedReferences
 import typing
 
-from genmonads.monad import mfor
-from genmonads.monadfilter import MonadFilter
 from genmonads.mtry import *
 
 A = typing.TypeVar('A')
@@ -20,7 +19,7 @@ class List(MonadFilter):
     """
 
     def __init__(self, *values):
-        self._values = list(values)
+        self._value = list(values)
 
     def __eq__(self, other):
         """
@@ -30,9 +29,10 @@ class List(MonadFilter):
         Returns:
             bool: `True` if other is an instance of `List` and inner values are equivalent, `False` otherwise
         """
-        if isinstance(other, List) and not isinstance(other, Nil):
-            return self._values.__eq__(other._values)
-        return False
+        if isinstance(other, List) and isinstance(other, List):
+            return self.get() == other.get()
+        else:
+            return False
 
     def __mname__(self):
         """
@@ -46,7 +46,7 @@ class List(MonadFilter):
         Returns:
             str: a string representation of the List
         """
-        return 'List(%s)' % ', '.join(str(v) for v in self._values)
+        return 'List(%s)' % ', '.join(str(v) for v in self.get())
 
     @staticmethod
     def empty():
@@ -67,11 +67,20 @@ class List(MonadFilter):
         Returns:
             List[T]: the flattened monad
         """
-        if self and hasattr(self._values[0], 'to_mlist'):
+        if self.is_gettable() and all(map(lambda x: hasattr(x, 'to_mlist'), self.get())):
             # noinspection PyProtectedMember
-            return List.pure(*[v for vs in self._values for v in vs.to_mlist()._values])
+            return List.pure(*[v for vs in self.get() for v in vs.to_mlist()._value])
         else:
             return self
+
+    def get(self):
+        """
+        Returns the `List`'s inner value.
+
+        Returns:
+            list[T]: the inner value
+        """
+        return self._value
 
     def head(self):
         """
@@ -83,7 +92,7 @@ class List(MonadFilter):
         Throws:
             IndexError: if the list is empty
         """
-        return self._values[0]
+        return self.get()[0]
 
     def head_option(self):
         """
@@ -93,6 +102,9 @@ class List(MonadFilter):
             Option[T]: the first item wrapped in `Some`, or `Nothing` if the list is empty
         """
         return mtry(self.head).to_option()
+
+    def is_gettable(self):
+        return isinstance(self, List) and not isinstance(self, Nil)
 
     def last(self):
         """
@@ -104,7 +116,7 @@ class List(MonadFilter):
         Throws:
             IndexError: if the list is empty
         """
-        return self._values[-1]
+        return self.get()[-1]
 
     def last_option(self):
         """
@@ -113,7 +125,7 @@ class List(MonadFilter):
         Returns:
             Option[T]: the first item wrapped in `Some`, or `Nothing` if the list is empty
         """
-        return mtry(self.last).to_option()
+        return mtry(self.last()).to_option()
 
     def map(self, f):
         """
@@ -125,7 +137,7 @@ class List(MonadFilter):
         Returns:
             List[B]: the resulting List
         """
-        return List.pure(*(f(v) for v in self._values))
+        return List.pure(*(f(v) for v in self.get()))
 
     def mtail(self):
         """
@@ -134,7 +146,7 @@ class List(MonadFilter):
         Returns:
             List[T]: the rest of the nel
         """
-        return List.pure(*self._values[1:])
+        return mtry(self.tail()).to_option().to_mlist()
 
     @staticmethod
     def pure(*values):
@@ -159,7 +171,7 @@ class List(MonadFilter):
         Returns:
             typing.List[T]: the tail of the list
         """
-        return self._values[1:]
+        return self.get()[1:]
 
     def to_list(self):
         """
@@ -168,7 +180,7 @@ class List(MonadFilter):
         Returns:
             typing.List[A]: the resulting python list
         """
-        return self._values
+        return self.get()
 
     def to_mlist(self):
         """
@@ -196,14 +208,12 @@ def mlist(*values):
 # noinspection PyMissingConstructor,PyPep8Naming
 class Nil(List):
     """
-    A type that represents the absence of an optional value.
-
-    Forms the `List` monad together with `Some`.
+    A type that represents the empty list.
     """
 
     # noinspection PyInitNewSignature
     def __init__(self):
-        self.values = []
+        self._value = []
 
     def __eq__(self, other):
         """

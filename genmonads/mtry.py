@@ -1,7 +1,6 @@
+# noinspection PyUnresolvedReferences
 import typing
 
-from genmonads.monad import mfor
-from genmonads.monadfilter import MonadFilter
 from genmonads.option import *
 
 A = typing.TypeVar('A')
@@ -76,17 +75,14 @@ class Try(MonadFilter):
         """
         raise NotImplementedError
 
-    def get_or_else(self, default):
-        """
-        Returns the `Try`'s inner value if an instance of `Success` or `default` if instance of `Failure`.
+    def is_gettable(self):
+        return True
 
-        Args:
-            default: the value to return for `Failure[T]` instances
+    def is_failure(self):
+        return isinstance(self, Failure)
 
-        Returns:
-            T: the `Try`'s inner value if an instance of `Success` or `default` if instance of `Failure`
-        """
-        raise NotImplementedError
+    def is_success(self):
+        return isinstance(self, Success)
 
     def map(self, f):
         """
@@ -185,8 +181,8 @@ def mtry(thunk):
 
 # noinspection PyMissingConstructor
 class Success(Try):
-    def __init__(self, result):
-        self._result = result
+    def __init__(self, value):
+        self._value = value
 
     def __mname__(self):
         """
@@ -200,7 +196,7 @@ class Success(Try):
         Returns:
             str: a string representation of monad
         """
-        return 'Success(%s)' % self._result
+        return 'Success(%s)' % self._value
 
     def flatten(self):
         """
@@ -221,7 +217,7 @@ class Success(Try):
         Returns:
             Union[T,Exception]: the inner value
         """
-        return self._result
+        return self._value
 
     # noinspection PyUnusedLocal
     def get_or_else(self, default):
@@ -234,7 +230,7 @@ class Success(Try):
         Returns:
             T: the `Try`'s inner value if an instance of `Success` or default if instance of `Failure[T]`
         """
-        return self._result
+        return self._value
 
     def map(self, f):
         """
@@ -261,17 +257,17 @@ class Success(Try):
         return self
 
     @staticmethod
-    def pure(result):
+    def pure(value):
         """
-        Injects a result into the `Success` monad.
+        Injects a value into the `Success` monad.
 
         Args:
-            result (T): the result
+            value (T): the value
 
         Returns:
             Try[T]: the resulting `Try`
         """
-        return Success(result)
+        return Success(value)
 
     def recover(self, f):
         """
@@ -301,6 +297,24 @@ class Success(Try):
         """
         return self
 
+    def to_mlist(self):
+        """
+        Converts the `Try` into a `List` monad.
+
+        Returns:
+            List[A]: the resulting List monad
+        """
+        return List(self.to_list())
+
+    def to_list(self):
+        """
+        Converts the `Try` into a list.
+
+        Returns:
+            typing.List[A]: the resulting python list
+        """
+        return [self.get(), ] if self.is_success() else []
+
     def to_option(self):
         """
         Converts an instance of `Try[T]` to `Option[T]`.
@@ -310,20 +324,20 @@ class Success(Try):
         Returns:
             Option[T]: the corresponding `Option`
         """
-        return Some(self._result)
+        return Some(self._value)
 
 
-def success(result):
+def success(value):
     """
     Injects a value into the `Success` monad.
 
     Args:
-        result (T): the result
+        value (T): the value
 
     Returns:
         Try[T]: the resulting monad
     """
-    return Success.pure(result)
+    return Success.pure(value)
 
 
 # noinspection PyMissingConstructor
@@ -484,9 +498,9 @@ def main():
 
     print((mtry(lambda: 5) >> mtry(lambda: 2)))
     print(mtry(lambda: 1 / 0).map(lambda x: x * 2))
-    print(mtry(lambda: 1 / 0).or_else(Success(0.0)))
-    print(mtry(lambda: 1 / 0).recover(lambda _: 0.0))
-    print(mtry(lambda: 1 / 0).recover_with(lambda _: Success(0.0)))
+    print(mtry(lambda: 1 / 0).or_else(Success(0)))
+    print(mtry(lambda: 1 / 0).recover(lambda _: 0))
+    print(mtry(lambda: 1 / 0).recover_with(lambda _: Success(0)))
 
 
 if __name__ == '__main__':

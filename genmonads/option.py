@@ -34,7 +34,7 @@ class Option(MonadFilter):
         Returns:
             bool: `True` if other is an instance of `Some` and inner values are equivalent, `False` otherwise
         """
-        if self.is_defined() and other.is_defined():
+        if self.is_gettable() and other.is_gettable():
             return self.get() == other.get()
         elif self.is_empty() and other.is_empty():
             return True
@@ -63,49 +63,22 @@ class Option(MonadFilter):
         Returns:
             Option[T]: the flattened monad
         """
-        if self.is_defined():
+        if self.is_gettable():
             x = self.get()
-            return x if x.is_defined() else Some(x)
+            return x if x.is_gettable() else Some(x)
         else:
             return Nothing()
 
+    def fold(self, default, f):
+        return Some(f(self.get())) if self.is_gettable() else default
+
     def get(self):
         """
-        Returns the `Option`'s inner value. Raises a `ValueError` for instances of `Nothing[T]`.
-
+        Returns the `Gettable`'s inner value.
         Returns:
             T: the inner value
         """
         raise NotImplementedError
-
-    def get_or_else(self, default):
-        """
-        Returns the `Option`'s inner value if an instance of `Some` or `default` if instance of `Nothing`.
-
-        Args:
-            default (T): the value to return for `Nothing[T]` instances
-
-        Returns:
-            T: the `Option`'s inner value if an instance of `Some` or `default` if instance of `Nothing`
-        """
-        return self.get() if self.is_defined() else default
-
-    def get_or_none(self):
-        """
-        Returns the `Option`'s inner value if an instance of `Some` or `None` if instance of `Nothing`.
-
-        Provided as interface to code that expects `None` values.
-
-        Returns:
-            Union[T,None]: the `Option`'s inner value if an instance of `Some` or `None` if instance of `Nothing`
-        """
-        return self.get_or_else(None)
-
-    def fold(self, default, f):
-        return Some(f(self.get())) if self.is_defined() else default
-
-    def forall(self, p):
-        return True if self.is_defined() or p(self.get()) else False
 
     def map(self, f):
         """
@@ -117,13 +90,13 @@ class Option(MonadFilter):
         Returns:
             Option[B]: the resulting Option
         """
-        return Some(f(self.get())) if self.is_defined() else Nothing()
+        return Some(f(self.get())) if self.is_gettable() else Nothing()
 
-    def is_defined(self):
-        return True if isinstance(self, Some) else False
+    def is_gettable(self):
+        return isinstance(self, Some)
 
     def is_empty(self):
-        return not self.is_defined()
+        return not self.is_gettable()
 
     @staticmethod
     def pure(value):
@@ -156,7 +129,7 @@ class Option(MonadFilter):
         Returns:
             typing.List[A]: the resulting python list
         """
-        return [self.get(), ] if self.is_defined() else []
+        return [self.get(), ] if self.is_gettable() else []
 
 
 def option(value):
