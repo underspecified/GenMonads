@@ -15,8 +15,8 @@ class NonEmptyList(Monad):
     """
     A type that represents a non-empty list of a single type.
 
-    Monadic computing is supported with `map()`, `flat_map()`, `flatten()`, and `filter()` functions, and
-    for-comprehensions can be formed by evaluating generators over monads with the `mfor()` function.
+    Monadic computing is supported with `map()`, `flat_map()`, `flatten()`, and `filter()` functions,
+    and for-comprehensions can be formed by evaluating generators over monads with the `mfor()` function.
     """
 
     def __init__(self, head, *tail):
@@ -43,7 +43,8 @@ class NonEmptyList(Monad):
         """
         if isinstance(other, NonEmptyList):
             return self.get() == other.get()
-        return False
+        else:
+            return False
 
     def __mname__(self):
         """
@@ -129,7 +130,7 @@ class NonEmptyList(Monad):
         Returns:
             List[T]: the rest of the nel
         """
-        return mlist(*self.tail)
+        return List(*self.tail)
 
     @staticmethod
     def pure(*values):
@@ -142,7 +143,10 @@ class NonEmptyList(Monad):
         Returns:
             NonEmptyList[T]: the resulting `NonEmptyList`
         """
-        return NonEmptyList(*values)
+        if values:
+            return NonEmptyList(*values)
+        else:
+            raise ValueError('Tried to construct an empty NonEmptyList!')
 
     def to_list(self):
         """
@@ -160,7 +164,7 @@ class NonEmptyList(Monad):
         Returns:
             List[T]: the resulting List monad
         """
-        return mlist(*self.get())
+        return List(*self.get())
 
     def to_nel(self):
         """
@@ -182,10 +186,7 @@ def nel(*values):
     Returns:
         NonEmptyList[T]: the resulting `NonEmptyList`
     """
-    if values:
-        return NonEmptyList.pure(*values)
-    else:
-        raise ValueError('Tried to construct an empty NonEmptyList!')
+    return NonEmptyList.pure(*values)
 
 
 def main():

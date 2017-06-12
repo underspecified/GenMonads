@@ -131,7 +131,7 @@ class Option(MonadFilter):
         Returns:
             List[A]: the resulting List monad
         """
-        return mlist(self.to_list())
+        return List(*self.to_list())
 
 
 def option(value):

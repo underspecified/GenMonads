@@ -5,6 +5,7 @@ import inspect
 # noinspection PyUnresolvedReferences
 import typing
 
+from genmonads.mlist import *
 # noinspection PyUnresolvedReferences
 from genmonads.monadfilter import *
 from genmonads.option import *

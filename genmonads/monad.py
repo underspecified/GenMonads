@@ -6,7 +6,7 @@ import typing
 from pony.orm.decompiling import decompile
 
 from genmonads.gettable import *
-from genmonads.monadtrans import *
+from genmonads.monadtrans import ast2src
 
 A = typing.TypeVar('A')
 B = typing.TypeVar('B')
