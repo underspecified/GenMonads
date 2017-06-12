@@ -1,11 +1,12 @@
 import re
 import sys
+# noinspection PyUnresolvedReferences
 import typing
 
 from pony.orm.decompiling import decompile
 
-from genmonads.monadtrans import ast2src
-from genmonads.gettable import Gettable
+from genmonads.gettable import *
+from genmonads.monadtrans import *
 
 A = typing.TypeVar('A')
 B = typing.TypeVar('B')

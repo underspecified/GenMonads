@@ -2,7 +2,9 @@
 import typing
 
 from genmonads.mlist import *
-from genmonads.monad import Monad, mfor
+from genmonads.monad import *
+from genmonads.mtry import *
+from genmonads.option import *
 
 A = typing.TypeVar('A')
 AA = typing.TypeVar('AA')
@@ -17,8 +19,8 @@ class Either(Monad):
 
     Instances of type `Either[A,B]` are either an instance of `Left[A]` or `Right[B]`.
 
-    Monadic computing is supported with right-biased `map()`, `flat_map()`, `flatten()`, and `filter()` functions, and
-    for-comprehensions can be formed by evaluating generators over monads with the `mfor()` function.
+    Monadic computing is supported with right-biased `map()`, `flat_map()`, `flatten()`, and `filter()` functions,
+    and for-comprehensions can be formed by evaluating generators over monads with the `mfor()` function.
     """
 
     def __init__(self, *args, **kwargs):
@@ -36,9 +38,9 @@ class Either(Monad):
             bool: `True` if outer type and inner values are equivalent, `False` otherwise
         """
         if self.is_left() and other.is_left():
-            return self.get().__eq__(other.get())
+            return self.get() == other.get()
         elif self.is_right() and other.is_right():
-            return self.get().__eq__(other.get())
+            return self.get() == other.get()
         else:
             return False
 
@@ -108,6 +110,9 @@ class Either(Monad):
             Union[B,None]: the `Either`'s inner value if an instance of `Right` or `None` if instance of `Left`
         """
         return self.get_or_else(None)
+
+    def is_gettable(self):
+        return True
 
     def is_left(self):
         """
@@ -209,12 +214,12 @@ class Left(Either):
     def __init__(self, value):
         self._value = value
 
-    def __str__(self):
+    def __repr__(self):
         """
         Returns:
             str: a string representation of the Either
         """
-        return 'Left(%s)' % self._value
+        return 'Left(%s)' % repr(self.get())
 
     def get(self):
         """
@@ -252,12 +257,12 @@ class Right(Either):
     def __init__(self, value):
         self._value = value
 
-    def __str__(self):
+    def __repr__(self):
         """
         Returns:
             str: a string representation of the `Either`
         """
-        return 'Right(%s)' % self._value
+        return 'Right(%s)' % repr(self.get())
 
     def get(self):
         """

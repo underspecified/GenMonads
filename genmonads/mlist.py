@@ -1,8 +1,10 @@
 # noinspection PyUnresolvedReferences
 import typing
 
-from genmonads.mtry import *
+# noinspection PyUnresolvedReferences
 from genmonads.monadfilter import *
+from genmonads.mtry import *
+from genmonads.nel import *
 
 A = typing.TypeVar('A')
 B = typing.TypeVar('B')
@@ -30,7 +32,7 @@ class List(MonadFilter):
         Returns:
             bool: `True` if other is an instance of `List` and inner values are equivalent, `False` otherwise
         """
-        if isinstance(other, List) and isinstance(other, List):
+        if isinstance(self, List) and isinstance(other, List):
             return self.get() == other.get()
         else:
             return False
@@ -42,12 +44,12 @@ class List(MonadFilter):
         """
         return 'List'
 
-    def __str__(self):
+    def __repr__(self):
         """
         Returns:
             str: a string representation of the List
         """
-        return 'List(%s)' % ', '.join(str(v) for v in self.get())
+        return 'List(%s)' % ', '.join(repr(v) for v in self.get())
 
     @staticmethod
     def empty():
@@ -69,8 +71,7 @@ class List(MonadFilter):
             List[T]: the flattened monad
         """
         if self.is_gettable() and all(map(lambda x: hasattr(x, 'to_mlist'), self.get())):
-            # noinspection PyProtectedMember
-            return List.pure(*[v for vs in self.get() for v in vs.to_mlist()._value])
+            return List.pure(*[v for vs in self.get() for v in vs.to_mlist().get()])
         else:
             return self
 
@@ -102,7 +103,7 @@ class List(MonadFilter):
         Returns:
             Option[T]: the first item wrapped in `Some`, or `Nothing` if the list is empty
         """
-        return mtry(self.head).to_option()
+        return mtry(lambda: self.head).to_option()
 
     def is_gettable(self):
         return isinstance(self, List) and not isinstance(self, Nil)
@@ -126,7 +127,7 @@ class List(MonadFilter):
         Returns:
             Option[T]: the first item wrapped in `Some`, or `Nothing` if the list is empty
         """
-        return mtry(self.last()).to_option()
+        return mtry(lambda: self.last()).to_option()
 
     def map(self, f):
         """
@@ -147,7 +148,7 @@ class List(MonadFilter):
         Returns:
             List[T]: the rest of the nel
         """
-        return mtry(self.tail()).to_option().to_mlist()
+        return mtry(lambda: self.tail()).to_option().to_mlist()
 
     @staticmethod
     def pure(*values):
@@ -155,15 +156,12 @@ class List(MonadFilter):
         Injects a value into the `List` monad.
 
         Args:
-            *values (T): the values
+            values (T): the values
 
         Returns:
             List[T]: the resulting `List`
         """
-        if values:
-            return List(*values)
-        else:
-            return Nil()
+        return List(*values) if values else Nil()
 
     def tail(self):
         """
@@ -185,19 +183,16 @@ class List(MonadFilter):
 
     def to_mlist(self):
         """
-        Converts the `List` into a `List` monad.
+        Tries to convert the `List` into a `NonEmptyList` monad.
 
         Returns:
-            List[A]: the resulting List monad
+            Try[NonEmptyList[A]]: the `NonEmptyList` wrapped in `Success` if the `List` is non-empty,
+            `Failure` otherwise
         """
         return self
 
     def to_nel(self):
-        from genmonads.nel import nel
-        print("self.get():", self.get())
-        try_nel = mtry(nel(*self.get()))
-        print("try_nel:", try_nel)
-        return try_nel
+        return mtry(lambda: nel(*self.get()))
 
 
 def mlist(*values):
@@ -205,7 +200,7 @@ def mlist(*values):
     Constructs a `List` instance from a tuple of values.
 
     Args:
-        values (Tuple[T]): the values
+        values (T): the values
 
     Returns:
         List[T]: the resulting `List`
@@ -236,7 +231,7 @@ class Nil(List):
         else:
             return False
 
-    def __str__(self):
+    def __repr__(self):
         """
         Returns:
             str: a string representation of the `List`

@@ -1,11 +1,30 @@
 # noinspection PyUnresolvedReferences
+from types import LambdaType
+# noinspection PyUnresolvedReferences
+import inspect
+# noinspection PyUnresolvedReferences
 import typing
 
+# noinspection PyUnresolvedReferences
+from genmonads.monadfilter import *
 from genmonads.option import *
 
 A = typing.TypeVar('A')
 B = typing.TypeVar('B')
 T = typing.TypeVar('T')
+
+
+def is_lambda(f):
+    return isinstance(f, LambdaType)
+
+
+def arity(f):
+    sig = inspect.signature(f)
+    return len(sig.parameters)
+
+
+def is_thunk(f):
+    return is_lambda(f) and arity(f) == 0
 
 
 class Try(MonadFilter):
@@ -76,6 +95,7 @@ class Try(MonadFilter):
         """
         raise NotImplementedError
 
+    # noinspection PyMethodMayBeStatic
     def is_gettable(self):
         return True
 
@@ -122,6 +142,8 @@ class Try(MonadFilter):
         Returns:
             Try[T]: the resulting `Try`
         """
+        if not is_thunk(thunk):
+            raise ValueError('Try.pure(%s) requires a thunk as an argument!' % thunk)
         try:
             return Success(thunk())
         except Exception as ex:
@@ -192,12 +214,12 @@ class Success(Try):
         """
         return 'Try'
 
-    def __str__(self):
+    def __repr__(self):
         """
         Returns:
             str: a string representation of monad
         """
-        return 'Success(%s)' % self._value
+        return 'Success(%s)' % repr(self.get())
 
     def flatten(self):
         """
@@ -217,19 +239,6 @@ class Success(Try):
 
         Returns:
             Union[T,Exception]: the inner value
-        """
-        return self._value
-
-    # noinspection PyUnusedLocal
-    def get_or_else(self, default):
-        """
-        Returns the `Try`'s inner value if an instance of `Success` or default if instance of `Failure[T]`.
-
-        Args:
-            default: the value to return for Failure instances
-
-        Returns:
-            T: the `Try`'s inner value if an instance of `Success` or default if instance of `Failure[T]`
         """
         return self._value
 
@@ -346,19 +355,19 @@ class Failure(Try):
     def __init__(self, ex):
         self._ex = ex
 
-    def __str__(self):
-        """
-        Returns:
-            str: a string representation of the monad
-        """
-        return 'Failure(%s)' % repr(self.get())
-
     def __mname__(self):
         """
         Returns:
             str: the monad's name
         """
         return 'Try'
+
+    def __repr__(self):
+        """
+        Returns:
+            str: a string representation of the monad
+        """
+        return 'Failure(%s)' % repr(self.get())
 
     def flatten(self):
         """

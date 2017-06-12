@@ -1,6 +1,6 @@
 import typing
 
-from genmonads.monad import Monad
+from genmonads.monad import *
 
 A = typing.TypeVar('A')
 B = typing.TypeVar('B')

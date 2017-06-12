@@ -2,8 +2,7 @@
 import typing
 
 from genmonads.mlist import *
-from genmonads.monad import mfor
-from genmonads.monadfilter import MonadFilter
+from genmonads.monadfilter import *
 
 A = typing.TypeVar('A')
 B = typing.TypeVar('B')
@@ -116,15 +115,6 @@ class Option(MonadFilter):
         """
         return Some(value)
 
-    def to_mlist(self):
-        """
-        Converts the `Option` into a `List` monad.
-
-        Returns:
-            List[A]: the resulting List monad
-        """
-        return List(self.to_list())
-
     def to_list(self):
         """
         Converts the `Option` into a list.
@@ -133,6 +123,15 @@ class Option(MonadFilter):
             typing.List[A]: the resulting python list
         """
         return [self.get(), ] if self.is_gettable() else []
+
+    def to_mlist(self):
+        """
+        Converts the `Option` into a `List` monad.
+
+        Returns:
+            List[A]: the resulting List monad
+        """
+        return mlist(self.to_list())
 
 
 def option(value):
@@ -165,12 +164,12 @@ class Some(Option):
     def __init__(self, value):
         self._value = value
 
-    def __str__(self):
+    def __repr__(self):
         """
         Returns:
             str: a string representation of the Option
         """
-        return 'Some(%s)' % self._value
+        return 'Some(%s)' % repr(self.get())
 
     def get(self):
         """
@@ -207,7 +206,7 @@ class Nothing(Option):
     def __init__(self):
         pass
 
-    def __str__(self):
+    def __repr__(self):
         """
         Returns:
             str: a string representation of the `Option`

@@ -1,8 +1,9 @@
 # noinspection PyUnresolvedReferences
 import typing
 
-from genmonads.mlist import *
+# noinspection PyUnresolvedReferences
 from genmonads.monad import *
+from genmonads.mlist import *
 from genmonads.mtry import *
 
 A = typing.TypeVar('A')
@@ -18,10 +19,12 @@ class NonEmptyList(Monad):
     for-comprehensions can be formed by evaluating generators over monads with the `mfor()` function.
     """
 
-    def __init__(self, *values):
-        if not values:
+    def __init__(self, head, *tail):
+        if not head:
             raise ValueError('Tried to construct an empty NonEmptyList!')
-        self._value = list(values)
+        self.head = head
+        self.tail = list(tail)
+        self._value = [self.head, ] + self.tail
 
     def __bool__(self):
         """
@@ -49,12 +52,12 @@ class NonEmptyList(Monad):
         """
         return 'NonEmptyList'
 
-    def __str__(self):
+    def __repr__(self):
         """
         Returns:
             str: a string representation of the List
         """
-        return 'NonEmptyList(%s)' % ', '.join(str(v) for v in self.get())
+        return 'NonEmptyList(%s)' % ', '.join(repr(v) for v in self.get())
 
     def filter(self, p):
         """
@@ -68,7 +71,6 @@ class NonEmptyList(Monad):
             Union[List[T]|Nel[T]]: a list containing all inner values where the predicate is `True`
         """
         res = self.to_mlist().filter(p)
-        print("res:", res, res.to_nel())
         return res.to_nel().get_or_else(res)
 
     def flatten(self):
@@ -83,7 +85,7 @@ class NonEmptyList(Monad):
         """
         if self.is_gettable() and all(map(lambda x: hasattr(x, 'to_nel'), self.get())):
             # noinspection PyProtectedMember
-            return NonEmptyList.pure(*[v for vs in self.get() for v in vs.to_nel().get()])
+            return NonEmptyList.pure(*[y for ys in self.get() for y in ys.to_nel().get()])
         else:
             return self
 
@@ -98,15 +100,6 @@ class NonEmptyList(Monad):
 
     def is_gettable(self):
         return True
-
-    def head(self):
-        """
-        Returns the first item in the nel.
-
-        Returns:
-            T: the first item
-        """
-        return self.get()[0]
 
     def last(self):
         """
@@ -136,7 +129,7 @@ class NonEmptyList(Monad):
         Returns:
             List[T]: the rest of the nel
         """
-        return mlist(*self.get()[1:])
+        return mlist(*self.tail)
 
     @staticmethod
     def pure(*values):
@@ -144,21 +137,12 @@ class NonEmptyList(Monad):
         Injects a value into the `NonEmptyList` monad.
 
         Args:
-            *values (T): the values
+            values (T): the values
 
         Returns:
             NonEmptyList[T]: the resulting `NonEmptyList`
         """
         return NonEmptyList(*values)
-
-    def tail(self):
-        """
-        Returns the tail of the nel.
-
-        Returns:
-            typing.List[T]: the tail of the nel
-        """
-        return self.get()[1:]
 
     def to_list(self):
         """
@@ -193,12 +177,15 @@ def nel(*values):
     Constructs a `NonEmptyList` instance from a tuple of values.
 
     Args:
-        values (Tuple[T]): the values
+        values (T): the values
 
     Returns:
         NonEmptyList[T]: the resulting `NonEmptyList`
     """
-    return NonEmptyList.pure(*values)
+    if values:
+        return NonEmptyList.pure(*values)
+    else:
+        raise ValueError('Tried to construct an empty NonEmptyList!')
 
 
 def main():
