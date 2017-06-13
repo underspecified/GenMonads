@@ -22,7 +22,7 @@ class MonadFilter(Monad):
         Returns:
             bool: `False` if equal to this monad's empty instance, `True` otherwise
         """
-        return self != self.empty()
+        return not self.is_empty()
 
     def contains(self, x):
         """
@@ -83,3 +83,9 @@ class MonadFilter(Monad):
             otherwise the monad's empty instance
         """
         return self.flat_map(lambda x: self.pure(x) if not p(x) else self.empty())
+
+    def is_empty(self):
+        return self != self.empty()
+
+    def non_empty(self):
+        return not self.is_empty()

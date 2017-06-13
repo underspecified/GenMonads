@@ -143,10 +143,7 @@ class NonEmptyList(Monad):
         Returns:
             NonEmptyList[T]: the resulting `NonEmptyList`
         """
-        if values:
-            return NonEmptyList(*values)
-        else:
-            raise ValueError('Tried to construct an empty NonEmptyList!')
+        return NonEmptyList(*values)
 
     def to_list(self):
         """

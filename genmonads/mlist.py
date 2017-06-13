@@ -183,16 +183,22 @@ class List(MonadFilter):
 
     def to_mlist(self):
         """
-        Tries to convert the `List` into a `NonEmptyList` monad.
+        Converts the `List` into a `List` monad.
 
         Returns:
-            Try[NonEmptyList[A]]: the `NonEmptyList` wrapped in `Success` if the `List` is non-empty,
-            `Failure` otherwise
+            List[A]: the resulting `List` monad
         """
         return self
 
     def to_nel(self):
-        return mtry(lambda: nel(*self.get()))
+        """
+        Tries to convert the `List` into a `NonEmptyList` monad.
+
+        Returns:
+            Option[NonEmptyList[A]]: the `NonEmptyList` wrapped in `Some` if the `List` is non-empty,
+            `Nothing` otherwise
+        """
+        return mtry(lambda: nel(*self.get())).to_option()
 
 
 def mlist(*values):

@@ -165,15 +165,6 @@ class Either(Monad):
         """
         return Left(self.get()) if self.is_right() else Right(self.get())
 
-    def to_mlist(self):
-        """
-        Converts the `Either` into a `List` monad.
-
-        Returns:
-            List[B]: the resulting List monad
-        """
-        return List(*self.to_list())
-
     def to_list(self):
         """
         Converts the `Either` into a python list.
@@ -182,6 +173,15 @@ class Either(Monad):
             List[B]: the resulting python list
         """
         return [self.get(), ] if self.is_right() else []
+
+    def to_mlist(self):
+        """
+        Converts the `Either` into a `List` monad.
+
+        Returns:
+            List[B]: the resulting List monad
+        """
+        return List(*self.to_list())
 
     def to_option(self):
         """
