@@ -1,24 +1,20 @@
 import re
 import sys
-# noinspection PyUnresolvedReferences
-import typing
 
 from pony.orm.decompiling import decompile
 
 from genmonads.gettable import *
 from genmonads.monadtrans import ast2src
 
-A = typing.TypeVar('A')
-B = typing.TypeVar('B')
-T = typing.TypeVar('T')
+__all__ = ['Monad', 'do', 'mfor']
 
 
 class Monad(Gettable):
     """
     A base class for representing monads.
 
-    Monadic computing is supported with `map()`, `flat_map()`, and `flatten()` functions, and for-comprehensions
-    can be formed by evaluating generators over monads with the `mfor()` function.
+    Monadic computing is supported with `map()` and `flat_map() functions, and for-comprehensions can be formed
+    by evaluating generators over monads with the `mfor()` function.
     """
 
     def __iter__(self):

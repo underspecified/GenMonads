@@ -1,18 +1,10 @@
-# noinspection PyUnresolvedReferences
 from types import LambdaType
-# noinspection PyUnresolvedReferences
 import inspect
-# noinspection PyUnresolvedReferences
-import typing
 
-from genmonads.mlist import *
-# noinspection PyUnresolvedReferences
 from genmonads.monadfilter import *
 from genmonads.option import *
 
-A = typing.TypeVar('A')
-B = typing.TypeVar('B')
-T = typing.TypeVar('T')
+__all__ = ['Failure', 'Success', 'Try', 'failure', 'mtry', 'success']
 
 
 def is_lambda(f):
@@ -58,8 +50,8 @@ class Try(MonadFilter):
         Returns:
             bool: `True` if inner values are equivalent, `False` otherwise
         """
-        if isinstance(other, Try):
-            return self.get() == other.get()
+        if type(self) == type(other):
+            return self.get_or_none() == other.get_or_none()
         else:
             return False
 
@@ -315,7 +307,7 @@ class Success(Try):
         Returns:
             List[A]: the resulting List monad
         """
-        return List(self.to_list())
+        return mlist.List(self.to_list())
 
     def to_list(self):
         """

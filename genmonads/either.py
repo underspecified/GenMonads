@@ -1,17 +1,9 @@
-# noinspection PyUnresolvedReferences
-import typing
-
 from genmonads.mlist import *
-# noinspection PyUnresolvedReferences
 from genmonads.monad import *
 from genmonads.mtry import *
 from genmonads.option import *
 
-A = typing.TypeVar('A')
-AA = typing.TypeVar('AA')
-B = typing.TypeVar('B')
-BB = typing.TypeVar('BB')
-C = typing.TypeVar('C')
+__all__ = ['Either', 'Left', 'Right', 'left', 'right']
 
 
 class Either(Monad):
@@ -20,8 +12,8 @@ class Either(Monad):
 
     Instances of type `Either[A,B]` are either an instance of `Left[A]` or `Right[B]`.
 
-    Monadic computing is supported with right-biased `map()`, `flat_map()`, `flatten()`, and `filter()` functions,
-    and for-comprehensions can be formed by evaluating generators over monads with the `mfor()` function.
+    Monadic computing is supported with right-biased `map()` and `flat_map()` functions, and for-comprehensions
+    can be formed by evaluating generators over monads with the `mfor()` function.
     """
 
     def __init__(self, *args, **kwargs):
@@ -38,10 +30,8 @@ class Either(Monad):
         Returns:
             bool: `True` if outer type and inner values are equivalent, `False` otherwise
         """
-        if self.is_left() and other.is_left():
-            return self.get() == other.get()
-        elif self.is_right() and other.is_right():
-            return self.get() == other.get()
+        if type(self) == type(other):
+            return self.get_or_none() == other.get_or_none()
         else:
             return False
 

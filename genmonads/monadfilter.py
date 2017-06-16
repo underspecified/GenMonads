@@ -1,14 +1,8 @@
-# noinspection PyUnresolvedReferences
-import typing
-
 from genmonads.monad import *
 
-A = typing.TypeVar('A')
-B = typing.TypeVar('B')
-T = typing.TypeVar('T')
+__all__ = ['MonadFilter', 'mfor', 'do']
 
 
-# noinspection PyAbstractClass
 class MonadFilter(Monad):
     """
     A base class for monads that can implement a `filter()` function.
@@ -83,6 +77,51 @@ class MonadFilter(Monad):
             otherwise the monad's empty instance
         """
         return self.flat_map(lambda x: self.pure(x) if not p(x) else self.empty())
+
+    def flatten(self):
+        """
+        Flattens nested instances of Monad.
+
+        Returns:
+            Monad[T]: the flattened monad
+        """
+        raise NotImplementedError
+
+    def get(self):
+        """
+        Returns the `Monad`'s inner value.
+        Returns:
+            T: the inner value
+        """
+        raise NotImplementedError
+
+    def is_gettable(self):
+        raise NotImplementedError
+
+    def map(self, f):
+        """
+        Applies a function to the inner value of a monad.
+
+        Args:
+            f (Callable[[A],B]): the function to apply
+
+        Returns:
+            Monad[B]: the resulting monad
+        """
+        raise NotImplementedError
+
+    @staticmethod
+    def pure(value):
+        """
+        Injects a value into the monad.
+
+        Args:
+            value (T): the value
+
+        Returns:
+            Monad[T]: the monadic value
+        """
+        raise NotImplementedError
 
     def is_empty(self):
         return self != self.empty()

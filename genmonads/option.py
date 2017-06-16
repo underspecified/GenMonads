@@ -1,12 +1,7 @@
-# noinspection PyUnresolvedReferences
-import typing
-
 from genmonads.mlist import *
 from genmonads.monadfilter import *
 
-A = typing.TypeVar('A')
-B = typing.TypeVar('B')
-T = typing.TypeVar('T')
+__all__ = ['Nothing', 'Option', 'Some', 'nothing', 'option', 'some']
 
 
 class Option(MonadFilter):
@@ -15,8 +10,8 @@ class Option(MonadFilter):
 
     Instances of type `Option[T]` are either an instance of `Some[T]` or `Nothing[T]`.
 
-    Monadic computing is supported with `map()`, `flat_map()`, `flatten()`, and `filter()` functions, and
-    for-comprehensions can  be formed by evaluating generators over monads with the `mfor()` function.
+    Monadic computing is supported with `map()`, `flat_map()`, `flatten()`, and `filter()` functions,
+    and for-comprehensions can  be formed by evaluating generators over monads with the `mfor()` function.
     """
 
     def __init__(self, *args, **kwargs):
@@ -33,8 +28,10 @@ class Option(MonadFilter):
         Returns:
             bool: `True` if other is an instance of `Some` and inner values are equivalent, `False` otherwise
         """
-        if self.is_gettable() and other.is_gettable():
-            return self.get() == other.get()
+        if type(self) != type(other):
+            return False
+        elif self.is_defined() and other.is_defined():
+            return self.get_or_none() == other.get_or_none()
         elif self.is_empty() and other.is_empty():
             return True
         else:

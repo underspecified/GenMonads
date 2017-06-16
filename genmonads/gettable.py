@@ -1,7 +1,4 @@
-# noinspection PyUnresolvedReferences
-import typing
-
-T = typing.TypeVar('T')
+__all__ = ['Gettable', ]
 
 
 class Gettable:

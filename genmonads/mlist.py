@@ -1,14 +1,8 @@
-# noinspection PyUnresolvedReferences
-import typing
-
-# noinspection PyUnresolvedReferences
 from genmonads.monadfilter import *
 from genmonads.mtry import *
 from genmonads.nel import *
 
-A = typing.TypeVar('A')
-B = typing.TypeVar('B')
-T = typing.TypeVar('T')
+__all__ = ['List', 'Nil', 'mlist', 'nil']
 
 
 class List(MonadFilter):
@@ -17,8 +11,8 @@ class List(MonadFilter):
 
     Instances are either of type `List[T]` or `Nil[T]`.
 
-    Monadic computing is supported with `map()`, `flat_map()`, `flatten()`, and `filter()` functions, and
-    for-comprehensions can be formed by evaluating generators over monads with the `mfor()` function.
+    Monadic computing is supported with `map()`, `flat_map()`, `flatten()`, and `filter()` functions,
+    and for-comprehensions can be formed by evaluating generators over monads with the `mfor()` function.
     """
 
     def __init__(self, *values):
@@ -32,8 +26,8 @@ class List(MonadFilter):
         Returns:
             bool: `True` if other is an instance of `List` and inner values are equivalent, `False` otherwise
         """
-        if isinstance(self, List) and isinstance(other, List):
-            return self.get() == other.get()
+        if type(self) == type(other):
+            return self.get_or_none() == other.get_or_none()
         else:
             return False
 
@@ -106,7 +100,7 @@ class List(MonadFilter):
         return mtry(lambda: self.head).to_option()
 
     def is_gettable(self):
-        return isinstance(self, List) and not isinstance(self, Nil)
+        return True
 
     def last(self):
         """

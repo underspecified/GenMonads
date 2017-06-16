@@ -1,22 +1,16 @@
-# noinspection PyUnresolvedReferences
-import typing
-
-# noinspection PyUnresolvedReferences
-from genmonads.monad import *
 from genmonads.mlist import *
+from genmonads.monad import *
 from genmonads.mtry import *
 
-A = typing.TypeVar('A')
-B = typing.TypeVar('B')
-T = typing.TypeVar('T')
+__all__ = ['NonEmptyList', 'nel']
 
 
 class NonEmptyList(Monad):
     """
     A type that represents a non-empty list of a single type.
 
-    Monadic computing is supported with `map()`, `flat_map()`, `flatten()`, and `filter()` functions,
-    and for-comprehensions can be formed by evaluating generators over monads with the `mfor()` function.
+    Monadic computing is supported with `map()` and `flat_map()` functions, and for-comprehensions can be formed
+    by evaluating generators over monads with the `mfor()` function.
     """
 
     def __init__(self, head, *tail):
@@ -41,8 +35,8 @@ class NonEmptyList(Monad):
         Returns:
             bool: `True` if other is an instance of `List` and inner values are equivalent, `False` otherwise
         """
-        if isinstance(other, NonEmptyList):
-            return self.get() == other.get()
+        if type(self) == type(other):
+            return self.get_or_none() == other.get_or_none()
         else:
             return False
 
@@ -191,16 +185,12 @@ def main():
 
     print(mfor(x + y
                for x in nel(2, 4, 6)
-               if x < 10
-               for y in nel(5, 7, 9)
-               if y % 2 != 0))
+               for y in nel(5, 7, 9)))
 
     def make_gen():
         for x in nel(4):
-            if x > 2:
-                for y in nel(10):
-                    if y % 2 == 0:
-                        yield x - y
+            for y in nel(10):
+                yield x - y
     print(mfor(make_gen()))
 
     print(nel(5) >> (lambda x: nel(x * 2)))

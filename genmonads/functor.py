@@ -59,4 +59,3 @@ class Functor(object):
             Callable[[Functor[A]],Functor[B]]: the resulting functor
         """
         return lambda fa: fa.map(f)
-  
