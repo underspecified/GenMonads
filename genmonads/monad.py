@@ -4,7 +4,7 @@ import sys
 from pony.orm.decompiling import decompile
 
 from genmonads.gettable import *
-from genmonads.flatmap import *
+from genmonads.flat_map import *
 from genmonads.functor import *
 from genmonads.monadtrans import ast2src
 

@@ -1,5 +1,5 @@
 from genmonads.either import *
-from genmonads.flatmap import *
+from genmonads.flat_map import *
 from genmonads.identity import *
 
 
