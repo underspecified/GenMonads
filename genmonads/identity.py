@@ -2,6 +2,7 @@ from genmonads.mlist import *
 from genmonads.mtry import *
 from genmonads.option import *
 from genmonads.monad import *
+from genmonads.tailrec import trampoline
 
 __all__ = ['Identity', 'identity']
 
@@ -55,8 +56,7 @@ class Identity(Monad):
         Returns:
             FlatMap[B]: the resulting monad
         """
-        x = self.get()
-        return x.map(f) if type(x) == Identity else f(x)
+        return f(self.get())
 
     def get(self):
         """

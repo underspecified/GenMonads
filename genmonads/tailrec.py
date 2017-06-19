@@ -1,6 +1,7 @@
 from genmonads.either import *
-from genmonads.flat_map import *
-from genmonads.identity import *
+from genmonads.mtry import *
+
+__all__ = ['trampoline', ]
 
 
 def trampoline(f, *args, **kwargs):
@@ -8,8 +9,6 @@ def trampoline(f, *args, **kwargs):
     while callable(g):
         g = g()
     return g
-
-tailrec = trampoline
 
 
 def main():
@@ -21,13 +20,12 @@ def main():
 
     # noinspection PyPep8Naming
     def factorialM(args):
-        n, acc = args
+        n, acc = args[0:]
         ga = right(acc) if n == 0 else left((n - 1, n * acc))
-        print("factorialM:", n, args, ga, identity(ga))
-        return identity(ga)
+        return Success(ga)
 
-    #print(trampoline(factorial, 1000))
-    #print(FlatMap.tailrec(factorialM, (1000, 1)))
+    print(trampoline(factorial, 1000, 1))
+    print(Try.tailrecM(factorialM, (1000, 1)))
 
 
 if __name__ == '__main__':
