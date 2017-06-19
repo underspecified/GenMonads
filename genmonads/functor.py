@@ -1,11 +1,3 @@
-# noinspection PyUnresolvedReferences
-import typing
-
-A = typing.TypeVar('A')
-B = typing.TypeVar('B')
-T = typing.TypeVar('T')
-
-
 class Functor(object):
     """
     A type class representing covariant functors, i.e. things which can be mapped over."""
@@ -59,3 +51,16 @@ class Functor(object):
             Callable[[Functor[A]],Functor[B]]: the resulting functor
         """
         return lambda fa: fa.map(f)
+
+    @staticmethod
+    def pure(value):
+        """
+        Injects a value into the functor.
+
+        Args:
+            value (T): the value
+
+        Returns:
+            Functor[T]: the resulting `Functor`
+        """
+        raise NotImplementedError

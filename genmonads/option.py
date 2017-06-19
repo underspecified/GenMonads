@@ -37,7 +37,8 @@ class Option(MonadFilter):
         else:
             return False
 
-    def __mname__(self):
+    @staticmethod
+    def __mname__():
         """
         Returns:
             str: the monad's name
@@ -52,21 +53,20 @@ class Option(MonadFilter):
         """
         return Nothing()
 
-    def flatten(self):
+    def flat_map(self, f):
         """
-        Flattens nested instances of `Option`.
+        Applies a function to the inner value of a `Try`.
+
+        Args:
+            f (Callable[[B],Option[C]): the function to apply
 
         Returns:
-            Option[T]: the flattened monad
+            Option[C]: the resulting monad
         """
-        if self.is_gettable():
-            x = self.get()
-            return x if x.is_gettable() else Some(x)
-        else:
-            return Nothing()
+        return f(self.get()) if self.is_defined() else self
 
     def fold(self, default, f):
-        return Some(f(self.get())) if self.is_gettable() else default
+        return Some(f(self.get())) if self.is_defined() else default
 
     def get(self):
         """
@@ -76,23 +76,11 @@ class Option(MonadFilter):
         """
         raise NotImplementedError
 
-    def map(self, f):
-        """
-        Applies a function to the inner value of an `Option`.
-
-        Args:
-            f (Callable[[A],B]): the function to apply
-
-        Returns:
-            Option[B]: the resulting Option
-        """
-        return Some(f(self.get())) if self.is_gettable() else Nothing()
-
     def is_defined(self):
         return self.is_gettable()
 
     def is_empty(self):
-        return not self.is_gettable()
+        return not self.is_defined()
 
     def is_gettable(self):
         return isinstance(self, Some)
@@ -119,7 +107,7 @@ class Option(MonadFilter):
         Returns:
             typing.List[A]: the resulting python list
         """
-        return [self.get(), ] if self.is_gettable() else []
+        return [self.get(), ] if self.is_defined() else []
 
     def to_mlist(self):
         """

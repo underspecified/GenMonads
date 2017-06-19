@@ -78,12 +78,15 @@ class MonadFilter(Monad):
         """
         return self.flat_map(lambda x: self.pure(x) if not p(x) else self.empty())
 
-    def flatten(self):
+    def flat_map(self, f):
         """
-        Flattens nested instances of Monad.
+        Applies a function to the inner value of a `MonadFilter`.
+
+        Args:
+            f (Callable[[B],MonadFilter[C]): the function to apply
 
         Returns:
-            Monad[T]: the flattened monad
+            MonadFilter[C]: the resulting monad
         """
         raise NotImplementedError
 
@@ -95,20 +98,11 @@ class MonadFilter(Monad):
         """
         raise NotImplementedError
 
-    def is_gettable(self):
-        raise NotImplementedError
+    def is_empty(self):
+        return self != self.empty()
 
-    def map(self, f):
-        """
-        Applies a function to the inner value of a monad.
-
-        Args:
-            f (Callable[[A],B]): the function to apply
-
-        Returns:
-            Monad[B]: the resulting monad
-        """
-        raise NotImplementedError
+    def non_empty(self):
+        return not self.is_empty()
 
     @staticmethod
     def pure(value):
@@ -122,9 +116,3 @@ class MonadFilter(Monad):
             Monad[T]: the monadic value
         """
         raise NotImplementedError
-
-    def is_empty(self):
-        return self != self.empty()
-
-    def non_empty(self):
-        return not self.is_empty()

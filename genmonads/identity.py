@@ -30,7 +30,8 @@ class Identity(Monad):
         else:
             return False
 
-    def __mname__(self):
+    @staticmethod
+    def __mname__():
         """
         Returns:
             str: the monad's name
@@ -44,15 +45,18 @@ class Identity(Monad):
         """
         return 'Identity(%s)' % repr(self.get())
 
-    def flatten(self):
+    def flat_map(self, f):
         """
-        Flattens nested instances of `Identity`.
+        Applies a function to the inner value of a monad.
+
+        Args:
+            f (Callable[[A],B]): the function to apply
 
         Returns:
-            Identity[T]: the flattened monad
+            FlatMap[B]: the resulting monad
         """
         x = self.get()
-        return x if x.is_identity() else self
+        return x.map(f) if type(x) == Identity else f(x)
 
     def get(self):
         """

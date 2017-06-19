@@ -1,3 +1,5 @@
+import sys
+
 from genmonads.mlist import *
 from genmonads.monad import *
 from genmonads.mtry import *
@@ -35,7 +37,8 @@ class Either(Monad):
         else:
             return False
 
-    def __mname__(self):
+    @staticmethod
+    def __mname__():
         """
         Returns:
             str: the monad's name
@@ -51,18 +54,17 @@ class Either(Monad):
     def filter_or_else(self, p, zero):
         return self if self.exists(p) else Left(zero)
 
-    def flatten(self):
+    def flat_map(self, f):
         """
-        Flattens nested instances of `Either`.
+        Applies a function to the inner value of a monad.
+
+        Args:
+            f (Callable[[B],Either[AA,BB]]): the function to apply
 
         Returns:
-            Union[Either[A,B],Either[AA,BB]]: the flattened monad
+            Union[Either[A,B],Either[AA,BB]]: the resulting monad
         """
-        if self.is_right():
-            b = self.get()
-            return b if b.is_right() or b.is_left() else self
-        else:
-            return self
+        return f(self.get()) if self.is_right() else self
 
     def fold(self, fa, fb):
         return Right(fb(self.get())) if self.is_right() else Left(fa(self.get()))
@@ -102,9 +104,6 @@ class Either(Monad):
         """
         return self.get_or_else(None)
 
-    def is_gettable(self):
-        return True
-
     def is_left(self):
         """
         Returns:
@@ -118,18 +117,6 @@ class Either(Monad):
             bool: `True` if instance of `Right`, `False` otherwise
         """
         return isinstance(self, Right)
-
-    def map(self, f):
-        """
-        Applies a function to the inner value of an `Either`.
-
-        Args:
-            f (Callable[[B],C]): the function to apply
-
-        Returns:
-            Either[A,C]: the resulting Either
-        """
-        return Right(f(self.get())) if self.is_right() else self
 
     @staticmethod
     def pure(value):

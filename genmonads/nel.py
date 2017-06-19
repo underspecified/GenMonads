@@ -40,7 +40,8 @@ class NonEmptyList(Monad):
         else:
             return False
 
-    def __mname__(self):
+    @staticmethod
+    def __mname__():
         """
         Returns:
             str: the monad's name
@@ -68,19 +69,23 @@ class NonEmptyList(Monad):
         res = self.to_mlist().filter(p)
         return res.to_nel().get_or_else(res)
 
-    def flatten(self):
+    def flat_map(self, f):
         """
-        Flattens nested instances of `NonEmptyList`.
+        Applies a function that produces a Monad's from unwrapped values to an Monad's inner value and flattens the
+        nested result.
 
         If the inner values can be converted to an instance of `NonEmptyList` by having an implementation of
-        `to_nel()`, the inner values will be converted to `NonEmptyList` before flattening.
+        `to_nel()`, the inner values will be converted to `NonEmptyList` before flattening. This allows for
+        flattening of `NonEmptyList[Option[T]]` into `List[T]`, as is done in Scala.
+
+        Args:
+            f (Callable[[A],NonEmptyList[B]]): the function to apply
 
         Returns:
-            NonEmptyList[T]: the flattened monad
+            List[B]: the resulting monad
         """
         if self.is_gettable() and all(map(lambda x: hasattr(x, 'to_nel'), self.get())):
-            # noinspection PyProtectedMember
-            return NonEmptyList.pure(*[y for ys in self.get() for y in ys.to_nel().get()])
+            return NonEmptyList.pure(*[v for vs in self.map(f).get() for v in vs.to_nel().get()])
         else:
             return self
 
@@ -92,9 +97,6 @@ class NonEmptyList(Monad):
             list[T]: the inner value
         """
         return self._value
-
-    def is_gettable(self):
-        return True
 
     def last(self):
         """

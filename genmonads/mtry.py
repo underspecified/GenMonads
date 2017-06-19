@@ -1,6 +1,7 @@
 from types import LambdaType
 import inspect
 
+from genmonads.mlist import *
 from genmonads.monadfilter import *
 from genmonads.option import *
 
@@ -55,7 +56,8 @@ class Try(MonadFilter):
         else:
             return False
 
-    def __mname__(self):
+    @staticmethod
+    def __mname__():
         """
         Returns:
             str: the monad's name
@@ -70,14 +72,20 @@ class Try(MonadFilter):
         """
         return Failure(ValueError("This Try instance is empty!"))
 
-    def flatten(self):
+    def flat_map(self, f):
         """
-        Flattens nested instances of `Try`.
+        Applies a function to the inner value of a `Try`.
+
+        Args:
+            f (Callable[[B],Try[C]): the function to apply
 
         Returns:
-            Try[T]: the flattened monad
+            Try[C]: the resulting monad
         """
-        raise NotImplementedError
+        return f(self.get()) if self.is_success() else self
+
+    def fold(self, fa, fb):
+        return Success(fb(self.get())) if self.is_success() else Failure(fa(self.get()))
 
     def get(self):
         """
@@ -88,28 +96,12 @@ class Try(MonadFilter):
         """
         raise NotImplementedError
 
-    # noinspection PyMethodMayBeStatic
-    def is_gettable(self):
-        return True
-
     def is_failure(self):
         return isinstance(self, Failure)
 
     def is_success(self):
         return isinstance(self, Success)
 
-    def map(self, f):
-        """
-        Applies a function to the inner value of a `Try`.
-
-        Args:
-            f (Callable[[A],B]): the function to apply
-
-        Returns:
-            Try[B]: the resulting `Try`
-        """
-        raise NotImplementedError
-
     def or_else(self, default):
         """
         Returns the `Try` if an instance of `Success` or `default` if an instance of `Failure` .
@@ -120,155 +112,23 @@ class Try(MonadFilter):
         Returns:
             Try[B]: the resulting `Try`
         """
-        raise NotImplementedError
-
-    @staticmethod
-    def pure(thunk):
-        """
-        Evaluates a failable computation in the `Try` monad.
-
-        This function should be used instead of calling `Try.__init__()` directly.
-
-        Args:
-            thunk (Callable[[None],T]): the computation
-
-        Returns:
-            Try[T]: the resulting `Try`
-        """
-        if not is_thunk(thunk):
-            raise ValueError('Try.pure(%s) requires a thunk as an argument!' % thunk)
-        try:
-            return Success(thunk())
-        except Exception as ex:
-            return Failure(ex)
-
-    def recover(self, f):
-        """
-        Recovers from a failed computation by applying `f` to the exception.
-
-        Essentially, a map on the `Failure` instance.
-
-        Args:
-            f (Callable[[Exception],B): the function to call on the `Failure[T]`'s exception
-
-        Returns:
-            Try[B]: the resulting `Try`
-        """
-        raise NotImplementedError
-
-    def recover_with(self, f):
-        """
-        Recovers from a failed computation by applying `f` to the exception.
-
-        Essentially, a flat_map on the `Failure` instance.
-
-        Args:
-            f (Callable[[Exception],Try[B]): the function to call on the `Failure[T]`'s exception
-
-        Returns:
-            Try[B]: the resulting `Try`
-        """
-        raise NotImplementedError
-
-    def to_option(self):
-        """
-        Converts an instance of `Try[T]` to `Option[T]`.
-
-        `Success[T]` is mapped to `Some[T]`, and `Failure[T]` is mapped to `Nothing[T]`.
-
-        Returns:
-            Option[T]: the corresponding `Option`
-        """
-        raise NotImplementedError
-
-
-def mtry(thunk):
-    """
-    Evaluates a delayed computation in the `Try` monad.
-
-    Args:
-        thunk (Callable[[None],T]): the delayed computation
-
-    Returns:
-        Try[T]: the resulting `Try`
-    """
-    return Try.pure(thunk)
-
-
-# noinspection PyMissingConstructor
-class Success(Try):
-    def __init__(self, value):
-        self._value = value
-
-    def __mname__(self):
-        """
-        Returns:
-            str: the monad's name
-        """
-        return 'Try'
-
-    def __repr__(self):
-        """
-        Returns:
-            str: a string representation of monad
-        """
-        return 'Success(%s)' % repr(self.get())
-
-    def flatten(self):
-        """
-        Flattens nested instances of `Try`.
-
-        Returns:
-            Try[T]
-        """
-        if isinstance(self.get(), Try):
-            return self.get()
-        else:
-            return self
-
-    def get(self):
-        """
-        Returns the `Try`'s inner value.
-
-        Returns:
-            Union[T,Exception]: the inner value
-        """
-        return self._value
-
-    def map(self, f):
-        """
-        Applies a function to the inner value of a `Try`.
-
-        Args:
-            f (Callable[[A],B]): the function to apply
-
-        Returns:
-            Try[B]: the resulting `Try`
-        """
-        return Try.pure(lambda: f(self.get()))
-
-    def or_else(self, default):
-        """
-        Returns the `Try` if an instance of `Success` or `default` if an instance of `Failure` .
-
-        Args:
-            default (Try[B]): the monad to return for `Failure[T]` instances
-
-        Returns:
-            Try[B]: the resulting `Try`
-        """
-        return self
+        return self if self.is_success() else default
 
     @staticmethod
     def pure(value):
         """
-        Injects a value into the `Success` monad.
+        Injects a value into the `Try` monad.
+
+        This function should be used instead of calling `Try.__init__()` directly.
 
         Args:
             value (T): the value
 
         Returns:
             Try[T]: the resulting `Try`
+            
+        Raises:
+            ValueError: if the argument is not a zero arity lambda function
         """
         return Success(value)
 
@@ -284,30 +144,21 @@ class Success(Try):
         Returns:
             Try[B]: the resulting `Try`
         """
-        return self
+        return self if self.is_success() else f(self.get())
 
     def recover_with(self, f):
         """
-        Recovers from a failed computation by applying `f` to the exception.
+        Recovers from a failed computation by applying `f` to the `Failure[T]` instance.
 
         Essentially, a flat_map on the `Failure` instance.
 
         Args:
-            f (Callable[[Exception],Try[B]): the function to call on the `Failure[T]`'s exception
+            f (Callable[[Exception],Try[B]): the function to call on the `Failure[T]`
 
         Returns:
             Try[B]: the resulting `Try`
         """
-        return self
-
-    def to_mlist(self):
-        """
-        Converts the `Try` into a `List` monad.
-
-        Returns:
-            List[A]: the resulting List monad
-        """
-        return mlist.List(self.to_list())
+        return self if self.is_success() else f(self)
 
     def to_list(self):
         """
@@ -318,6 +169,15 @@ class Success(Try):
         """
         return [self.get(), ] if self.is_success() else []
 
+    def to_mlist(self):
+        """
+        Converts the `Try` into a `List` monad.
+
+        Returns:
+            List[A]: the resulting List monad
+        """
+        return List(*self.to_list())
+
     def to_option(self):
         """
         Converts an instance of `Try[T]` to `Option[T]`.
@@ -327,7 +187,52 @@ class Success(Try):
         Returns:
             Option[T]: the corresponding `Option`
         """
-        return Some(self._value)
+        return Some(self.get()) if self.is_success() else None
+
+
+def mtry(thunk):
+    """
+    Evaluates a failable computation in the `Try` monad.
+
+    This function should be used instead of calling `Try.__init__()` directly.
+
+    Args:
+        thunk (Callable[[None],T]): the computation
+
+    Returns:
+        Try[T]: the resulting `Try`
+
+    Raises:
+        ValueError: if the argument is not a zero arity lambda function
+    """
+    if not is_thunk(thunk):
+        raise ValueError('Try.pure(%s) requires a thunk as an argument!' % thunk)
+    try:
+        return Success(thunk())
+    except Exception as ex:
+        return Failure(ex)
+
+
+# noinspection PyMissingConstructor
+class Success(Try):
+    def __init__(self, value):
+        self._value = value
+
+    def __repr__(self):
+        """
+        Returns:
+            str: a string representation of monad
+        """
+        return 'Success(%s)' % repr(self.get())
+
+    def get(self):
+        """
+        Returns the `Try`'s inner value.
+
+        Returns:
+            Union[T,Exception]: the inner value
+        """
+        return self._value
 
 
 def success(value):
@@ -340,20 +245,13 @@ def success(value):
     Returns:
         Try[T]: the resulting monad
     """
-    return Success.pure(value)
+    return Success(value)
 
 
 # noinspection PyMissingConstructor
 class Failure(Try):
     def __init__(self, ex):
-        self._ex = ex
-
-    def __mname__(self):
-        """
-        Returns:
-            str: the monad's name
-        """
-        return 'Try'
+        self._value = ex
 
     def __repr__(self):
         """
@@ -362,15 +260,6 @@ class Failure(Try):
         """
         return 'Failure(%s)' % repr(self.get())
 
-    def flatten(self):
-        """
-        Flattens nested instances of `Try`.
-
-        Returns:
-            Try[T]: the flattened monad
-        """
-        return self
-
     def get(self):
         """
         Returns the `Try`'s inner value.
@@ -378,43 +267,7 @@ class Failure(Try):
         Returns:
             Union[T,Exception]: the inner value
         """
-        return self._ex
-
-    def get_or_else(self, default):
-        """
-        Returns the `Try`'s inner value if an instance of `Success` or `default` if instance of `Failure`.
-
-        Args:
-            default: the value to return for `Failure[T]` instances
-
-        Returns:
-            T: the `Try`'s inner value if an instance of `Success` or `default` if instance of `Failure`
-        """
-        return default
-
-    def map(self, f):
-        """
-        Applies a function to the inner value of a `Try`.
-
-        Args:
-            f (Callable[[A],B]): the function to apply
-
-        Returns:
-            Try[B]: the resulting `Try`
-        """
-        return self
-
-    def or_else(self, default):
-        """
-        Returns the `Try` if an instance of `Success` or `default` if an instance of `Failure` .
-
-        Args:
-            default (Try[B]): the monad to return for `Failure[T]` instances
-
-        Returns:
-            Try[B]: the resulting `Try`
-        """
-        return default
+        return self._value
 
     def raise_ex(self):
         """
@@ -424,45 +277,6 @@ class Failure(Try):
             Exception: the exception
         """
         raise self.get()
-
-    def recover(self, f):
-        """
-        Recovers from a failed computation by applying `f` to the exception.
-
-        Essentially, a map on the `Failure` instance.
-
-        Args:
-            f (Callable[[Exception],B): the function to call on the `Failure[T]`'s exception
-
-        Returns:
-            Try[B]: the resulting `Try`
-        """
-        return Try.pure(lambda: f(self.get()))
-
-    def recover_with(self, f):
-        """
-        Recovers from a failed computation by applying `f` to the exception.
-
-        Essentially, a flat_map on the `Failure` instance.
-
-        Args:
-            f (Callable[[Exception],Try[B]): the function to call on the `Failure[T]`'s exception
-
-        Returns:
-            Try[B]: the resulting `Try`
-        """
-        return self.recover(f).flatten()
-
-    def to_option(self):
-        """
-        Converts an instance of `Try[T]` to `Option[T]`.
-
-        `Success[T]` is mapped to `Some[T]`, and `Failure[T]` is mapped to `Nothing[T]`.
-
-        Returns:
-            Option[T]: the corresponding `Option`
-        """
-        return Nothing()
 
 
 def failure(ex):
@@ -475,7 +289,7 @@ def failure(ex):
     Returns:
         Failure[T]: the resulting `Failure`
     """
-    return Failure.pure(ex)
+    return Failure(ex)
 
 
 def main():

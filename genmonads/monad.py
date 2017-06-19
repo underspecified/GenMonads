@@ -4,12 +4,14 @@ import sys
 from pony.orm.decompiling import decompile
 
 from genmonads.gettable import *
+from genmonads.flatmap import *
+from genmonads.functor import *
 from genmonads.monadtrans import ast2src
 
 __all__ = ['Monad', 'do', 'mfor']
 
 
-class Monad(Gettable):
+class Monad(Gettable, FlatMap, Functor):
     """
     A base class for representing monads.
 
@@ -24,7 +26,8 @@ class Monad(Gettable):
         """
         return MonadIter(self)
 
-    def __mname__(self):
+    @staticmethod
+    def __mname__():
         """
         Returns:
             str: the monad's name
@@ -57,26 +60,15 @@ class Monad(Gettable):
         Returns:
             Monad[B]: the resulting monad
         """
-        return self.map(f).flatten()
-
-    def flatten(self):
-        """
-        Flattens nested instances of Monad.
-
-        Returns:
-            Monad[T]: the flattened monad
-        """
         raise NotImplementedError
 
     def get(self):
         """
         Returns the `Monad`'s inner value.
+        
         Returns:
             T: the inner value
         """
-        raise NotImplementedError
-
-    def is_gettable(self):
         raise NotImplementedError
 
     def map(self, f):
@@ -89,7 +81,7 @@ class Monad(Gettable):
         Returns:
             Monad[B]: the resulting monad
         """
-        raise NotImplementedError
+        return self.flat_map(lambda a: self.pure(f(a)))
 
     @staticmethod
     def pure(value):
@@ -166,7 +158,7 @@ def mfor(gen, frame_depth=5):
         raise ex
 
 
-def do(gen, frame_depth=5):
+def do(gen, frame_depth=10):
     """
     A synonym for `mfor`.
 

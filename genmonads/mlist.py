@@ -31,7 +31,8 @@ class List(MonadFilter):
         else:
             return False
 
-    def __mname__(self):
+    @staticmethod
+    def __mname__():
         """
         Returns:
             str: the monad's name
@@ -53,19 +54,23 @@ class List(MonadFilter):
         """
         return Nil()
 
-    def flatten(self):
+    def flat_map(self, f):
         """
-        Flattens nested instances of `List`.
+        Applies a function that produces an Monad from unwrapped values to an Monad's inner value and flattens the
+        nested result.
 
         If the inner values can be converted to an instance of `List` by having an implementation of
         `to_mlist()`, the inner values will be converted to `List` before flattening. This allows for
         flattening of `List[Option[T]]` into `List[T]`, as is done in Scala.
 
+        Args:
+            f (Callable[[A],List[B]]): the function to apply
+
         Returns:
-            List[T]: the flattened monad
+            List[B]: the resulting monad
         """
         if self.is_gettable() and all(map(lambda x: hasattr(x, 'to_mlist'), self.get())):
-            return List.pure(*[v for vs in self.get() for v in vs.to_mlist().get()])
+            return List.pure(*[v for vs in self.map(f).get() for v in vs.to_mlist().get()])
         else:
             return self
 

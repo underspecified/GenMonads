@@ -44,10 +44,4 @@ class Gettable:
         return True if self.is_gettable() or p(self.get()) else False
 
     def is_gettable(self):
-        raise NotImplementedError
-
-    def is_empty(self):
-        return not self.is_gettable()
-
-    def non_empty(self):
-        return self.is_gettable()
+        return True
