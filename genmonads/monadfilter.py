@@ -1,4 +1,8 @@
+# noinspection PyUnresolvedReferences
+import sys
+
 from genmonads.monad import *
+from genmonads.tailrec import *
 
 __all__ = ['MonadFilter', 'mfor', 'do']
 
@@ -99,7 +103,7 @@ class MonadFilter(Monad):
         raise NotImplementedError
 
     def is_empty(self):
-        return self != self.empty()
+        return self == self.empty()
 
     def non_empty(self):
         return not self.is_empty()
@@ -116,3 +120,29 @@ class MonadFilter(Monad):
             Monad[T]: the monadic value
         """
         raise NotImplementedError
+
+    # noinspection PyPep8Naming
+    @staticmethod
+    def tailrecM(f, a):
+        """
+        Applies a tail-recursive function in a stack safe manner.
+
+        Args:
+            f (Callable[[A],F[Either[A,B]]]): the function to apply
+            a: the recursive function's input
+
+        Returns:
+            F[B]: an `F` instance containing the result of applying the tail-recursive function to its argument
+        """
+        def go(a1):
+            fa = f(a1)
+            if fa.non_empty():
+                e = fa.get()
+                x = e.get()
+                if e.is_left():
+                    return lambda: go(x)
+                else:
+                    return fa.pure(x)
+            else:
+                return fa
+        return trampoline(go, a)

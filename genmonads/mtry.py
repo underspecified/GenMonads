@@ -96,6 +96,9 @@ class Try(MonadFilter):
         """
         raise NotImplementedError
 
+    def is_empty(self):
+        return self.is_failure()
+
     def is_failure(self):
         return isinstance(self, Failure)
 

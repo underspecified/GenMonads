@@ -1,13 +1,7 @@
 from genmonads.functor import *
+from genmonads.tailrec import *
 
 __all__ = ['FlatMap', ]
-
-
-def trampoline(f, *args, **kwargs):
-    g = lambda: f(*args, **kwargs)
-    while callable(g):
-        g = g()
-    return g
 
 
 class FlatMap(Functor):
@@ -119,20 +113,19 @@ class FlatMap(Functor):
         Applies a tail-recursive function in a stack safe manner.
 
         Args:
-            f (Callable[[A],F[Either[A,B]]]): the function to apply
+            f (Callable[[A],FlatMap[Either[A,B]]]): the function to apply
             a: the recursive function's input
 
         Returns:
-            F[B]: an `F` instance containing the result of applying the tail-recursive function to
+            FlatMap[B]: a `FlatMap` instance containing the result of applying the tail-recursive function to
             its argument
         """
         def go(a1):
             fa = f(a1)
             e = fa.get()
-            a2 = e.get()
+            x = e.get()
             if e.is_left():
-                return lambda: go(a2)
+                return lambda: go(x)
             else:
-                return fa.pure(a2)
+                return fa.pure(x)
         return trampoline(go, a)
-
