@@ -1,13 +1,7 @@
 from genmonads.functor import *
+from genmonads.tailrec import *
 
 __all__ = ['FlatMap', ]
-
-
-def trampoline(f, *args, **kwargs):
-    g = lambda: f(*args, **kwargs)
-    while callable(g):
-        g = g()
-    return g
 
 
 class FlatMap(Functor):
@@ -128,11 +122,10 @@ class FlatMap(Functor):
         """
         def go(a1):
             fa = f(a1)
+            print("FlatMap.go(", a, "):", fa)
             e = fa.get()
+            print("FlatMap.go(", a, "):", e)
             a2 = e.get()
-            if e.is_left():
-                return lambda: go(a2)
-            else:
-                return fa.pure(a2)
+            print("FlatMap.go(", a, "):", a2)
+            return fa.pure(a2) if e.is_right() else lambda: go(a2)
         return trampoline(go, a)
-

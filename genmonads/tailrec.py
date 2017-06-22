@@ -1,6 +1,3 @@
-from genmonads.either import *
-from genmonads.mtry import *
-
 __all__ = ['trampoline', ]
 
 
@@ -12,6 +9,9 @@ def trampoline(f, *args, **kwargs):
 
 
 def main():
+    from genmonads.either import left, right
+    from genmonads.nel import NonEmptyList
+
     def factorial(n, acc=1):
         if n == 0:
             return acc
@@ -22,10 +22,10 @@ def main():
     def factorialM(args):
         n, acc = args[0:]
         ga = right(acc) if n == 0 else left((n - 1, n * acc))
-        return Success(ga)
+        return NonEmptyList(ga)
 
     print(trampoline(factorial, 1000, 1))
-    print(Try.tailrecM(factorialM, (1000, 1)))
+    print(NonEmptyList.tailrecM(factorialM, (1000, 1)))
 
 
 if __name__ == '__main__':

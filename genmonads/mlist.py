@@ -1,6 +1,7 @@
 from genmonads.monadfilter import *
 from genmonads.mtry import *
 from genmonads.nel import *
+from genmonads.tailrec import *
 
 __all__ = ['List', 'Nil', 'mlist', 'nil']
 
@@ -170,6 +171,27 @@ class List(MonadFilter):
             typing.List[T]: the tail of the list
         """
         return self.get()[1:]
+
+    # noinspection PyPep8Naming
+    @staticmethod
+    def tailrecM(f, a):
+        """
+        Applies a tail-recursive function in a stack safe manner.
+
+        Args:
+            f (Callable[[A],F[Either[A,B]]]): the function to apply
+            a: the recursive function's input
+
+        Returns:
+            F[B]: an `F` instance containing the result of applying the tail-recursive function to
+            its argument
+        """
+        def go(a1):
+            fa = f(a1)
+            e = fa.head()
+            a2 = e.get()
+            return fa.pure(a2) if e.is_right() else lambda: go(a2)
+        return trampoline(go, a)
 
     def to_list(self):
         """
