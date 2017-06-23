@@ -2,7 +2,6 @@ from genmonads.mlist import *
 from genmonads.mtry import *
 from genmonads.option import *
 from genmonads.monad import *
-from genmonads.tailrec import trampoline
 
 __all__ = ['Identity', 'identity']
 

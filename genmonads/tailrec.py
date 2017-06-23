@@ -8,7 +8,6 @@ def trampoline(f, *args, **kwargs):
     return g
 
 
-# noinspection PyPep8Naming
 def main():
     from genmonads.either import left, right
     from genmonads.mtry import Failure, Success, Try

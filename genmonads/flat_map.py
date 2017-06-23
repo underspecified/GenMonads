@@ -123,9 +123,6 @@ class FlatMap(Functor):
         def go(a1):
             fa = f(a1)
             e = fa.get()
-            x = e.get()
-            if e.is_left():
-                return lambda: go(x)
-            else:
-                return fa.pure(x)
+            a2 = e.get()
+            return fa.pure(a2) if e.is_right() else lambda: go(a2)
         return trampoline(go, a)
