@@ -1,3 +1,4 @@
+from genmonads.either import *
 from genmonads.mlist import *
 from genmonads.monadfilter import *
 
@@ -149,6 +150,9 @@ class Some(Option):
     def __init__(self, value):
         self._value = value
 
+    def __hash__(self):
+        return hash(self.__repr__()) ^ hash(self.get())
+
     def __repr__(self):
         """
         Returns:
@@ -190,6 +194,9 @@ class Nothing(Option):
     # noinspection PyInitNewSignature
     def __init__(self):
         pass
+
+    def __hash__(self):
+        return hash(self.__repr__())
 
     def __repr__(self):
         """
@@ -237,6 +244,43 @@ def main():
 
     print(option(None).map(lambda x: x * 2))
 
+    def match(x, conds):
+        #print("match(", x, conds, ")")
+
+        def is_wildcard(y):
+            return y == '_'
+
+        def matches(var, value):
+            #print("matches(", var, value, "):", is_wildcard(var) or var == value)
+            return is_wildcard(var) or var == value
+
+        sentinel = Left('Type class has no inner value')
+
+        for pattern, action in conds.items():
+            #print("pattern, action:", pattern, action)
+            try:
+                if is_wildcard(pattern):
+                    return action(x)
+                else:
+                    p = pattern.get_or_else(sentinel)
+                    x1 = x.get_or_else(sentinel)
+                    #print("p, x1:", p, x1)
+                    if p == sentinel and x == sentinel:
+                        return action()
+                    elif type(p) != list and matches(p, x1):
+                        return action(x1)
+                    elif type(p) == list and all(matches(p1, x2) for p1, x2 in zip(p, x1)):
+                        return action(x1)
+            except Exception as ex:
+                pass
+
+    y = 5
+    _ = '_'
+    match(option(5), {
+        Some(y+1): lambda x: print("Some(x):", x),
+        Nothing(): lambda: print("Nothing!"),
+        _: lambda _: print("oops!")
+    })
 
 if __name__ == '__main__':
     main()
