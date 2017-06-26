@@ -221,6 +221,9 @@ class List(MonadFilter):
         """
         return mtry(lambda: nel(*self.get())).to_option()
 
+    def unpack(self):
+        return tuple(self.get())
+
 
 def mlist(*values):
     """
