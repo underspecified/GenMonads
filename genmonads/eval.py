@@ -357,7 +357,8 @@ def main():
     print((later(lambda: 5) >> later(lambda: 2))
           .get())
     # noinspection PyUnresolvedReferences
-    print(later(lambda: 1 / 0).map(lambda x: x * 2)
+    print(later(lambda: 1 / 0)
+          .map(lambda x: x * 2)
           .to_mtry())
 
 if __name__ == '__main__':
