@@ -337,13 +337,15 @@ def main():
     print(now(2))
     print(now(lambda: 3))
 
-    print(later(lambda: 2)
+    print(now(2)
           .flat_map(lambda x: later(lambda: 5)
-                    .map(lambda y: x + y)).get())
+                    .map(lambda y: x + y))
+          .get())
 
     print(mfor(x + y
                for x in later(lambda: 2)
-               for y in later(lambda: 5)).get())
+               for y in later(lambda: 5))
+          .get())
 
     def make_gen():
         for x in later(lambda: 4):
@@ -352,9 +354,11 @@ def main():
 
     print(mfor(make_gen()).get())
 
-    print((later(lambda: 5) >> later(lambda: 2)).get())
+    print((later(lambda: 5) >> later(lambda: 2))
+          .get())
     # noinspection PyUnresolvedReferences
-    print(later(lambda: 1 / 0).map(lambda x: x * 2).to_mtry())
+    print(later(lambda: 1 / 0).map(lambda x: x * 2)
+          .to_mtry())
 
 if __name__ == '__main__':
     main()
