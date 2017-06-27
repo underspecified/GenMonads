@@ -331,22 +331,22 @@ def main():
     print(now(2))
     print(now(lambda: 3))
 
-    print(now(lambda: 2)
-          .flat_map(lambda x: now(lambda: 5)
+    print(later(lambda: 2)
+          .flat_map(lambda x: later(lambda: 5)
                     .map(lambda y: x + y)).get())
 
     print(mfor(x + y
-               for x in now(lambda: 2)
-               for y in now(lambda: 5)).get())
+               for x in later(lambda: 2)
+               for y in later(lambda: 5)).get())
 
     def make_gen():
-        for x in now(lambda: 4):
-            for y in now(lambda: 10):
+        for x in later(lambda: 4):
+            for y in later(lambda: 10):
                 yield x - y
 
     print(mfor(make_gen()).get())
 
-    print((now(lambda: 5) >> now(lambda: 2)))
+    print((later(lambda: 5) >> later(lambda: 2)))
     print(mtry(lambda: now(lambda: 1 / 0).map(lambda x: x * 2)))
 
 
