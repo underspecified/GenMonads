@@ -29,7 +29,8 @@ def main():
             return Success(ga)
 
     _args = (1000, 1)
-    assert Try.pure(trampoline(factorial, _args)) == Try.tailrecM(factorialM, _args)
+    print(Try.pure(trampoline(factorial, _args)))
+    print(Try.tailrecM(factorialM, _args))
 
 
 if __name__ == '__main__':

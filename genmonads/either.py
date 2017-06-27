@@ -1,5 +1,3 @@
-import sys
-
 from genmonads.mlist import *
 from genmonads.monad import *
 from genmonads.mtry import *
