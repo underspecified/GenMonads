@@ -1,3 +1,4 @@
+from functools import reduce
 from types import LambdaType
 import inspect
 
@@ -278,24 +279,49 @@ class Call(Eval):
     def __repr__(self):
         return 'Call(%s)' % self._thunk
 
-    def get(self):
-        return Call.loop(self).get()
-
     @staticmethod
-    def loop(fa):
+    def _loop(fa):
         # noinspection PyProtectedMember
         def go(_fa):
-            if fa.is_call():
+            if _fa.is_call():
                 return lambda: go(_fa._thunk()),
-            elif fa.is_compute():
-                return Compute(lambda: _fa.start(), lambda s: Call.loop(_fa.run(s))),
+            elif _fa.is_compute():
+                return Compute(lambda: _fa.start(), lambda s: Call._loop1(_fa.run(s))),
             else:
                 return _fa
 
         return trampoline(go, fa)
 
+    @staticmethod
+    def _loop1(fa):
+        return Call._loop(fa)
+
+    def get(self):
+        return Call._loop(self).get()
+
     def memoize(self):
         return Later(lambda: self.get())
+
+
+def defer(thunk):
+    """
+    Defer a computation that produces an `Eval` monad.
+
+    This function should be used instead of calling `Eval.__init__()` directly.
+
+    Args:
+        thunk (Callable[[None],Eval[T]]): the computation
+
+    Returns:
+        Eval[T]: an `Eval` that will contain the value of the computation once evaluated
+
+    Raises:
+        ValueError: if the argument is not a zero arity lambda function
+    """
+    if not is_thunk(thunk):
+        raise ValueError('defer() requires a thunk as an argument!' % thunk)
+    else:
+        return Call(thunk)
 
 
 # noinspection PyMissingConstructor
@@ -316,7 +342,7 @@ class Compute(Eval):
             if curr.is_compute():
                 cc = curr.start()
                 if cc.is_compute():
-                    return lambda: go(cc, [cc.run, curr.run] + fs)
+                    return lambda: go(cc.start(), [cc.run, curr.run] + fs)
                 else:
                     return lambda: go(curr.run(cc.get()), fs)
             elif fs:
@@ -360,6 +386,16 @@ def main():
     print(later(lambda: 1 / 0)
           .map(lambda x: x * 2)
           .to_mtry())
+
+    n = 1000
+    print(reduce(lambda x, y: x * y,
+                 range(1, n+1),
+                 1))
+    print(reduce(lambda x, y: x.flat_map(lambda xx: later(lambda: xx * y)),
+                 range(1, n+1),
+                 later(lambda: 1))
+          .get())
+
 
 if __name__ == '__main__':
     main()
