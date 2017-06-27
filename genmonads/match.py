@@ -1,7 +1,5 @@
 from itertools import zip_longest
 
-from genmonads.mtry import *
-
 __all__ = ['Wildcard', 'is_wildcard', 'match', 'matches', '_']
 
 
@@ -14,7 +12,7 @@ def is_wildcard(y):
     return type(y) == Wildcard
 
 
-exhausted = Failure(ValueError('This iterable has been exhausted.'))
+exhausted = ValueError('This iterable has been exhausted.')
 
 
 def matches(a1, a2):
@@ -27,6 +25,7 @@ def matches(a1, a2):
     return type(a1) == type(a2) and a1.is_gettable() and a2.is_gettable() and _matches_all(a1, a2)
 
 
+# noinspection PyProtectedMember
 def match(x, conditions):
     """
     Checks a `Gettable[A]` type class instance `x` against dictionary of pattern => action mappings, and when a match
@@ -40,7 +39,7 @@ def match(x, conditions):
     >>>     Some(5-1):
     >>>         lambda y: print("Some(5-1) matches %s: %s" % (x, y)),
     >>>     Some(_):
-    >>>         lambda y: print("Some(5-1) matches %s: %s" % (x, y)),
+    >>>         lambda y: print("Some(_) matches %s: %s" % (x, y)),
     >>>     Nothing():
     >>>         lambda: print("Nothing() matches", x),
     >>>     _:
@@ -65,7 +64,7 @@ def match(x, conditions):
 def main():
     from genmonads.option import Some, Nothing, option
     x = option(5)
-    match(x, {
+    x.match({
         Some(5-1):
             lambda y: print("Some(5-1) matches %s: %s" % (x, y)),
         Some(_):
