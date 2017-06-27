@@ -154,6 +154,12 @@ class Eval(Monad):
         """
         return Now(value)
 
+    def to_mtry(self):
+        return mtry(lambda: self.get())
+
+    def to_option(self):
+        return self.to_mtry().to_option()
+
 
 # noinspection PyMissingConstructor
 class Now(Eval):
@@ -346,9 +352,9 @@ def main():
 
     print(mfor(make_gen()).get())
 
-    print((later(lambda: 5) >> later(lambda: 2)))
-    print(mtry(lambda: now(lambda: 1 / 0).map(lambda x: x * 2)))
-
+    print((later(lambda: 5) >> later(lambda: 2)).get())
+    # noinspection PyUnresolvedReferences
+    print(later(lambda: 1 / 0).map(lambda x: x * 2).to_mtry())
 
 if __name__ == '__main__':
     main()
