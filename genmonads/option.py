@@ -6,7 +6,7 @@ __all__ = ['Nothing', 'Option', 'Some', 'nothing', 'option', 'some']
 
 class Option(MonadFilter):
     """
-    A type that represents an optional value.
+    A type class that represents an optional value.
 
     Instances of type `Option[T]` are either an instance of `Some[T]` or `Nothing[T]`.
 
@@ -71,6 +71,7 @@ class Option(MonadFilter):
     def get(self):
         """
         Returns the `Gettable`'s inner value.
+
         Returns:
             T: the inner value
         """
@@ -105,7 +106,7 @@ class Option(MonadFilter):
         Converts the `Option` into a list.
 
         Returns:
-            typing.List[A]: the resulting python list
+            List[A]: the resulting python list
         """
         return [self.get(), ] if self.is_defined() else []
 

@@ -1,53 +1,40 @@
 from functools import reduce
-from types import LambdaType
-import inspect
 
 from genmonads.monad import *
 from genmonads.mtry import *
 from genmonads.tailrec import *
+from genmonads.util import *
 
 __all__ = ['Eval', 'always', 'later', 'now']
 
 
-def is_lambda(f):
-    return isinstance(f, LambdaType)
-
-
-def arity(f):
-    sig = inspect.signature(f)
-    return len(sig.parameters)
-
-
-def is_thunk(f):
-    return is_lambda(f) and arity(f) == 0
-
-
 class Eval(Monad):
     """
-    A type that represents a failable computation.
+    A monad that represents computations. It consists of the following type classes:
+    
+    `Now[T]`: eager computations that are evaluated on creation.
+    `Later[T]`: lazy computations that are evaluated once their value is requested.
+    `Always[T]`: lazy computations that are evaluated every time their value is requested.
 
-    Instances of type `Try[T]` are either instances of `Success[T]` or `Failure[T]`. This monad uses eager evaluation.
-    For lazy computations, see the `Task` monad (under construction).
-
-    Instances of `Try[T]` are constructed by passing a computation wrapped in a thunk (i.e. a lambda expression
-    with no arguments) to either the `now()` or `Try.pure()` or functions. The thunk is evaluated immediately,
-    and successful computations return the result wrapped in `Success`, while computations that raise an exception
-    return that exception wrapped in `Failure[T]`.
-
-    Monadic computing is supported with `map`, `flat_map()`, and `flatten()`, functions, and for-comprehensions
-    can be formed by evaluating generators over monads with the `mfor()` function.
+    Instances of `Eval[T]` are constructed by passing a computation wrapped in a thunk (i.e. a lambda expression
+    with no arguments) to the `Eval.pure()`, `now()`, `later()`, or `always()` functions. The value of evaluating
+    that computation can be retrieved via the `Eval.get()` function.
+    
+    Monadic computing is supported with `map()`, `flat_map()`, and `flatten()` functions, and for-comprehensions
+    can be formed by evaluating generators over monads with the `mfor()` function. `Eval.flat_map()` is implemented
+    tail-recursively with trampolines and supports infinite nesting.
     """
 
     def __init__(self, *args, **kwargs):
         raise ValueError(
-            """Tried to call the constructor of abstract base class Try.
+            """Tried to call the constructor of abstract base class Eval.
             Use the Eval.now(), Eval.later(), and Eval.always() functions instead."""
         )
 
     def __eq__(self, other):
         """
         Args:
-            other (Try[T]): the value to compare against
+            other (Eval[T]): the value to compare against
 
         Returns:
             bool: `True` if inner values are equivalent, `False` otherwise
@@ -68,13 +55,13 @@ class Eval(Monad):
     # noinspection PyUnresolvedReferences,PyProtectedMember
     def flat_map(self, f):
         """
-        Applies a function to the inner value of a `Try`.
+        Applies a function to the inner value of a `Eval`.
 
         Args:
-            f (Callable[[B],Try[C]): the function to apply
+            f (Callable[[B],Eval[C]): the function to apply
 
         Returns:
-            Try[C]: the resulting monad
+            Eval[C]: the resulting monad
         """
         if self.is_compute():
             return Compute(self.start, lambda s: Compute(lambda: self.run(s), f))
@@ -85,7 +72,7 @@ class Eval(Monad):
 
     def get(self):
         """
-        Returns the Try's inner value.
+        Returns the Eval's inner value.
 
         Returns:
             Union[T,Exception]: the inner value
@@ -93,33 +80,59 @@ class Eval(Monad):
         raise NotImplementedError
 
     def is_always(self):
+        """
+        Returns:
+            bool: True if `self` is instance of `Always`, False otherwise
+        """
         return type(self) == Always
 
     def is_call(self):
+        """
+        Returns:
+            bool: True if `self` is instance of `Call`, False otherwise
+        """
         return type(self) == Call
 
     def is_compute(self):
+        """
+        Returns:
+            bool: True if `self` is instance of `Compute`, False otherwise
+        """
         return type(self) == Compute
 
     def is_later(self):
+        """
+        Returns:
+            bool: True if `self` is instance of `Later`, False otherwise
+        """
         return type(self) == Later
 
     def is_now(self):
+        """
+        Returns:
+            bool: True if `self` is instance of `Now`, False otherwise
+        """
         return type(self) == Now
 
     def map(self, f):
         """
-        Applies a function to the inner value of a `Try`.
+        Applies a function to the inner value of a `Eval`.
 
         Args:
-            f (Callable[[B],Try[C]): the function to apply
+            f (Callable[[B],Eval[C]): the function to apply
 
         Returns:
-            Try[C]: the resulting monad
+            Eval[C]: the resulting monad
         """
         return self.flat_map(lambda x: Now(f(x)))
 
     def memoize(self):
+        """
+        Memoize this instance of `Eval`. Will convert `Always` into a `Later` instance.
+
+        Returns:
+            Eval[T]: a memoized version of `self`. 
+        """
         raise NotImplementedError
 
     @staticmethod
@@ -133,7 +146,7 @@ class Eval(Monad):
             value (T): the value
 
         Returns:
-            Now[T]: the resulting `Try`
+            Now[T]: the resulting `Eval`
 
         Raises:
             ValueError: if the argument is not a zero arity lambda function
@@ -164,6 +177,9 @@ class Eval(Monad):
 
 # noinspection PyMissingConstructor
 class Now(Eval):
+    """
+    A monad representing an eager computation that is evaluated once and memoized.
+    """
     def __init__(self, value):
         self._value = value
 
@@ -197,17 +213,36 @@ def now(x):
 
 # noinspection PyMissingConstructor
 class Later(Eval):
+    """
+    A monad representing a lazy computation that is evaluated once and memoized.
+    
+    It is roughly equivalent to a lazy value in languages like Scala and Haskell.
+    Upon its evaluation, the closure containing the computation will be cleared.
+    """
     def __init__(self, thunk):
         self._thunk = thunk
         self._value = None
 
+    def __eq__(self, other):
+        """
+        Args:
+            other (Later[T]): the value to compare against
+
+        Returns:
+            bool: `True` if the thunks or inner values are equivalent, `False` otherwise
+        """
+        if type(self) == type(other):
+            return (self._thunk, self._value) == (other._thunk, other._value)
+        else:
+            return False
+
     def __repr__(self):
-        return 'Later(%s)' % self._thunk if self._value is None else self.get()
+        return 'Later(%s)' % str('<thunk>' if self._value is None else self.get())
 
     def get(self):
         if self._value is None:
             self._value = self._thunk()
-            self._thunk = None
+            self._thunk = None  # clear the closure after evaluation
         return self._value
 
     def memoize(self):
@@ -216,7 +251,7 @@ class Later(Eval):
 
 def later(thunk):
     """
-    Lazily evaluates a value in the `Eval` monad.
+    Lazily evaluates a computation in the `Eval` monad.
 
     This function should be used instead of calling `Eval.__init__()` directly.
 
@@ -237,11 +272,28 @@ def later(thunk):
 
 # noinspection PyMissingConstructor
 class Always(Eval):
+    """
+    A monad representing a lazy computation that is evaluated every time its result is requested.
+    """
+
     def __init__(self, thunk):
         self._thunk = thunk
 
+    def __eq__(self, other):
+        """
+        Args:
+            other (Always[T]): the value to compare against
+
+        Returns:
+            bool: `True` if the thunks or inner values are equivalent, `False` otherwise
+        """
+        if type(self) == type(other):
+            return self._thunk == other._thunk
+        else:
+            return False
+
     def __repr__(self):
-        return 'Always(%s)' % self._thunk
+        return 'Always(<thunk>)'
 
     def get(self):
         return self._thunk()
@@ -252,7 +304,7 @@ class Always(Eval):
 
 def always(thunk):
     """
-    Repeatedly evaluates a value in the `Eval` monad.
+    Repeatedly evaluates a computation in the `Eval` monad.
 
     This function should be used instead of calling `Eval.__init__()` directly.
 
@@ -273,11 +325,31 @@ def always(thunk):
 
 # noinspection PyMissingConstructor
 class Call(Eval):
+    """
+    A monad representing a lazy computation that is evaluated once and memoized.
+
+    It is roughly equivalent to a lazy value in languages like Scala and Haskell.
+    Upon its evaluation, the closure containing the computation will be cleared.
+    """
+
     def __init__(self, thunk):
         self._thunk = thunk
 
+    def __eq__(self, other):
+        """
+        Args:
+            other (Call[T]): the value to compare against
+
+        Returns:
+            bool: `True` if the thunks or inner values are equivalent, `False` otherwise
+        """
+        if type(self) == type(other):
+            return self._thunk == other._thunk
+        else:
+            return False
+
     def __repr__(self):
-        return 'Call(%s)' % self._thunk
+        return 'Call(<thunk>)'
 
     @staticmethod
     def _loop(fa):
@@ -331,9 +403,22 @@ class Compute(Eval):
         self.run = run
         self._value = None
 
+    def __eq__(self, other):
+        """
+        Args:
+            other (Compute[T]): the value to compare against
+
+        Returns:
+            bool: `True` if the thunks or inner values are equivalent, `False` otherwise
+        """
+        if type(self) == type(other):
+            return (self.start, self.run, self._value) == (other.start, other.run, other._value)
+        else:
+            return False
+
     def __repr__(self):
         if self._value is None:
-            return 'Compute(%s, %s)' % (self.start, self.run)
+            return 'Compute(<thunk>)'
         else:
             return 'Compute(%s)' % self.get()
 
@@ -394,6 +479,11 @@ def main():
     print(reduce(lambda x, y: x.flat_map(lambda xx: later(lambda: xx * y)),
                  range(1, n+1),
                  later(lambda: 1))
+          .get())
+    from genmonads.option import option
+    print(reduce(lambda x, y: x.flat_map(lambda xx: option(xx * y)),
+                 range(1, n+1),
+                 option(1))
           .get())
 
 

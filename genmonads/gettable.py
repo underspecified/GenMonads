@@ -14,6 +14,7 @@ class Gettable:
     def get(self):
         """
         Returns the `Gettable`'s inner value.
+
         Returns:
             T: the inner value
         """
@@ -43,39 +44,46 @@ class Gettable:
         return self.get_or_else(None)
 
     def forall(self, p):
-        return True if self.is_gettable() or p(self.get()) else False
+        """
+        Checks if this type class either does not implement the `get()` method or predicate `p` is true on its
+        inner value.
+
+        Returns:
+            bool: `True` if `get()` is not implemented or predicate `p` is true on its inner value, `False` otherwise
+        """
+        return (not self.is_gettable()) or p(self.get())
 
     def is_gettable(self):
         """
         Returns true if this type class implements the `get()` method.
+
         Returns:
-            Boolean: `True` if `get()` is implemented, `False` otherwise
+            bool: `True` if `get()` is implemented, `False` otherwise
         """
         return True
 
+    # noinspection PyProtectedMember
     def match(self, conditions):
         """
         Checks a `Gettable[A]` type class instance `x` against dictionary of pattern => action mappings, and when a
         match is found, returns the results from calling the associated action on `x`'s inner value. Wildcard matches
         (`_`) are supported in both the type class and inner values.
 
-        >>> from genmonads.match import match, _
         >>> from genmonads.option import Some, Nothing, option
         >>> x = option(5)
         >>> x.match({
         >>>     Some(5-1):
         >>>         lambda y: print("Some(5-1) matches %s: %s" % (x, y)),
         >>>     Some(_):
-        >>>         lambda y: print("Some(5-1) matches %s: %s" % (x, y)),
+        >>>         lambda y: print("Some(_) matches %s: %s" % (x, y)),
         >>>     Nothing():
-        >>>         lambda: print("Nothing() matches", x),
+        >>>         lambda: print("Nothing() matches:", x),
         >>>     _:
-        >>>         lambda: print("Fallthrough wildcard match:", x),
+        >>>         lambda: print("Fallthrough wildcard matches:", x),
         >>>})
         Some(_) matches Some(5): 5
 
         Args:
-            x (Gettable[A]): the type class to match against
             conditions (Dict[Gettable[A],Callable[[A],B]): a dictionary of pattern => action mappings
 
         Returns:
@@ -84,11 +92,21 @@ class Gettable:
         return match(self, conditions)
 
     def matches(self, other):
+        """
+        Checks if `self` matches `other`, taking into account wildcards in both type classes and arguments.
+
+        Args:
+            other: the type class to match against
+
+        Returns:
+            bool: True if `self` matches `other`, False otherwise
+        """
         return matches(self, other)
 
     def unpack(self):
         """
         Returns the `Gettable`'s inner value as a tuple to support unpacking
+
         Returns:
             Tuple[T]: the inner value
         """

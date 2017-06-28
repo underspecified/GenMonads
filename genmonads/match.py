@@ -16,6 +16,17 @@ exhausted = ValueError('This iterable has been exhausted.')
 
 
 def matches(a1, a2):
+    """
+    Checks if `a1` matches `a2`, taking into account wildcards in both type classes and arguments.
+
+    Args:
+        a1: the first type class to match
+        a2: the second type class to match
+
+    Returns:
+        bool: True if `self` matches `other`, False otherwise
+    """
+
     def _matches(l, r):
         return is_wildcard(l) or l == r
 
@@ -41,9 +52,9 @@ def match(x, conditions):
     >>>     Some(_):
     >>>         lambda y: print("Some(_) matches %s: %s" % (x, y)),
     >>>     Nothing():
-    >>>         lambda: print("Nothing() matches", x),
+    >>>         lambda: print("Nothing() matches:", x),
     >>>     _:
-    >>>         lambda: print("Fallthrough wildcard match:", x),
+    >>>         lambda: print("Fallthrough wildcard matches:", x),
     >>>})
     Some(_) matches Some(5): 5
 
@@ -72,7 +83,7 @@ def main():
         Nothing():
             lambda: print("Nothing() matches", x),
         _:
-            lambda: print("Fallthrough wildcard match:", x),
+            lambda: print("Fallthrough wildcard matches:", x),
     })
 
 if __name__ == '__main__':

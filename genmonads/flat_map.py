@@ -32,7 +32,7 @@ class FlatMap(Functor):
             f (Union[Callable[[A],FlatMap[B]],FlatMap[B]]): the function to apply
 
         Returns:
-            FlatMap[B]
+            FlatMap[B]: the resulting functor
         """
         return self.flat_map(f) if callable(f) else self.followed_by(f)
 
@@ -41,19 +41,19 @@ class FlatMap(Functor):
         Flattens nested `F` structures.
 
         Returns:
-            FlatMap[T]: the flattened monad
+            FlatMap[T]: the flattened functor
         """
         return self.flat_map(lambda fa: fa)
 
     def flat_map(self, f):
         """
-        Applies a function to the inner value of a monad.
+        Applies a function to the inner value of a functor.
 
         Args:
             f (Callable[[A],B]): the function to apply
 
         Returns:
-            FlatMap[B]: the resulting monad
+            FlatMap[B]: the resulting functor
         """
         raise NotImplementedError
 

@@ -1,24 +1,9 @@
-from types import LambdaType
-import inspect
-
 from genmonads.mlist import *
 from genmonads.monadfilter import *
 from genmonads.option import *
+from genmonads.util import *
 
 __all__ = ['Failure', 'Success', 'Try', 'failure', 'mtry', 'success']
-
-
-def is_lambda(f):
-    return isinstance(f, LambdaType)
-
-
-def arity(f):
-    sig = inspect.signature(f)
-    return len(sig.parameters)
-
-
-def is_thunk(f):
-    return is_lambda(f) and arity(f) == 0
 
 
 class Try(MonadFilter):
@@ -33,7 +18,7 @@ class Try(MonadFilter):
     and successful computations return the result wrapped in `Success`, while computations that raise an exception
     return that exception wrapped in `Failure[T]`.
 
-    Monadic computing is supported with `map`, `flat_map()`, `flatten()`, and `filter()` functions, and
+    Monadic computing is supported with `map()`, `flat_map()`, `flatten()`, and `filter()` functions, and
     for-comprehensions can be formed by evaluating generators over monads with the `mfor()` function.
     """
 
