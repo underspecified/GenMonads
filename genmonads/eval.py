@@ -180,6 +180,7 @@ class Now(Eval):
     """
     A monad representing an eager computation that is evaluated once and memoized.
     """
+
     def __init__(self, value):
         self._value = value
 
@@ -219,6 +220,7 @@ class Later(Eval):
     It is roughly equivalent to a lazy value in languages like Scala and Haskell.
     Upon its evaluation, the closure containing the computation will be cleared.
     """
+
     def __init__(self, thunk):
         self._thunk = thunk
         self._value = None
