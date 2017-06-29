@@ -1,12 +1,11 @@
-from genmonads.monadfilter import *
-from genmonads.mtry import *
-from genmonads.nel import *
-from genmonads.tailrec import *
+from genmonads.foldable import Foldable
+from genmonads.monadfilter import MonadFilter
+from genmonads.tailrec import trampoline
 
 __all__ = ['List', 'Nil', 'mlist', 'nil']
 
 
-class List(MonadFilter):
+class List(Foldable, MonadFilter):
     """
     A type that represents list of values of the same type.
 
@@ -75,6 +74,37 @@ class List(MonadFilter):
         else:
             return self
 
+    def fold_left(self, b, f):
+        """
+        Performs left-associated fold using `f`. Uses eager evaluation.
+
+        Args:
+            b (B): the initial value
+            f (Callable[[B,A],B]): the function to fold with
+
+        Returns:
+            B: the result of folding
+        """
+        for a in self.get():
+            b = f(b, a)
+        return b
+
+    def fold_right(self, lb, f):
+        """
+        Performs left-associated fold using `f`. Uses lazy evaluation, requiring type `Eval[B]`
+        for initial value and accumulation results.
+
+        Args:
+            lb (Eval[B]): the lazily-evaluated initial value
+            f (Callable[[A,Eval[B]],Eval[B]]): the function to fold with
+
+        Returns:
+            Eval[B]: the result of folding
+        """
+        for a in reversed(self.get()):
+            lb = f(a, lb)
+        return lb
+
     def get(self):
         """
         Returns the `List`'s inner value.
@@ -103,8 +133,10 @@ class List(MonadFilter):
         Returns:
             Option[T]: the first item wrapped in `Some`, or `Nothing` if the list is empty
         """
+        from genmonads.mtry import mtry
         return mtry(lambda: self.head).to_option()
 
+    # noinspection PyMethodMayBeStatic
     def is_gettable(self):
         return True
 
@@ -127,6 +159,7 @@ class List(MonadFilter):
         Returns:
             Option[T]: the first item wrapped in `Some`, or `Nothing` if the list is empty
         """
+        from genmonads.mtry import mtry
         return mtry(lambda: self.last()).to_option()
 
     def map(self, f):
@@ -148,6 +181,7 @@ class List(MonadFilter):
         Returns:
             List[T]: the rest of the nel
         """
+        from genmonads.mtry import mtry
         return mtry(lambda: self.tail()).to_option().to_mlist()
 
     @staticmethod
@@ -186,11 +220,13 @@ class List(MonadFilter):
             F[B]: an `F` instance containing the result of applying the tail-recursive function to
             its argument
         """
+
         def go(a1):
             fa = f(a1)
             e = fa.head()
             a2 = e.get()
             return fa.pure(a2) if e.is_right() else lambda: go(a2)
+
         return trampoline(go, a)
 
     def to_list(self):
@@ -219,6 +255,8 @@ class List(MonadFilter):
             Option[NonEmptyList[A]]: the `NonEmptyList` wrapped in `Some` if the `List` is non-empty,
             `Nothing` otherwise
         """
+        from genmonads.mtry import mtry
+        from genmonads.nel import nel
         return mtry(lambda: nel(*self.get())).to_option()
 
     def unpack(self):
@@ -233,7 +271,7 @@ def mlist(*values):
         values (T): the values
 
     Returns:
-        List[T]: the resulting `List`
+        mlist.List[T]: the resulting `List`
     """
     return List.pure(*values)
 
@@ -305,6 +343,8 @@ def nil():
 
 
 def main():
+    from genmonads.monadfilter import mfor
+
     print(mlist(2, 3).flat_map(lambda x: List.pure(x + 5)))
 
     print(mfor(x + y
@@ -319,6 +359,7 @@ def main():
                 for y in mlist(10):
                     if y % 2 == 0:
                         yield x - y
+
     print(mfor(make_gen()))
 
     print(mlist(5) >> (lambda x: mlist(x * 2)))
@@ -326,6 +367,7 @@ def main():
     print(nil().map(lambda x: x * 2))
 
     print(mlist(mlist(1, 2, 3, 4, 5), mlist(5, 4, 3, 2, 1)).flat_map(lambda x: x.last_option()))
+
 
 if __name__ == '__main__':
     main()

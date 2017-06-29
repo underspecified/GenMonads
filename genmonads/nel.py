@@ -1,12 +1,11 @@
-from genmonads.mlist import *
-from genmonads.monad import *
-from genmonads.mtry import *
-from genmonads.tailrec import *
+from genmonads.foldable import Foldable
+from genmonads.monad import Monad
+from genmonads.tailrec import trampoline
 
 __all__ = ['NonEmptyList', 'nel']
 
 
-class NonEmptyList(Monad):
+class NonEmptyList(Foldable, Monad):
     """
     A type that represents a non-empty list of a single type.
 
@@ -90,6 +89,37 @@ class NonEmptyList(Monad):
         else:
             return self
 
+    def fold_left(self, b, f):
+        """
+        Performs left-associated fold using `f`. Uses eager evaluation.
+
+        Args:
+            b (B): the initial value
+            f (Callable[[B,A],B]): the function to fold with
+
+        Returns:
+            B: the result of folding
+        """
+        for a in self.get():
+            b = f(b, a)
+        return b
+
+    def fold_right(self, lb, f):
+        """
+        Performs left-associated fold using `f`. Uses lazy evaluation, requiring type `Eval[B]`
+        for initial value and accumulation results.
+
+        Args:
+            lb (Eval[B]): the lazily-evaluated initial value
+            f (Callable[[A,Eval[B]],Eval[B]]): the function to fold with
+
+        Returns:
+            Eval[B]: the result of folding
+        """
+        for a in reversed(self.get()):
+            lb = f(a, lb)
+        return lb
+
     def get(self):
         """
         Returns the `Nel`'s inner value.
@@ -127,6 +157,7 @@ class NonEmptyList(Monad):
         Returns:
             List[T]: the rest of the nel
         """
+        from genmonads.mlist import List
         return List(*self.tail)
 
     @staticmethod
@@ -156,11 +187,13 @@ class NonEmptyList(Monad):
             F[B]: an `F` instance containing the result of applying the tail-recursive function to
             its argument
         """
+
         def go(a1):
             fa = f(a1)
             e = fa.head
             a2 = e.get()
             return fa.pure(a2) if e.is_right() else lambda: go(a2)
+
         return trampoline(go, a)
 
     def to_list(self):
@@ -179,6 +212,7 @@ class NonEmptyList(Monad):
         Returns:
             List[T]: the resulting List monad
         """
+        from genmonads.mlist import List
         return List(*self.get())
 
     def to_nel(self):
@@ -205,6 +239,9 @@ def nel(*values):
 
 
 def main():
+    from genmonads.monad import mfor
+    from genmonads.mtry import mtry
+
     print(nel(2, 3).flat_map(lambda x: nel(x + 5)))
 
     print(mfor(x + y
@@ -215,6 +252,7 @@ def main():
         for x in nel(4):
             for y in nel(10):
                 yield x - y
+
     print(mfor(make_gen()))
 
     print(nel(5) >> (lambda x: nel(x * 2)))
@@ -222,6 +260,7 @@ def main():
     print(mtry(lambda: nel().map(lambda x: x * 2)))
 
     print(nel(nel(1, 2, 3, 4, 5), nel(5, 4, 3, 2, 1)).flatten())
+
 
 if __name__ == '__main__':
     main()

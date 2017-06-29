@@ -1,12 +1,12 @@
-from genmonads.mlist import *
-from genmonads.monadfilter import *
-from genmonads.option import *
-from genmonads.util import *
+from genmonads.util import is_thunk
+
+from genmonads.foldable import Foldable
+from genmonads.monad import Monad
 
 __all__ = ['Failure', 'Success', 'Try', 'failure', 'mtry', 'success']
 
 
-class Try(MonadFilter):
+class Try(Foldable, Monad):
     """
     A type that represents a failable computation.
 
@@ -83,6 +83,33 @@ class Try(MonadFilter):
         """
         return f(self.get()) if self.is_success() else self
 
+    def fold_left(self, b, f):
+        """
+        Performs left-associated fold using `f`. Uses eager evaluation.
+
+        Args:
+            b (B): the initial value
+            f (Callable[[B,A],B]): the function to fold with
+
+        Returns:
+            B: the result of folding
+        """
+        return f(b, self.get()) if self.is_success() else b
+
+    def fold_right(self, lb, f):
+        """
+        Performs left-associated fold using `f`. Uses lazy evaluation, requiring type `Eval[B]`
+        for initial value and accumulation results.
+
+        Args:
+            lb (Eval[B]): the lazily-evaluated initial value
+            f (Callable[[A,Eval[B]],Eval[B]]): the function to fold with
+
+        Returns:
+            Eval[B]: the result of folding
+        """
+        return f(self.get(), lb) if self.is_success() else lb
+
     def get(self):
         """
         Returns the Try's inner value.
@@ -91,9 +118,6 @@ class Try(MonadFilter):
             Union[T,Exception]: the inner value
         """
         raise NotImplementedError
-
-    def is_empty(self):
-        return self.is_failure()
 
     def is_failure(self):
         return isinstance(self, Failure)
@@ -159,24 +183,6 @@ class Try(MonadFilter):
         """
         return self if self.is_success() else f(self)
 
-    def to_list(self):
-        """
-        Converts the `Try` into a list.
-
-        Returns:
-            typing.List[A]: the resulting python list
-        """
-        return [self.get(), ] if self.is_success() else []
-
-    def to_mlist(self):
-        """
-        Converts the `Try` into a `List` monad.
-
-        Returns:
-            List[A]: the resulting List monad
-        """
-        return List(*self.to_list())
-
     def to_option(self):
         """
         Converts an instance of `Try[T]` to `Option[T]`.
@@ -186,6 +192,7 @@ class Try(MonadFilter):
         Returns:
             Option[T]: the corresponding `Option`
         """
+        from genmonads.option import Some
         return Some(self.get()) if self.is_success() else None
 
 
@@ -292,6 +299,8 @@ def failure(ex):
 
 
 def main():
+    from genmonads.monad import mfor
+
     print(mtry(lambda: 2)
           .filter(lambda x: x < 10)
           .flat_map(lambda x: mtry(lambda: 5)
@@ -310,6 +319,7 @@ def main():
                 for y in mtry(lambda: 10):
                     if y % 2 == 0:
                         yield x - y
+
     print(mfor(make_gen()))
 
     print((mtry(lambda: 5) >> mtry(lambda: 2)))

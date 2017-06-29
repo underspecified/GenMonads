@@ -1,12 +1,10 @@
-from genmonads.mlist import *
-from genmonads.monad import *
-from genmonads.mtry import *
-from genmonads.option import *
+from genmonads.foldable import Foldable
+from genmonads.monad import Monad
 
 __all__ = ['Either', 'Left', 'Right', 'left', 'right']
 
 
-class Either(Monad):
+class Either(Foldable, Monad):
     """
     A type that represents a disjoint union.
 
@@ -57,30 +55,6 @@ class Either(Monad):
         """
         return fb(self.get()) if self.is_right() else fa(self.get())
 
-    def contains(self, elem):
-        """
-        Checks if any of this monad's inner values is equivalent to `elem`.
-
-        Args:
-            elem (T): the element
-
-        Returns:
-            bool: True if any of this monad's inner values is equivalent to `elem`
-        """
-        return self.exists(lambda x: elem == x)
-
-    def exists(self, p):
-        """
-        Checks if the predicate is `True` for any of this monad's inner values .
-
-        Args:
-            p (Callable[[T],bool]): the predicate
-
-        Returns:
-            bool: True if the predicate is `True` for any of this monad's inner values
-        """
-        return self.filter_or_else(p, Left('No match found.')).is_right()
-
     def filter_or_else(self, p, zero):
         """
         Filters this monad by applying the predicate `p` to the monad's inner value.
@@ -108,18 +82,32 @@ class Either(Monad):
         """
         return f(self.get()) if self.is_right() else self
 
-    def forall(self, p):
+    def fold_left(self, b, f):
         """
-        Checks if the predicate is `True` for all of this monad's inner values or the monad is empty.
+        Performs left-associated fold using `f`. Uses eager evaluation.
 
         Args:
-            p (Callable[[T],bool]): the predicate
+            b (B): the initial value
+            f (Callable[[B,A],B]): the function to fold with
 
         Returns:
-            bool: True if the predicate is True for all of this monad's inner values or the monad is empty,
-            False otherwise
+            B: the result of folding
         """
-        return self.is_left() or p(self.get())
+        return f(b, self.get()) if self.is_right() else b
+
+    def fold_right(self, lb, f):
+        """
+        Performs left-associated fold using `f`. Uses lazy evaluation, requiring type `Eval[B]`
+        for initial value and accumulation results.
+
+        Args:
+            lb (Eval[B]): the lazily-evaluated initial value
+            f (Callable[[A,Eval[B]],Eval[B]]): the function to fold with
+
+        Returns:
+            Eval[B]: the result of folding
+        """
+        return f(self.get(), lb) if self.is_right() else lb
 
     def get(self):
         """
@@ -191,24 +179,6 @@ class Either(Monad):
         """
         return Left(self.get()) if self.is_right() else Right(self.get())
 
-    def to_list(self):
-        """
-        Converts the `Either` into a python list.
-
-        Returns:
-            List[B]: the resulting python list
-        """
-        return [self.get(), ] if self.is_right() else []
-
-    def to_mlist(self):
-        """
-        Converts the `Either` into a `List` monad.
-
-        Returns:
-            List[B]: the resulting List monad
-        """
-        return List(*self.to_list())
-
     def to_option(self):
         """
         Converts the `Either` into `Some` if an instance of `Right` and `Nothing` if an instance of `Left`.
@@ -216,6 +186,7 @@ class Either(Monad):
         Returns:
             Option[B]: the resulting `Option`
         """
+        from genmonads.option import Nothing, Some
         return Some(self.get()) if self.is_right() else Nothing()
 
     def to_try(self, ex):
@@ -226,6 +197,7 @@ class Either(Monad):
         Returns:
             Try[B]: the resulting `Try`
         """
+        from genmonads.mtry import Failure, Success
         return Success(self.get()) if self.is_right() else Failure(ex)
 
 
@@ -314,15 +286,20 @@ def right(value):
     return Right(value)
 
 
+# noinspection PyTypeChecker
 def main():
+    from genmonads.monad import mfor
+
     print(mfor(x + y
                for x in right(2)
                for y in right(5)))
 
+    # noinspection PyTypeChecker
     def make_gen():
         for x in right(4):
             for y in left('oops'):
                 yield x - y
+
     print(mfor(make_gen()))
 
     print(right(5) >> (lambda x: right(x * 2)))

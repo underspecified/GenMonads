@@ -3,9 +3,9 @@ import sys
 
 from pony.orm.decompiling import decompile
 
-from genmonads.gettable import *
-from genmonads.flat_map import *
-from genmonads.functor import *
+from genmonads.flat_map import FlatMap
+from genmonads.functor import Functor
+from genmonads.gettable import Gettable
 from genmonads.monadtrans import ast2src
 
 __all__ = ['Monad', 'do', 'mfor']

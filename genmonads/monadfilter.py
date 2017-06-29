@@ -1,8 +1,8 @@
 # noinspection PyUnresolvedReferences
 import sys
 
-from genmonads.monad import *
-from genmonads.tailrec import *
+from genmonads.monad import Monad
+from genmonads.tailrec import trampoline
 
 __all__ = ['MonadFilter', 'mfor', 'do']
 

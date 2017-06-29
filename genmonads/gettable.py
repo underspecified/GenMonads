@@ -1,4 +1,4 @@
-from genmonads.match import *
+import genmonads.match as match
 
 __all__ = ['Gettable', 'Wildcard', 'is_wildcard', 'match', 'matches', '_']
 
@@ -43,6 +43,7 @@ class Gettable:
         """
         return self.get_or_else(None)
 
+    # noinspection PyMethodMayBeStatic
     def is_gettable(self):
         """
         Returns true if this type class implements the `get()` method.
@@ -59,6 +60,7 @@ class Gettable:
         match is found, returns the results from calling the associated action on `x`'s inner value. Wildcard matches
         (`_`) are supported in both the type class and inner values.
 
+        >>> from genmonads.match import _
         >>> from genmonads.option import Some, Nothing, option
         >>> x = option(5)
         >>> x.match({
@@ -79,7 +81,7 @@ class Gettable:
         Returns:
             Union[B,None]: the result of calling the matched action on `x`'s inner value or `None` if no match is found
         """
-        return match(self, conditions)
+        return match.match(self, conditions)
 
     def matches(self, other):
         """
@@ -91,7 +93,7 @@ class Gettable:
         Returns:
             bool: True if `self` matches `other`, False otherwise
         """
-        return matches(self, other)
+        return match.matches(self, other)
 
     def unpack(self):
         """

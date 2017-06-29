@@ -12,7 +12,7 @@ class MonadTranslator(PythonTranslator):
 
     For example, consider the following generator:
 
-    >>> from genmonads.Option import *
+    >>> from genmonads.option import *
     >>> print(mfor(x + y
               for x in option(2)
               if x < 10

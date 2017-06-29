@@ -1,10 +1,10 @@
-from genmonads.functor import *
-from genmonads.tailrec import *
+import genmonads.functor as functor
+import genmonads.tailrec as tailrec
 
 __all__ = ['FlatMap', ]
 
 
-class FlatMap(Functor):
+class FlatMap(functor.Functor):
     """
     A type class for that implements the `flat_map()` function.
     """
@@ -125,4 +125,4 @@ class FlatMap(Functor):
             e = fa.get()
             a2 = e.get()
             return fa.pure(a2) if e.is_right() else lambda: go(a2)
-        return trampoline(go, a)
+        return tailrec.trampoline(go, a)

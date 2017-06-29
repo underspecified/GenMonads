@@ -1,11 +1,10 @@
 from functools import reduce
 
-from genmonads.monad import *
-from genmonads.mtry import *
-from genmonads.tailrec import *
-from genmonads.util import *
+from genmonads.monad import Monad
+from genmonads.tailrec import trampoline
+from genmonads.util import is_thunk
 
-__all__ = ['Eval', 'always', 'later', 'now']
+__all__ = ['Always', 'Eval', 'Later', 'Now', 'always', 'later', 'now']
 
 
 class Eval(Monad):
@@ -169,6 +168,7 @@ class Eval(Monad):
         return Now(value)
 
     def to_mtry(self):
+        from genmonads.mtry import mtry
         return mtry(lambda: self.get())
 
     def to_option(self):
@@ -180,6 +180,7 @@ class Now(Eval):
     """
     A monad representing an eager computation that is evaluated once and memoized.
     """
+
     def __init__(self, value):
         self._value = value
 
@@ -219,6 +220,7 @@ class Later(Eval):
     It is roughly equivalent to a lazy value in languages like Scala and Haskell.
     Upon its evaluation, the closure containing the computation will be cleared.
     """
+
     def __init__(self, thunk):
         self._thunk = thunk
         self._value = None
@@ -445,6 +447,8 @@ class Compute(Eval):
 
 
 def main():
+    from genmonads.monad import mfor
+
     print(now(2))
     print(now(lambda: 3))
 
@@ -474,15 +478,15 @@ def main():
 
     n = 1000
     print(reduce(lambda x, y: x * y,
-                 range(1, n+1),
+                 range(1, n + 1),
                  1))
     print(reduce(lambda x, y: x.flat_map(lambda xx: later(lambda: xx * y)),
-                 range(1, n+1),
+                 range(1, n + 1),
                  later(lambda: 1))
           .get())
     from genmonads.option import option
     print(reduce(lambda x, y: x.flat_map(lambda xx: option(xx * y)),
-                 range(1, n+1),
+                 range(1, n + 1),
                  option(1))
           .get())
 

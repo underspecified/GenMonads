@@ -1,7 +1,4 @@
-from genmonads.mlist import *
-from genmonads.mtry import *
-from genmonads.option import *
-from genmonads.monad import *
+from genmonads.monad import Monad
 
 __all__ = ['Identity', 'identity']
 
@@ -83,6 +80,7 @@ class Identity(Monad):
     def is_empty(self):
         return not self.is_gettable()
 
+    # noinspection PyMethodMayBeStatic
     def is_gettable(self):
         return True
 
@@ -118,6 +116,7 @@ class Identity(Monad):
         Returns:
             List[A]: the resulting List monad
         """
+        from genmonads.mlist import List
         return List(*self.to_list())
 
     def to_mtry(self):
@@ -125,8 +124,9 @@ class Identity(Monad):
         Converts the `Identity` into a `Try` monad.
 
         Returns:
-            Self[A]: the resulting Try monad
+            Try[A]: the resulting Try monad
         """
+        from genmonads.mtry import Success
         return Success(self.get())
 
     def to_option(self):
@@ -134,8 +134,9 @@ class Identity(Monad):
         Converts the `Identity` into a `Option` monad.
 
         Returns:
-            Self[A]: the resulting Option monad
+            Option[A]: the resulting Option monad
         """
+        from genmonads.option import Some
         return Some(self.get())
 
 
@@ -153,6 +154,9 @@ def identity(value):
 
 
 def main():
+    from genmonads.monad import mfor
+    from genmonads.mtry import mtry
+
     print(mfor(x + y
                for x in identity(2)
                for y in identity(5)))
@@ -161,11 +165,13 @@ def main():
         for x in identity(4):
             for y in identity(10):
                 yield x - y
+
     print(mfor(make_gen()))
 
     print(identity(5) >> (lambda x: identity(x * 2)))
 
     print(mtry(lambda: identity(None).map(lambda x: x * 2)))
+
 
 if __name__ == '__main__':
     main()

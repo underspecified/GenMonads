@@ -1,10 +1,10 @@
-from genmonads.mlist import *
-from genmonads.monadfilter import *
+from genmonads.foldable import Foldable
+from genmonads.monadfilter import MonadFilter
 
 __all__ = ['Nothing', 'Option', 'Some', 'nothing', 'option', 'some']
 
 
-class Option(MonadFilter):
+class Option(Foldable, MonadFilter):
     """
     A type class that represents an optional value.
 
@@ -79,6 +79,33 @@ class Option(MonadFilter):
         """
         return f(self.get()) if self.is_defined() else self
 
+    def fold_left(self, b, f):
+        """
+        Performs left-associated fold using `f`. Uses eager evaluation.
+
+        Args:
+            b (B): the initial value
+            f (Callable[[B,A],B]): the function to fold with
+
+        Returns:
+            B: the result of folding
+        """
+        return f(b, self.get()) if self.is_defined() else b
+
+    def fold_right(self, lb, f):
+        """
+        Performs left-associated fold using `f`. Uses lazy evaluation, requiring type `Eval[B]`
+        for initial value and accumulation results.
+
+        Args:
+            lb (Eval[B]): the lazily-evaluated initial value
+            f (Callable[[A,Eval[B]],Eval[B]]): the function to fold with
+
+        Returns:
+            Eval[B]: the result of folding
+        """
+        return f(self.get(), lb) if self.is_defined() else lb
+
     def get(self):
         """
         Returns the `Gettable`'s inner value.
@@ -128,6 +155,7 @@ class Option(MonadFilter):
         Returns:
             List[A]: the resulting List monad
         """
+        from genmonads.mlist import List
         return List(*self.to_list())
 
 
@@ -225,6 +253,7 @@ class Nothing(Option):
         """
         raise ValueError("Tried to access the non-existent inner value of a Nothing instance")
 
+    # noinspection PyMethodMayBeStatic
     def unpack(self):
         return ()
 
@@ -240,6 +269,8 @@ def nothing():
 
 
 def main():
+    from genmonads.monadfilter import mfor
+
     print(mfor(x + y
                for x in option(2)
                if x < 10
@@ -252,11 +283,13 @@ def main():
                 for y in option(10):
                     if y % 2 == 0:
                         yield x - y
+
     print(mfor(make_gen()))
 
     print(option(5) >> (lambda x: option(x * 2)))
 
     print(option(None).map(lambda x: x * 2))
+
 
 if __name__ == '__main__':
     main()
