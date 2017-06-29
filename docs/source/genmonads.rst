@@ -28,6 +28,14 @@ genmonads.flat_map module
     :undoc-members:
     :show-inheritance:
 
+genmonads.foldable module
+-------------------------
+
+.. automodule:: genmonads.foldable
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 genmonads.functor module
 ------------------------
 
