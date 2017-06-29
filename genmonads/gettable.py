@@ -43,16 +43,6 @@ class Gettable:
         """
         return self.get_or_else(None)
 
-    def forall(self, p):
-        """
-        Checks if this type class either does not implement the `get()` method or predicate `p` is true on its
-        inner value.
-
-        Returns:
-            bool: `True` if `get()` is not implemented or predicate `p` is true on its inner value, `False` otherwise
-        """
-        return (not self.is_gettable()) or p(self.get())
-
     def is_gettable(self):
         """
         Returns true if this type class implements the `get()` method.
@@ -80,7 +70,7 @@ class Gettable:
         >>>         lambda: print("Nothing() matches:", x),
         >>>     _:
         >>>         lambda: print("Fallthrough wildcard matches:", x),
-        >>>})
+        >>> })
         Some(_) matches Some(5): 5
 
         Args:

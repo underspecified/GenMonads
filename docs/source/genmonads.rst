@@ -4,6 +4,62 @@ genmonads package
 Submodules
 ----------
 
+genmonads.either module
+-----------------------
+
+.. automodule:: genmonads.either
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+genmonads.eval module
+---------------------
+
+.. automodule:: genmonads.eval
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+genmonads.flat_map module
+-------------------------
+
+.. automodule:: genmonads.flat_map
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+genmonads.functor module
+------------------------
+
+.. automodule:: genmonads.functor
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+genmonads.gettable module
+-------------------------
+
+.. automodule:: genmonads.gettable
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+genmonads.identity module
+-------------------------
+
+.. automodule:: genmonads.identity
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+genmonads.match module
+----------------------
+
+.. automodule:: genmonads.match
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 genmonads.mlist module
 ----------------------
 
@@ -56,6 +112,30 @@ genmonads.option module
 -----------------------
 
 .. automodule:: genmonads.option
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+genmonads.semigroup module
+--------------------------
+
+.. automodule:: genmonads.semigroup
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+genmonads.tailrec module
+------------------------
+
+.. automodule:: genmonads.tailrec
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+genmonads.util module
+---------------------
+
+.. automodule:: genmonads.util
     :members:
     :undoc-members:
     :show-inheritance:

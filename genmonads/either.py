@@ -43,18 +43,62 @@ class Either(Monad):
         """
         return 'Either'
 
+    def cata(self, fa, fb):
+        """
+        Transforms an `Either[A,B]` instance by applying `fa` to the inner value of instances of Left[A],
+        and `fb` to the inner value of instance of Right[B].
+
+        Args:
+            fa (Callable[[A],C): the function to apply to instances of `Left[A]`
+            fb (Callable[[B],C): the function to apply to instances of `Right[B]`
+
+        Returns:
+            C: the resulting `C` instance
+        """
+        return fb(self.get()) if self.is_right() else fa(self.get())
+
     def contains(self, elem):
-        return self.exists(lambda b: b == elem)
+        """
+        Checks if any of this monad's inner values is equivalent to `elem`.
+
+        Args:
+            elem (T): the element
+
+        Returns:
+            bool: True if any of this monad's inner values is equivalent to `elem`
+        """
+        return self.exists(lambda x: elem == x)
 
     def exists(self, p):
-        return True if self.is_right() and p(self.get()) else False
+        """
+        Checks if the predicate is `True` for any of this monad's inner values .
+
+        Args:
+            p (Callable[[T],bool]): the predicate
+
+        Returns:
+            bool: True if the predicate is `True` for any of this monad's inner values
+        """
+        return self.filter_or_else(p, Left('No match found.')).is_right()
 
     def filter_or_else(self, p, zero):
+        """
+        Filters this monad by applying the predicate `p` to the monad's inner value.
+        Returns this monad if the predicate is `True`, `zero` otherwise.
+
+        Args:
+            p (Callable[[T],bool]): the predicate
+            zero (Either[A,B]): the value to return if `filter()` fails
+
+        Returns:
+            Either[A,B]: this instance if the predicate is `True` when applied to its inner value,
+            otherwise `zero`
+        """
         return self if self.exists(p) else Left(zero)
 
     def flat_map(self, f):
         """
-        Applies a function to the inner value of a monad.
+        Applies a function to the inner value of this monad.
 
         Args:
             f (Callable[[B],Either[AA,BB]]): the function to apply
@@ -64,11 +108,18 @@ class Either(Monad):
         """
         return f(self.get()) if self.is_right() else self
 
-    def fold(self, fa, fb):
-        return Right(fb(self.get())) if self.is_right() else Left(fa(self.get()))
-
     def forall(self, p):
-        return True if self.is_left() or p(self.get()) else False
+        """
+        Checks if the predicate is `True` for all of this monad's inner values or the monad is empty.
+
+        Args:
+            p (Callable[[T],bool]): the predicate
+
+        Returns:
+            bool: True if the predicate is True for all of this monad's inner values or the monad is empty,
+            False otherwise
+        """
+        return self.is_left() or p(self.get())
 
     def get(self):
         """

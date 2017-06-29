@@ -45,6 +45,20 @@ class Option(MonadFilter):
         """
         return 'Option'
 
+    def cata(self, f, default):
+        """
+        Transforms an `Option[A]` instance by applying `f` to the inner value of instances of `Some[A]`,
+        and returning `default` in the case of `Nothing`.
+
+        Args:
+            f (Callable[[A],B): the function to apply to instances of `Left[A]`
+            default (B): the function to apply to instances of `Right[B]`
+
+        Returns:
+            B: the resulting `B` instance
+        """
+        return f(self.get()) if self.is_defined() else default
+
     @staticmethod
     def empty():
         """
@@ -64,9 +78,6 @@ class Option(MonadFilter):
             Option[C]: the resulting monad
         """
         return f(self.get()) if self.is_defined() else self
-
-    def fold(self, default, f):
-        return Some(f(self.get())) if self.is_defined() else default
 
     def get(self):
         """

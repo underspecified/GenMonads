@@ -11,7 +11,7 @@ from genmonads.monadtrans import ast2src
 __all__ = ['Monad', 'do', 'mfor']
 
 
-class Monad(Gettable, FlatMap, Functor):
+class Monad(FlatMap, Functor, Gettable):
     """
     A base class for representing monads.
 

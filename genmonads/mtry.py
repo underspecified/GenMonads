@@ -49,6 +49,20 @@ class Try(MonadFilter):
         """
         return 'Try'
 
+    def cata(self, fa, fb):
+        """
+        Transforms an `Either[A,B]` instance by applying `fa` to the inner value of instances of Left[A],
+        and `fb` to the inner value of instance of Right[B].
+
+        Args:
+            fa (Callable[[A],C): the function to apply to instances of `Left[A]`
+            fb (Callable[[B],C): the function to apply to instances of `Right[B]`
+
+        Returns:
+            C: the resulting `C` instance
+        """
+        return fb(self.get()) if self.is_success() else fa(self.get())
+
     @staticmethod
     def empty():
         """
@@ -68,9 +82,6 @@ class Try(MonadFilter):
             Try[C]: the resulting monad
         """
         return f(self.get()) if self.is_success() else self
-
-    def fold(self, fa, fb):
-        return Success(fb(self.get())) if self.is_success() else Failure(fa(self.get()))
 
     def get(self):
         """

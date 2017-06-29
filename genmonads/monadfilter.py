@@ -52,7 +52,7 @@ class MonadFilter(Monad):
         Returns:
             bool: True if the predicate is `True` for any of this monad's inner values
         """
-        return True if self.filter(p) else False
+        return self.filter(p).non_empty()
 
     def filter(self, p):
         """
@@ -94,6 +94,19 @@ class MonadFilter(Monad):
         """
         raise NotImplementedError
 
+    def forall(self, p):
+        """
+        Checks if the predicate is `True` for all of this monad's inner values or the monad is empty.
+
+        Args:
+            p (Callable[[T],bool]): the predicate
+
+        Returns:
+            bool: True if the predicate is True for all of this monad's inner values or the monad is empty,
+            False otherwise
+        """
+        return self.is_empty() or p(self.get())
+
     def get(self):
         """
         Returns the `Monad`'s inner value.
@@ -103,9 +116,21 @@ class MonadFilter(Monad):
         raise NotImplementedError
 
     def is_empty(self):
+        """
+        Checks if the monad is equal to the empty value for its type class.
+
+        Returns:
+            bool: True if the monad is empty, False otherwise
+        """
         return self == self.empty()
 
     def non_empty(self):
+        """
+        Checks if the monad is unequal to the empty value for its type class.
+
+        Returns:
+            bool: True if the monad is non-empty, False otherwise
+        """
         return not self.is_empty()
 
     @staticmethod

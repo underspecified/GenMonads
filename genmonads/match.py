@@ -55,7 +55,7 @@ def match(x, conditions):
     >>>         lambda: print("Nothing() matches:", x),
     >>>     _:
     >>>         lambda: print("Fallthrough wildcard matches:", x),
-    >>>})
+    >>> })
     Some(_) matches Some(5): 5
 
     Args:
