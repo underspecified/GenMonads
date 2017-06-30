@@ -10,8 +10,8 @@ class Try(Foldable, Monad):
     """
     A type that represents a failable computation.
 
-    Instances of type `Try[T]` are either instances of `Success[T]` or `Failure[T]`. This monad uses eager evaluation.
-    For lazy computations, see the `Task` monad (under construction).
+    Instances of type `Try[T]` are either instances of `Success[T]` or `Failure[T]`.
+    This monad uses eager evaluation. For lazy computations, see the `Eval` monad.
 
     Instances of `Try[T]` are constructed by passing a computation wrapped in a thunk (i.e. a lambda expression
     with no arguments) to either the `mtry()` or `Try.pure()` or functions. The thunk is evaluated immediately,

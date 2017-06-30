@@ -1,20 +1,7 @@
-from types import LambdaType
+from types import GeneratorType, LambdaType
 import inspect
 
 __all__ = ['arity', 'is_lambda', 'is_thunk']
-
-
-def is_lambda(f):
-    """
-    Checks if function `f` is a lambda expression.
-    
-    Args:
-        f (Callable[A,B]): the function to check
-
-    Returns:
-        bool: True if `f` is a lambda expression, False otherwise
-    """
-    return isinstance(f, LambdaType)
 
 
 def arity(f):
@@ -29,6 +16,32 @@ def arity(f):
     """
     sig = inspect.signature(f)
     return len(sig.parameters)
+
+
+def is_generator(it):
+    """
+    Checks if iterator `it` is a generator.
+
+    Args:
+        it (Iterable[T]): the function to check
+
+    Returns:
+        bool: True if `it` is a generator, False otherwise
+    """
+    return isinstance(it, GeneratorType)
+
+
+def is_lambda(f):
+    """
+    Checks if function `f` is a lambda expression.
+    
+    Args:
+        f (Callable[A,B]): the function to check
+
+    Returns:
+        bool: True if `f` is a lambda expression, False otherwise
+    """
+    return isinstance(f, LambdaType)
 
 
 def is_thunk(f):

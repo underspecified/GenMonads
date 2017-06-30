@@ -269,7 +269,7 @@ def nothing():
 
 
 def main():
-    from genmonads.monadfilter import mfor
+    from genmonads.monad import mfor
 
     print(mfor(x + y
                for x in option(2)

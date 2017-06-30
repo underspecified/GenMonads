@@ -84,10 +84,9 @@ class NonEmptyList(Foldable, Monad):
         Returns:
             List[B]: the resulting monad
         """
-        if self.is_gettable() and all(map(lambda x: hasattr(x, 'to_nel'), self.get())):
-            return NonEmptyList.pure(*[v for vs in self.map(f).get() for v in vs.to_nel().get()])
-        else:
-            return self
+        return NonEmptyList.pure(*[v
+                                   for vs in [f(v1) for v1 in self.unpack()]
+                                   for v in vs.unpack()])
 
     def fold_left(self, b, f):
         """
@@ -223,6 +222,9 @@ class NonEmptyList(Foldable, Monad):
             NonEmptyList[T]: the resulting nel
         """
         return self
+
+    def unpack(self):
+        return tuple(self.get())
 
 
 def nel(*values):

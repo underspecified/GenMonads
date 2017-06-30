@@ -4,7 +4,7 @@ import sys
 from genmonads.monad import Monad
 from genmonads.tailrec import trampoline
 
-__all__ = ['MonadFilter', 'mfor', 'do']
+__all__ = ['MonadFilter', ]
 
 
 class MonadFilter(Monad):

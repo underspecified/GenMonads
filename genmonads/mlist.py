@@ -69,10 +69,9 @@ class List(Foldable, MonadFilter):
         Returns:
             List[B]: the resulting monad
         """
-        if self.is_gettable() and all(map(lambda x: hasattr(x, 'to_mlist'), self.get())):
-            return List.pure(*[v for vs in self.map(f).get() for v in vs.to_mlist().get()])
-        else:
-            return self
+        return List.pure(*[v
+                           for vs in [f(v1) for v1 in self.unpack()]
+                           for v in vs.unpack()])
 
     def fold_left(self, b, f):
         """
@@ -162,18 +161,6 @@ class List(Foldable, MonadFilter):
         from genmonads.mtry import mtry
         return mtry(lambda: self.last()).to_option()
 
-    def map(self, f):
-        """
-        Applies a function to the inner value of an `List`.
-
-        Args:
-            f (Callable[[A],B]): the function to apply
-
-        Returns:
-            List[B]: the resulting List
-        """
-        return List.pure(*(f(v) for v in self.get()))
-
     def mtail(self):
         """
         Returns the tail of the list as a monadic List.
@@ -228,24 +215,6 @@ class List(Foldable, MonadFilter):
             return fa.pure(a2) if e.is_right() else lambda: go(a2)
 
         return trampoline(go, a)
-
-    def to_list(self):
-        """
-        Converts the `List` into a python list.
-
-        Returns:
-            typing.List[A]: the resulting python list
-        """
-        return self.get()
-
-    def to_mlist(self):
-        """
-        Converts the `List` into a `List` monad.
-
-        Returns:
-            List[A]: the resulting `List` monad
-        """
-        return self
 
     def to_nel(self):
         """
@@ -306,31 +275,6 @@ class Nil(List):
         """
         return 'Nil'
 
-    def flatten(self):
-        """
-        Flattens nested instances of `List`.
-
-        If the inner values can be converted to an instance of `List` by having an implementation of
-        `to_mlist()`, the inner values will be converted to `List` before flattening. This allows for
-        flattening of `List[Option[T]]` into `List[T]`, as is done in Scala.
-
-        Returns:
-            List[T]: the flattened monad
-        """
-        return self
-
-    def map(self, f):
-        """
-        Applies a function to the inner value of an `List`.
-
-        Args:
-            f (Callable[[A],B]): the function to apply
-
-        Returns:
-            List[B]: the resulting `List`
-        """
-        return self
-
 
 def nil():
     """
@@ -343,7 +287,7 @@ def nil():
 
 
 def main():
-    from genmonads.monadfilter import mfor
+    from genmonads.monad import mfor
 
     print(mlist(2, 3).flat_map(lambda x: List.pure(x + 5)))
 

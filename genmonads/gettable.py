@@ -1,6 +1,6 @@
-import genmonads.match as match
+from genmonads.match import match, matches
 
-__all__ = ['Gettable', 'Wildcard', 'is_wildcard', 'match', 'matches', '_']
+__all__ = ['Gettable', ]
 
 
 class Gettable:
@@ -81,7 +81,7 @@ class Gettable:
         Returns:
             Union[B,None]: the result of calling the matched action on `x`'s inner value or `None` if no match is found
         """
-        return match.match(self, conditions)
+        return match(self, conditions)
 
     def matches(self, other):
         """
@@ -93,7 +93,7 @@ class Gettable:
         Returns:
             bool: True if `self` matches `other`, False otherwise
         """
-        return match.matches(self, other)
+        return matches(self, other)
 
     def unpack(self):
         """
