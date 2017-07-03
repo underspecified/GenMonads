@@ -1,30 +1,33 @@
+import itertools
+
+from genmonads.eval import Now, defer
 from genmonads.foldable import Foldable
 from genmonads.monadfilter import MonadFilter
 from genmonads.tailrec import trampoline
 
-__all__ = ['List', 'Nil', 'mlist', 'nil']
+__all__ = ['Stream', 'stream']
 
 
-class List(Foldable, MonadFilter):
+class Stream(Foldable, MonadFilter):
     """
-    A type that represents list of values of the same type.
+    A type that represents a memoized stream of values.
 
-    Instances are either of type `List[T]` or `Nil[T]`.
+    Instances are either of type `Stream[T]` or `Nil[T]`.
 
     Monadic computing is supported with `map()`, `flat_map()`, `flatten()`, and `filter()` functions,
     and for-comprehensions can be formed by evaluating generators over monads with the `mfor()` function.
     """
 
-    def __init__(self, *values):
-        self._value = list(values)
+    def __init__(self, gen):
+        self._value = gen
 
     def __eq__(self, other):
         """
         Args:
-            other (List[T]): the value to compare against
+            other (Stream[T]): the value to compare against
 
         Returns:
-            bool: `True` if other is an instance of `List` and inner values are equivalent, `False` otherwise
+            bool: `True` if other is an instance of `Stream` and inner values are equivalent, `False` otherwise
         """
         if type(self) == type(other):
             return self.get_or_none() == other.get_or_none()
@@ -37,41 +40,41 @@ class List(Foldable, MonadFilter):
         Returns:
             str: the monad's name
         """
-        return 'List'
+        return 'Stream'
 
     def __repr__(self):
         """
         Returns:
-            str: a string representation of the List
+            str: a string representation of the Stream
         """
-        return 'List(%s)' % ', '.join(repr(v) for v in self.get())
+        return 'Stream(%s)' % (', '.join(repr(v) for v in self.get()) if self._value is not None else str(self._gen))
 
     @staticmethod
     def empty():
         """
         Returns:
-            List[T]: `Nil`, the empty instance for this `MonadFilter`
+            Stream[T]: the empty instance for this `MonadFilter`
         """
-        return Nil()
+        return Stream((x for x in []))
 
     def flat_map(self, f):
         """
         Applies a function that produces an Monad from unwrapped values to an Monad's inner value and flattens the
         nested result.
 
-        If the inner values can be converted to an instance of `List` by having an implementation of
-        `to_mlist()`, the inner values will be converted to `List` before flattening. This allows for
-        flattening of `List[Option[T]]` into `List[T]`, as is done in Scala.
+        If the inner values can be converted to an instance of `Stream` by having an implementation of
+        `to_mlist()`, the inner values will be converted to `Stream` before flattening. This allows for
+        flattening of `Stream[Option[T]]` into `Stream[T]`, as is done in Scala.
 
         Args:
-            f (Callable[[A],List[B]]): the function to apply
+            f (Callable[[A],Stream[B]]): the function to apply
 
         Returns:
-            List[B]: the resulting monad
+            Stream[B]: the resulting monad
         """
-        return List.pure(*[v
-                           for vs in [f(v1) for v1 in self.unpack()]
-                           for v in vs.unpack()])
+        return Stream.from_gen((v
+                                for vs in (f(v1) for v1 in self.unpack())
+                                for v in vs.unpack()))
 
     def fold_left(self, b, f):
         """
@@ -90,7 +93,7 @@ class List(Foldable, MonadFilter):
 
     def fold_right(self, lb, f):
         """
-        Performs left-associated fold using `f`. Uses lazy evaluation, requiring type `Eval[B]`
+        Performs right-associated fold using `f`. Uses lazy evaluation, requiring type `Eval[B]`
         for initial value and accumulation results.
 
         Args:
@@ -100,18 +103,21 @@ class List(Foldable, MonadFilter):
         Returns:
             Eval[B]: the result of folding
         """
-        for a in reversed(self.get()):
-            lb = f(a, lb)
-        return lb
+        return Now(self).flat_map(lambda s: lb if s.is_empty() else f(s.head(), defer(s.tail().fold_right(lb, f))))
+
+    @staticmethod
+    def from_gen(gen):
+        return Stream(gen)
 
     def get(self):
         """
-        Returns the `List`'s inner value.
+        Returns the `Stream`'s inner value.
 
         Returns:
             list[T]: the inner value
         """
-        return self._value
+        value, self._value = itertools.tee(self._value)
+        return [x for x in value]
 
     def head(self):
         """
@@ -123,7 +129,7 @@ class List(Foldable, MonadFilter):
         Throws:
             IndexError: if the list is empty
         """
-        return self.get()[0]
+        return Stream.empty() if self.is_empty()
 
     def head_option(self):
         """
@@ -134,6 +140,15 @@ class List(Foldable, MonadFilter):
         """
         from genmonads.mtry import mtry
         return mtry(lambda: self.head).to_option()
+
+    # noinspection PyUnresolvedReferences
+    def is_empty(self):
+        from genmonads.mtry import mtry
+        if self._value is not None and len(self._value) > 0:
+            return True
+        else:
+            test, self._gen = itertools.tee(self._gen)
+            return mtry(lambda: next(test)).is_failure()
 
     # noinspection PyMethodMayBeStatic
     def is_gettable(self):
@@ -161,37 +176,59 @@ class List(Foldable, MonadFilter):
         from genmonads.mtry import mtry
         return mtry(lambda: self.last()).to_option()
 
-    def mtail(self):
+    def map(self, f):
         """
-        Returns the tail of the list as a monadic List.
+        Applies a function to the inner value of a monad.
+
+        Args:
+            f (Callable[[A],B]): the function to apply
 
         Returns:
-            List[T]: the rest of the nel
+            Monad[B]: the resulting monad
+        """
+        return Stream.from_gen((x for x in self._gen))
+
+    def mtail_option(self):
+        """
+        Returns the tail of the list as an option.
+
+        Returns:
+            Option[List[T]]: the rest of the stream
         """
         from genmonads.mtry import mtry
-        return mtry(lambda: self.tail()).to_option().to_mlist()
+        return mtry(lambda: self.tail().to_mlist()).to_option()
 
     @staticmethod
     def pure(*values):
         """
-        Injects a value into the `List` monad.
+        Injects a value into the `Stream` monad.
 
         Args:
             values (T): the values
 
         Returns:
-            List[T]: the resulting `List`
+            Stream[T]: the resulting `Stream`
         """
-        return List(*values) if values else Nil()
+        return Stream((x for x in values))
 
     def tail(self):
         """
         Returns the tail of the list.
 
         Returns:
-            typing.List[T]: the tail of the list
+            typing.Stream[T]: the tail of the list
         """
         return self.get()[1:]
+
+    def tail_option(self):
+        """
+        Returns the tail of the list as an option.
+
+        Returns:
+            Option[List[T]]: the rest of the stream
+        """
+        from genmonads.mtry import mtry
+        return mtry(lambda: self.tail()).to_option()
 
     # noinspection PyPep8Naming
     @staticmethod
@@ -216,101 +253,59 @@ class List(Foldable, MonadFilter):
 
         return trampoline(go, a)
 
-    def to_nel(self):
-        """
-        Tries to convert the `List` into a `NonEmptyList` monad.
-
-        Returns:
-            Option[NonEmptyList[A]]: the `NonEmptyList` wrapped in `Some` if the `List` is non-empty,
-            `Nothing` otherwise
-        """
-        from genmonads.mtry import mtry
-        from genmonads.nel import nel
-        return mtry(lambda: nel(*self.get())).to_option()
-
     def unpack(self):
         return tuple(self.get())
 
 
-def mlist(*values):
+def stream(*values):
     """
-    Constructs a `List` instance from a tuple of values.
+    Constructs a `Stream` instance from a tuple of values.
 
     Args:
         values (T): the values
 
     Returns:
-        stream.List[T]: the resulting `List`
+        stream.Stream[T]: the resulting `Stream`
     """
-    return List.pure(*values)
-
-
-# noinspection PyMissingConstructor,PyPep8Naming
-class Nil(List):
-    """
-    A type that represents the empty list.
-    """
-
-    # noinspection PyInitNewSignature
-    def __init__(self):
-        self._value = []
-
-    def __eq__(self, other):
-        """
-        Args:
-            other (List[T]): the value to compare against
-
-        Returns:
-            bool: `True` if other is instance of `Nil`, `False` otherwise
-        """
-        if isinstance(other, Nil):
-            return True
-        else:
-            return False
-
-    def __repr__(self):
-        """
-        Returns:
-            str: a string representation of the `List`
-        """
-        return 'Nil'
-
-
-def nil():
-    """
-    Constructs a `Nil` instance.
-
-    Returns:
-        Nil[T]: the resulting `Nil`
-    """
-    return Nil()
+    return Stream.pure(*values)
 
 
 def main():
     from genmonads.monad import mfor
+    import itertools
 
-    print(mlist(2, 3).flat_map(lambda x: List.pure(x + 5)))
+    print(stream(2, 3).flat_map(lambda x: Stream.pure(x + 5)))
 
     print(mfor(x + y
-               for x in mlist(2, 4, 6)
+               for x in stream(2, 4, 6)
                if x < 10
-               for y in mlist(5, 7, 9)
-               if y % 2 != 0))
+               for y in stream(5, 7, 9)
+               if y % 2 != 0)
+          .get())
 
     def make_gen():
-        for x in mlist(4):
+        for x in stream(4):
             if x > 2:
-                for y in mlist(10):
+                for y in stream(10):
                     if y % 2 == 0:
                         yield x - y
 
-    print(mfor(make_gen()))
+    print(mfor(make_gen())
+          .get())
 
-    print(mlist(5) >> (lambda x: mlist(x * 2)))
+    print((stream(5) >> (lambda x: stream(x * 2)))
+          .get())
 
-    print(nil().map(lambda x: x * 2))
+    print(stream().map(lambda x: x * 2)
+          .get())
 
-    print(mlist(mlist(1, 2, 3, 4, 5), mlist(5, 4, 3, 2, 1)).flat_map(lambda x: x.last_option()))
+    print(stream(stream(1, 2, 3, 4, 5), stream(5, 4, 3, 2, 1))
+          .flat_map(lambda x: x.last_option())
+          .get())
+
+    print(Stream.from_gen(itertools.count())
+          .fold_right(Now(0), lambda a, lb: lb if a == 0 else Now(1))
+          .get())
 
 
 if __name__ == '__main__':

@@ -68,7 +68,7 @@ class Foldable:
             p (Callable[[A],bool]): the predicate
 
         Returns:
-            mlist.List[A]: a list of consecutive elements at the beginning of the `Foldable` that `p` does not match
+            stream.List[A]: a list of consecutive elements at the beginning of the `Foldable` that `p` does not match
         """
         return self.fold_right(
             Now([]),
@@ -130,7 +130,7 @@ class Foldable:
 
     def fold_right(self, lb, f):
         """
-        Performs left-associated fold using `f`. Uses lazy evaluation, requiring type `Eval[B]`
+        Performs right-associated fold using `f`. Uses lazy evaluation, requiring type `Eval[B]`
         for initial value and accumulation results.
 
         Args:
