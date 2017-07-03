@@ -12,8 +12,6 @@ class Stream(Foldable, MonadFilter):
     """
     A type that represents a memoized stream of values.
 
-    Instances are either of type `Stream[T]` or `Nil[T]`.
-
     Monadic computing is supported with `map()`, `flat_map()`, `flatten()`, and `filter()` functions,
     and for-comprehensions can be formed by evaluating generators over monads with the `mfor()` function.
     """
@@ -29,10 +27,7 @@ class Stream(Foldable, MonadFilter):
         Returns:
             bool: `True` if other is an instance of `Stream` and inner values are equivalent, `False` otherwise
         """
-        if type(self) == type(other):
-            return self.get_or_none() == other.get_or_none()
-        else:
-            return False
+        return type(self) == type(other) and self._value == other._value
 
     @staticmethod
     def __mname__():
@@ -47,7 +42,7 @@ class Stream(Foldable, MonadFilter):
         Returns:
             str: a string representation of the Stream
         """
-        return 'Stream(%s)' % (', '.join(repr(v) for v in self.get()) if self._value is not None else str(self._gen))
+        return 'Stream(%s)' % str(self._value)
 
     @staticmethod
     def empty():
@@ -57,24 +52,21 @@ class Stream(Foldable, MonadFilter):
         """
         return Stream((x for x in []))
 
+    # noinspection PyProtectedMember
     def flat_map(self, f):
         """
-        Applies a function that produces an Monad from unwrapped values to an Monad's inner value and flattens the
-        nested result.
-
-        If the inner values can be converted to an instance of `Stream` by having an implementation of
-        `to_mlist()`, the inner values will be converted to `Stream` before flattening. This allows for
-        flattening of `Stream[Option[T]]` into `Stream[T]`, as is done in Scala.
+        Applies a function that produces a stream from unwrapped values to a stream's inner value
+        and flattens the nested result.
 
         Args:
             f (Callable[[A],Stream[B]]): the function to apply
 
         Returns:
-            Stream[B]: the resulting monad
+            Stream[B]: the resulting stream
         """
         return Stream.from_gen((v
-                                for vs in (f(v1) for v1 in self.unpack())
-                                for v in vs.unpack()))
+                                for vs in (f(v1) for v1 in self._value)
+                                for v in vs._value))
 
     def fold_left(self, b, f):
         """
@@ -87,8 +79,8 @@ class Stream(Foldable, MonadFilter):
         Returns:
             B: the result of folding
         """
-        for a in self.get():
-            b = f(b, a)
+        for a in self._value:
+            b = f(a, b)
         return b
 
     def fold_right(self, lb, f):
@@ -103,7 +95,13 @@ class Stream(Foldable, MonadFilter):
         Returns:
             Eval[B]: the result of folding
         """
-        return Now(self).flat_map(lambda s: lb if s.is_empty() else f(s.head(), defer(s.tail().fold_right(lb, f))))
+        def go(s):
+            if s.is_empty():
+                return lb
+            else:
+                head, tail = s.head_and_tail()
+                return f(head, defer(lambda: tail.fold_right(lb, f)))
+        return Now(self).flat_map(go)
 
     @staticmethod
     def from_gen(gen):
@@ -111,29 +109,32 @@ class Stream(Foldable, MonadFilter):
 
     def get(self):
         """
-        Returns the `Stream`'s inner value.
+        Returns the stream's inner value.
 
         Returns:
-            list[T]: the inner value
+            List[T]: the inner value
         """
         value, self._value = itertools.tee(self._value)
         return [x for x in value]
 
     def head(self):
         """
-        Returns the first item in the list.
+        Returns the first item in the stream.
 
         Returns:
             T: the first item
 
         Throws:
-            IndexError: if the list is empty
+            StopIteration: if the stream is empty
         """
-        return Stream.empty() if self.is_empty()
+        return next(self._value)
+
+    def head_and_tail(self):
+        return next(self._value), Stream(self._value)
 
     def head_option(self):
         """
-        Safely returns the first item in the list by wrapping the attempt in `Option`.
+        Safely returns the first item in the stream by wrapping the attempt in `Option`.
 
         Returns:
             Option[T]: the first item wrapped in `Some`, or `Nothing` if the list is empty
@@ -141,14 +142,11 @@ class Stream(Foldable, MonadFilter):
         from genmonads.mtry import mtry
         return mtry(lambda: self.head).to_option()
 
-    # noinspection PyUnresolvedReferences
+    # noinspection PyUnresolvedReferences,PyAttributeOutsideInit
     def is_empty(self):
         from genmonads.mtry import mtry
-        if self._value is not None and len(self._value) > 0:
-            return True
-        else:
-            test, self._gen = itertools.tee(self._gen)
-            return mtry(lambda: next(test)).is_failure()
+        test, self._value = itertools.tee(self._value)
+        return mtry(lambda: next(test)).is_failure()
 
     # noinspection PyMethodMayBeStatic
     def is_gettable(self):
@@ -156,15 +154,20 @@ class Stream(Foldable, MonadFilter):
 
     def last(self):
         """
-        Returns the last item in the list.
+        Returns the last item in the stream.
 
         Returns:
             T: the last item
 
         Throws:
-            IndexError: if the list is empty
+            StopIteration: if the stream is empty
         """
-        return self.get()[-1]
+        x = next(self._value)
+        try:
+            while True:
+                x = next(self._value)
+        except StopIteration:
+            return x
 
     def last_option(self):
         """
@@ -186,17 +189,17 @@ class Stream(Foldable, MonadFilter):
         Returns:
             Monad[B]: the resulting monad
         """
-        return Stream.from_gen((x for x in self._gen))
+        return Stream.from_gen((f(x) for x in self._value))
 
     def mtail_option(self):
         """
         Returns the tail of the list as an option.
 
         Returns:
-            Option[List[T]]: the rest of the stream
+            Option[Stream[T]]: the rest of the stream
         """
         from genmonads.mtry import mtry
-        return mtry(lambda: self.tail().to_mlist()).to_option()
+        return mtry(lambda: self.tail()).to_option()
 
     @staticmethod
     def pure(*values):
@@ -213,19 +216,23 @@ class Stream(Foldable, MonadFilter):
 
     def tail(self):
         """
-        Returns the tail of the list.
+        Returns the tail of the stream.
 
         Returns:
-            typing.Stream[T]: the tail of the list
+            Stream[T]: the tail of the list
+
+        Throws:
+            StopIteration: if the stream is empty
         """
-        return self.get()[1:]
+        next(self._value)
+        return Stream.from_gen(self._value)
 
     def tail_option(self):
         """
-        Returns the tail of the list as an option.
+        Returns the tail of the stream as an option.
 
         Returns:
-            Option[List[T]]: the rest of the stream
+            Option[Stream[T]]: the rest of the stream
         """
         from genmonads.mtry import mtry
         return mtry(lambda: self.tail()).to_option()
@@ -274,7 +281,9 @@ def main():
     from genmonads.monad import mfor
     import itertools
 
-    print(stream(2, 3).flat_map(lambda x: Stream.pure(x + 5)))
+    print(stream(2, 3)
+          .flat_map(lambda x: Stream.pure(x + 5))
+          .get())
 
     print(mfor(x + y
                for x in stream(2, 4, 6)
@@ -296,15 +305,19 @@ def main():
     print((stream(5) >> (lambda x: stream(x * 2)))
           .get())
 
-    print(stream().map(lambda x: x * 2)
+    print(stream()
+          .map(lambda x: x * 2)
           .get())
 
     print(stream(stream(1, 2, 3, 4, 5), stream(5, 4, 3, 2, 1))
-          .flat_map(lambda x: x.last_option())
+          .flat_map(lambda x: x.last_option()
+                               .map(lambda y: stream(y))
+                               .get_or_else(Stream.empty()))
           .get())
 
-    print(Stream.from_gen(itertools.count())
-          .fold_right(Now(0), lambda a, lb: lb if a == 0 else Now(1))
+    print(Stream
+          .from_gen(itertools.count())
+          .fold_right(Now(0), lambda a, lb: lb if a < 5 else Now(a))
           .get())
 
 

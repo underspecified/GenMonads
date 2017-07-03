@@ -355,12 +355,25 @@ class Call(Eval):
 
     @staticmethod
     def _loop(fa):
+        """
+        Args:
+            fa (Call[T])
+
+        Returns:
+            Call[T]
+        """
         # noinspection PyProtectedMember
         def go(_fa):
+            """
+            Args:
+                _fa (Call[T])
+            Returns:
+                Call[T]
+            """
             if _fa.is_call():
-                return lambda: go(_fa._thunk()),
+                return lambda: go(_fa._thunk())
             elif _fa.is_compute():
-                return Compute(lambda: _fa.start(), lambda s: Call._loop1(_fa.run(s))),
+                return Compute(lambda: _fa.start(), lambda s: Call._loop1(_fa.run(s)))
             else:
                 return _fa
 
@@ -368,9 +381,20 @@ class Call(Eval):
 
     @staticmethod
     def _loop1(fa):
+        """
+        Args:
+            fa (Call[T])
+
+        Returns:
+            Call[T]
+        """
         return Call._loop(fa)
 
     def get(self):
+        """
+        Returns:
+            T
+        """
         return Call._loop(self).get()
 
     def memoize(self):

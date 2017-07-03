@@ -63,14 +63,6 @@ class Try(Foldable, Monad):
         """
         return fb(self.get()) if self.is_success() else fa(self.get())
 
-    @staticmethod
-    def empty():
-        """
-        Returns:
-            Try[T]: `Failure[T]` with a `ValueError`, the empty instance for this `MonadFilter`
-        """
-        return Failure(ValueError("This Try instance is empty!"))
-
     def flat_map(self, f):
         """
         Applies a function to the inner value of a `Try`.
@@ -302,23 +294,17 @@ def main():
     from genmonads.monad import mfor
 
     print(mtry(lambda: 2)
-          .filter(lambda x: x < 10)
           .flat_map(lambda x: mtry(lambda: 5)
-                    .filter(lambda y: y % 2 != 0)
                     .map(lambda y: x + y)))
 
     print(mfor(x + y
                for x in mtry(lambda: 2)
-               if x < 10
-               for y in mtry(lambda: 5)
-               if y % 2 != 0))
+               for y in mtry(lambda: 5)))
 
     def make_gen():
         for x in mtry(lambda: 4):
-            if x > 2:
-                for y in mtry(lambda: 10):
-                    if y % 2 == 0:
-                        yield x - y
+            for y in mtry(lambda: 10):
+                yield x - y
 
     print(mfor(make_gen()))
 
