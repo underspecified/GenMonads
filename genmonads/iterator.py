@@ -45,10 +45,10 @@ class Iterator(Foldable, MonadFilter):
         return 'Iterator(%s)' % str(self._value)
 
     def drop(self, n):
-        return Iterator(itertools.islice(self._value, start=n))
+        return Iterator.from_iter(itertools.islice(self._value, start=n))
 
     def drop_while(self, p):
-        return Iterator(itertools.dropwhile(self._value, p))
+        return Iterator.from_iter(itertools.dropwhile(self._value, p))
 
     @staticmethod
     def empty():
@@ -56,10 +56,10 @@ class Iterator(Foldable, MonadFilter):
         Returns:
             Iterator[T]: the empty instance for this `MonadFilter`
         """
-        return Iterator((x for x in []))
+        return Iterator.from_iter((x for x in []))
 
     def filter(self, p):
-        return Iterator(filter(p, self._value))
+        return Iterator.from_iter(filter(p, self._value))
 
     def flat_map(self, f):
         """
@@ -88,7 +88,7 @@ class Iterator(Foldable, MonadFilter):
         it = (v
               for vs in (f(v1) for v1 in self.get())
               for v in to_iter(vs))
-        return Iterator(it)
+        return Iterator.from_iter(it)
 
     def fold_left(self, b, f):
         """
@@ -125,6 +125,10 @@ class Iterator(Foldable, MonadFilter):
                 return f(head, defer(lambda: tail.fold_right(lb, f)))
         return Now(self).flat_map(go)
 
+    @staticmethod
+    def from_iter(it):
+        return Stream(it)
+
     def get(self):
         """
         Returns the iterator's inner value.
@@ -148,7 +152,7 @@ class Iterator(Foldable, MonadFilter):
         return next(self._value)
 
     def head_and_tail(self):
-        return next(self._value), Iterator(self._value)
+        return next(self._value), Iterator.from_iter(self._value)
 
     def head_option(self):
         """
@@ -207,7 +211,7 @@ class Iterator(Foldable, MonadFilter):
         Returns:
             Monad[B]: the resulting monad
         """
-        return Iterator((f(x) for x in self._value))
+        return Iterator.from_iter((f(x) for x in self._value))
 
     def memoize(self):
         return self.to_stream()
@@ -233,7 +237,7 @@ class Iterator(Foldable, MonadFilter):
         Returns:
             Iterator[T]: the resulting `Iterator`
         """
-        return Iterator((x for x in values))
+        return Iterator.from_iter((x for x in values))
 
     def tail(self):
         """
@@ -246,7 +250,7 @@ class Iterator(Foldable, MonadFilter):
             StopIteration: if the iterator is empty
         """
         next(self._value)
-        return Iterator(self._value)
+        return Iterator.from_iter(self._value)
 
     def tail_option(self):
         """
@@ -325,6 +329,10 @@ class Stream(Iterator):
     def __repr__(self):
         return 'Stream(%s)' % ', '.join(repr(x) for x in self.get())
 
+    @staticmethod
+    def from_iter(it):
+        return Stream(it)
+
     def get(self):
         """
         Returns the iterator's inner value.
@@ -332,6 +340,7 @@ class Stream(Iterator):
         Returns:
             List[T]: the inner value
         """
+        print("Stream.get(%s)", self._it)
         if self._value is None:
             self._value = [x for x in self._it]
         return self._value
@@ -373,40 +382,35 @@ def main():
     from genmonads.monad import mfor
     import operator
 
-    print(iterator(2, 3)
-          .flat_map(lambda x: Iterator.pure(x + 5))
-          .to_stream())
+    print(stream(2, 3)
+          .flat_map(lambda x: Iterator.pure(x + 5)))
 
     # noinspection PyUnresolvedReferences
     print(mfor(x + y
-               for x in iterator(2, 4, 6)
-               if x < 10
-               for y in iterator(5, 7, 9)
-               if y % 2 != 0)
-          .to_stream())
+               for x in stream(2, 4, 6)
+               #if x < 10
+               for y in stream(5, 7, 9)
+               #if y % 2 != 0
+              ))
 
     def make_gen():
-        for x in iterator(4):
+        for x in stream(4):
             if x > 2:
-                for y in iterator(10):
+                for y in stream(10):
                     if y % 2 == 0:
                         yield x - y
 
     # noinspection PyUnresolvedReferences
-    print(mfor(make_gen())
-          .to_stream())
+    print(mfor(make_gen()))
 
     # noinspection PyUnresolvedReferences
-    print((iterator(5) >> (lambda x: iterator(x * 2)))
-          .to_stream())
+    print((stream(5) >> (lambda x: stream(x * 2))))
 
-    print(iterator()
-          .map(lambda x: x * 2)
-          .to_stream())
+    print(stream()
+          .map(lambda x: x * 2))
 
-    print(iterator(iterator(1, 2, 3, 4, 5), iterator(5, 4, 3, 2, 1))
-          .flat_map(lambda x: x.last_option())
-          .to_stream())
+    print(stream(stream(1, 2, 3, 4, 5), stream(5, 4, 3, 2, 1))
+          .flat_map(lambda x: x.last_option()))
 
     n = 1000
     print(Iterator(itertools.count(1))
@@ -414,7 +418,7 @@ def main():
           .get())
 
     print(Iterator(itertools.count(1))
-          .take(1000)
+          .take()
           .fold_left(1, operator.mul))
 
 if __name__ == '__main__':
