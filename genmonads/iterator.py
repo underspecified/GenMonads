@@ -44,6 +44,12 @@ class Iterator(Foldable, MonadFilter):
         """
         return 'Iterator(%s)' % str(self._value)
 
+    def drop(self, n):
+        return Iterator(itertools.islice(self._value, start=n))
+
+    def drop_while(self, p):
+        return Iterator(itertools.dropwhile(self._value, p))
+
     @staticmethod
     def empty():
         """
@@ -55,7 +61,6 @@ class Iterator(Foldable, MonadFilter):
     def filter(self, p):
         return Iterator(filter(p, self._value))
 
-    # noinspection PyProtectedMember
     def flat_map(self, f):
         """
         Applies a function that produces a iterator from unwrapped values to a iterator's inner value
@@ -96,7 +101,9 @@ class Iterator(Foldable, MonadFilter):
         Returns:
             B: the result of folding
         """
-        return b if self.is_empty() else itertools.accumulate(self._value, f)
+        for a in self.get():
+            b = f(b, a)
+        return b
 
     def fold_right(self, lb, f):
         """
@@ -126,7 +133,7 @@ class Iterator(Foldable, MonadFilter):
             Iterator[T]: the inner value
         """
         value, self._value = itertools.tee(self._value)
-        return self._value
+        return value
 
     def head(self):
         """
@@ -273,6 +280,12 @@ class Iterator(Foldable, MonadFilter):
 
         return trampoline(go, a)
 
+    def take(self, n):
+        return Iterator(itertools.islice(self._value, n))
+
+    def take_while(self, p):
+        return Iterator(itertools.dropwhile(self._value, p))
+
     def to_iter(self):
         return self
 
@@ -339,6 +352,9 @@ class Stream(Iterator):
     def to_iter(self):
         return Iterator(self.get())
 
+    def to_stream(self):
+        return self
+
 
 def stream(*values):
     """
@@ -355,7 +371,7 @@ def stream(*values):
 
 def main():
     from genmonads.monad import mfor
-    import itertools
+    import operator
 
     print(iterator(2, 3)
           .flat_map(lambda x: Iterator.pure(x + 5))
@@ -392,10 +408,14 @@ def main():
           .flat_map(lambda x: x.last_option())
           .to_stream())
 
-    print(Iterator(itertools.count())
-          .fold_right(Now(0), lambda a, lb: lb if a < 5 else Now(a))
+    n = 1000
+    print(Iterator(itertools.count(1))
+          .fold_right(Now(1), lambda a, lb: lb.map(lambda b: a * b) if a < n else Now(a))
           .get())
 
+    print(Iterator(itertools.count(1))
+          .take(1000)
+          .fold_left(1, operator.mul))
 
 if __name__ == '__main__':
     main()

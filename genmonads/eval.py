@@ -65,7 +65,7 @@ class Eval(Monad):
         if self.is_compute():
             return Compute(self.start, lambda s: Compute(lambda: self.run(s), f))
         elif self.is_call():
-            return Compute(c._thunk, f)
+            return Compute(self._thunk, f)
         else:
             return Compute(lambda: self, f)
 
@@ -362,7 +362,8 @@ class Call(Eval):
         Returns:
             Call[T]
         """
-        # noinspection PyProtectedMember
+
+        # noinspection PyUnresolvedReferences
         def go(_fa):
             """
             Args:
