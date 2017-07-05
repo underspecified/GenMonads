@@ -195,14 +195,35 @@ class Foldable:
         """
         return self._reduce_right_to_option(lambda x: x, f)
 
-    def to_mlist(self):
-        from genmonads.mlist import List
-        return List(*self.to_list())
+    def to_iter(self):
+        """
+        Converts the `Foldable` into an iterator.
+
+        Returns:
+            Iterator[A]: the resulting python list
+        """
+        from genmonads.iterator import Iterator
+        return Iterator(self.to_list())
 
     def to_list(self):
         return self.fold_left(
             [],
-            lambda lst, a: lst + [a, ])
+            lambda lst, a: lst + [a, ]
+        )
+
+    def to_mlist(self):
+        from genmonads.mlist import List
+        return List(*self.to_list())
+
+    def to_stream(self):
+        """
+        Converts the `Foldable` into a stream.
+
+        Returns:
+            Stream[A]: the resulting python list
+        """
+        from genmonads.iterator import Stream
+        return Stream(self.to_list())
 
     def take_while_(self, p):
         """

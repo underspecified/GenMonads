@@ -5,12 +5,12 @@ from genmonads.foldable import Foldable
 from genmonads.monadfilter import MonadFilter
 from genmonads.tailrec import trampoline
 
-__all__ = ['Iterator', 'iterator']
+__all__ = ['Iterator', 'iterator', 'Stream', 'stream']
 
 
 class Iterator(Foldable, MonadFilter):
     """
-    A type that represents an iterator of values.
+    A type that represents a lazy iterator of values. Useful for representing python iterators and generators.
 
     Monadic computing is supported with `map()`, `flat_map()`, `flatten()`, and `filter()` functions,
     and for-comprehensions can be formed by evaluating generators over monads with the `mfor()` function.
@@ -53,7 +53,7 @@ class Iterator(Foldable, MonadFilter):
         return Iterator((x for x in []))
 
     def filter(self, p):
-        return Iterator.from_iter(*filter(p, self._value))
+        return Iterator(filter(p, self._value))
 
     # noinspection PyProtectedMember
     def flat_map(self, f):
@@ -67,9 +67,23 @@ class Iterator(Foldable, MonadFilter):
         Returns:
             Iterator[B]: the resulting iterator
         """
-        return Iterator.from_iter((v
-                                  for vs in (f(v1) for v1 in self._value)
-                                  for v in vs._value))
+        def to_iter(v):
+            """
+            Args:
+                v (Union[F[T],T]): the value
+
+            Returns:
+                Iterator[T]: the empty instance for this `MonadFilter`
+            """
+            return (mtry(lambda: v.to_iter().get())
+                    .or_else(mtry(lambda: v.unpack()))
+                    .get_or_else((v, )))
+
+        from genmonads.mtry import mtry
+        it = (v
+              for vs in (f(v1) for v1 in self.get())
+              for v in to_iter(vs))
+        return Iterator(it)
 
     def fold_left(self, b, f):
         """
@@ -104,19 +118,15 @@ class Iterator(Foldable, MonadFilter):
                 return f(head, defer(lambda: tail.fold_right(lb, f)))
         return Now(self).flat_map(go)
 
-    @staticmethod
-    def from_iter(it):
-        return Iterator(it)
-
     def get(self):
         """
         Returns the iterator's inner value.
 
         Returns:
-            List[T]: the inner value
+            Iterator[T]: the inner value
         """
         value, self._value = itertools.tee(self._value)
-        return [x for x in value]
+        return self._value
 
     def head(self):
         """
@@ -190,7 +200,10 @@ class Iterator(Foldable, MonadFilter):
         Returns:
             Monad[B]: the resulting monad
         """
-        return Iterator.from_iter((f(x) for x in self._value))
+        return Iterator((f(x) for x in self._value))
+
+    def memoize(self):
+        return self.to_stream()
 
     def mtail_option(self):
         """
@@ -226,7 +239,7 @@ class Iterator(Foldable, MonadFilter):
             StopIteration: if the iterator is empty
         """
         next(self._value)
-        return Iterator.from_iter(self._value)
+        return Iterator(self._value)
 
     def tail_option(self):
         """
@@ -252,7 +265,6 @@ class Iterator(Foldable, MonadFilter):
             F[B]: an `F` instance containing the result of applying the tail-recursive function to
             its argument
         """
-
         def go(a1):
             fa = f(a1)
             e = fa.head()
@@ -260,6 +272,12 @@ class Iterator(Foldable, MonadFilter):
             return fa.pure(a2) if e.is_right() else lambda: go(a2)
 
         return trampoline(go, a)
+
+    def to_iter(self):
+        return self
+
+    def to_stream(self):
+        return Stream(self.get())
 
     def unpack(self):
         return tuple(self.get())
@@ -273,9 +291,66 @@ def iterator(*values):
         values (T): the values
 
     Returns:
-        iterator.Iterator[T]: the resulting `Iterator`
+        Iterator[T]: the resulting `Iterator`
     """
     return Iterator.pure(*values)
+
+
+# noinspection PyMissingConstructor
+class Stream(Iterator):
+    """
+    A type that represents a memoized, lazy stream of values.
+
+    Monadic computing is supported with `map()`, `flat_map()`, `flatten()`, and `filter()` functions,
+    and for-comprehensions can be formed by evaluating generators over monads with the `mfor()` function.
+    """
+
+    def __init__(self, it):
+        self._it = it
+        self._value = None
+
+    def __repr__(self):
+        return 'Stream(%s)' % ', '.join(repr(x) for x in self.get())
+
+    def get(self):
+        """
+        Returns the iterator's inner value.
+
+        Returns:
+            List[T]: the inner value
+        """
+        if self._value is None:
+            self._value = [x for x in self._it]
+        return self._value
+
+    @staticmethod
+    def pure(*values):
+        """
+        Injects a value into the `Stream` monad.
+
+        Args:
+            values (T): the values
+
+        Returns:
+            Stream[T]: the resulting `Iterator`
+        """
+        return Stream((x for x in values))
+
+    def to_iter(self):
+        return Iterator(self.get())
+
+
+def stream(*values):
+    """
+    Constructs a `Iterator` instance from a tuple of values.
+
+    Args:
+        values (T): the values
+
+    Returns:
+        Stream[T]: the resulting `Iterator`
+    """
+    return Stream.pure(*values)
 
 
 def main():
@@ -284,14 +359,15 @@ def main():
 
     print(iterator(2, 3)
           .flat_map(lambda x: Iterator.pure(x + 5))
-          .get())
+          .to_stream())
 
+    # noinspection PyUnresolvedReferences
     print(mfor(x + y
                for x in iterator(2, 4, 6)
                if x < 10
                for y in iterator(5, 7, 9)
                if y % 2 != 0)
-          .get())
+          .to_stream())
 
     def make_gen():
         for x in iterator(4):
@@ -300,24 +376,23 @@ def main():
                     if y % 2 == 0:
                         yield x - y
 
+    # noinspection PyUnresolvedReferences
     print(mfor(make_gen())
-          .get())
+          .to_stream())
 
+    # noinspection PyUnresolvedReferences
     print((iterator(5) >> (lambda x: iterator(x * 2)))
-          .get())
+          .to_stream())
 
     print(iterator()
           .map(lambda x: x * 2)
-          .get())
+          .to_stream())
 
     print(iterator(iterator(1, 2, 3, 4, 5), iterator(5, 4, 3, 2, 1))
-          .flat_map(lambda x: x.last_option()
-                               .map(lambda y: iterator(y))
-                               .get_or_else(Iterator.empty()))
-          .get())
+          .flat_map(lambda x: x.last_option())
+          .to_stream())
 
-    print(Iterator
-          .from_iter(itertools.count())
+    print(Iterator(itertools.count())
           .fold_right(Now(0), lambda a, lb: lb if a < 5 else Now(a))
           .get())
 

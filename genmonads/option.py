@@ -139,25 +139,6 @@ class Option(Foldable, MonadFilter):
         """
         return Some(value)
 
-    def to_list(self):
-        """
-        Converts the `Option` into a list.
-
-        Returns:
-            List[A]: the resulting python list
-        """
-        return [self.get(), ] if self.is_defined() else []
-
-    def to_mlist(self):
-        """
-        Converts the `Option` into a `List` monad.
-
-        Returns:
-            List[A]: the resulting List monad
-        """
-        from genmonads.mlist import List
-        return List(*self.to_list())
-
 
 def option(value):
     """

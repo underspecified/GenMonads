@@ -84,9 +84,21 @@ class NonEmptyList(Foldable, Monad):
         Returns:
             List[B]: the resulting monad
         """
-        return NonEmptyList.pure(*[v
-                                   for vs in [f(v1) for v1 in self.unpack()]
-                                   for v in vs.unpack()])
+        def to_nel(v):
+            """
+            Args:
+                v (Union[F[T],T]): the value
+
+            Returns:
+                Iterator[T]: the empty instance for this `MonadFilter`
+            """
+            return (mtry(lambda: v.to_nel().get())
+                    .get_or_else((v,)))
+
+        from genmonads.mtry import mtry
+        return NonEmptyList(*[v
+                              for vs in (f(v1)for v1 in self.get())
+                              for v in to_nel(vs)])
 
     def fold_left(self, b, f):
         """

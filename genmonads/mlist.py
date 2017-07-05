@@ -69,9 +69,22 @@ class List(Foldable, MonadFilter):
         Returns:
             List[B]: the resulting monad
         """
-        return List.pure(*[v
-                           for vs in [f(v1) for v1 in self.unpack()]
-                           for v in vs.unpack()])
+        def to_mlist(v):
+            """
+            Args:
+                v (Union[F[T],T]): the value
+
+            Returns:
+                Iterator[T]: the empty instance for this `MonadFilter`
+            """
+            return (mtry(lambda: v.to_mlist().get())
+                    .or_else(mtry(lambda: v.unpack()))
+                    .get_or_else((v,)))
+
+        from genmonads.mtry import mtry
+        return List(*[v
+                      for vs in (f(v1)for v1 in self.get())
+                      for v in to_mlist(vs)])
 
     def fold_left(self, b, f):
         """
