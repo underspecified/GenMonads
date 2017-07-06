@@ -45,10 +45,10 @@ class Iterator(Foldable, MonadFilter):
         return 'Iterator(%s)' % str(self._value)
 
     def drop(self, n):
-        return Iterator.from_iter(itertools.islice(self._value, start=n))
+        return Iterator.from_iter(itertools.islice(self.get(), start=n))
 
     def drop_while(self, p):
-        return Iterator.from_iter(itertools.dropwhile(self._value, p))
+        return Iterator.from_iter(itertools.dropwhile(self.get(), p))
 
     @staticmethod
     def empty():
@@ -59,7 +59,7 @@ class Iterator(Foldable, MonadFilter):
         return Iterator.from_iter((x for x in []))
 
     def filter(self, p):
-        return Iterator.from_iter(filter(p, self._value))
+        return Iterator.from_iter(filter(p, self.get()))
 
     def flat_map(self, f):
         """
@@ -72,7 +72,8 @@ class Iterator(Foldable, MonadFilter):
         Returns:
             Iterator[B]: the resulting iterator
         """
-        def to_iter(v):
+
+        def to_list(v):
             """
             Args:
                 v (Union[F[T],T]): the value
@@ -80,14 +81,14 @@ class Iterator(Foldable, MonadFilter):
             Returns:
                 Iterator[T]: the empty instance for this `MonadFilter`
             """
-            return (mtry(lambda: v.to_iter().get())
-                    .or_else(mtry(lambda: v.unpack()))
-                    .get_or_else((v, )))
+            return (mtry(lambda: v.to_iter().to_list())
+                    .or_else(mtry(lambda: [x for x in v.unpack()]))
+                    .get_or_else([v, ]))
 
         from genmonads.mtry import mtry
         it = (v
-              for vs in (f(v1) for v1 in self.get())
-              for v in to_iter(vs))
+              for vs in (f(v1) for v1 in self.to_list())
+              for v in to_list(vs))
         return Iterator.from_iter(it)
 
     def fold_left(self, b, f):
@@ -117,17 +118,19 @@ class Iterator(Foldable, MonadFilter):
         Returns:
             Eval[B]: the result of folding
         """
+
         def go(s):
             if s.is_empty():
                 return lb
             else:
                 head, tail = s.head_and_tail()
                 return f(head, defer(lambda: tail.fold_right(lb, f)))
+
         return Now(self).flat_map(go)
 
     @staticmethod
     def from_iter(it):
-        return Stream(it)
+        return Iterator(it)
 
     def get(self):
         """
@@ -136,8 +139,7 @@ class Iterator(Foldable, MonadFilter):
         Returns:
             Iterator[T]: the inner value
         """
-        value, self._value = itertools.tee(self._value)
-        return value
+        return self._value
 
     def head(self):
         """
@@ -152,7 +154,7 @@ class Iterator(Foldable, MonadFilter):
         return next(self._value)
 
     def head_and_tail(self):
-        return next(self._value), Iterator.from_iter(self._value)
+        return next(self._value), self
 
     def head_option(self):
         """
@@ -211,7 +213,7 @@ class Iterator(Foldable, MonadFilter):
         Returns:
             Monad[B]: the resulting monad
         """
-        return Iterator.from_iter((f(x) for x in self._value))
+        return Iterator.from_iter((f(x) for x in self.get()))
 
     def memoize(self):
         return self.to_stream()
@@ -250,7 +252,7 @@ class Iterator(Foldable, MonadFilter):
             StopIteration: if the iterator is empty
         """
         next(self._value)
-        return Iterator.from_iter(self._value)
+        return self
 
     def tail_option(self):
         """
@@ -276,6 +278,7 @@ class Iterator(Foldable, MonadFilter):
             F[B]: an `F` instance containing the result of applying the tail-recursive function to
             its argument
         """
+
         def go(a1):
             fa = f(a1)
             e = fa.head()
@@ -285,10 +288,10 @@ class Iterator(Foldable, MonadFilter):
         return trampoline(go, a)
 
     def take(self, n):
-        return Iterator(itertools.islice(self._value, n))
+        return Iterator(itertools.islice(self.get(), n))
 
     def take_while(self, p):
-        return Iterator(itertools.dropwhile(self._value, p))
+        return Iterator(itertools.dropwhile(self.get(), p))
 
     def to_iter(self):
         return self
@@ -323,8 +326,8 @@ class Stream(Iterator):
     """
 
     def __init__(self, it):
-        self._it = it
-        self._value = None
+        self._value = it
+        self._memo = None
 
     def __repr__(self):
         return 'Stream(%s)' % ', '.join(repr(x) for x in self.get())
@@ -340,10 +343,9 @@ class Stream(Iterator):
         Returns:
             List[T]: the inner value
         """
-        print("Stream.get(%s)", self._it)
-        if self._value is None:
-            self._value = [x for x in self._it]
-        return self._value
+        if self._memo is None:
+            self._memo = [x for x in self._value]
+        return self._memo
 
     @staticmethod
     def pure(*values):
@@ -359,7 +361,7 @@ class Stream(Iterator):
         return Stream((x for x in values))
 
     def to_iter(self):
-        return Iterator(self.get())
+        return Iterator.from_iter(self._value)
 
     def to_stream(self):
         return self
@@ -382,35 +384,40 @@ def main():
     from genmonads.monad import mfor
     import operator
 
-    print(stream(2, 3)
-          .flat_map(lambda x: Iterator.pure(x + 5)))
+    print(iterator(2, 3)
+          .flat_map(lambda x: Iterator.pure(x + 5))
+          .to_stream())
 
     # noinspection PyUnresolvedReferences
     print(mfor(x + y
-               for x in stream(2, 4, 6)
-               #if x < 10
-               for y in stream(5, 7, 9)
-               #if y % 2 != 0
-              ))
+               for x in iterator(2, 4, 6)
+               if x < 5
+               for y in iterator(5, 7, 9)
+               if y % 3 != 0)
+          .to_stream())
 
     def make_gen():
-        for x in stream(4):
+        for x in iterator(4):
             if x > 2:
-                for y in stream(10):
+                for y in iterator(10):
                     if y % 2 == 0:
                         yield x - y
 
     # noinspection PyUnresolvedReferences
-    print(mfor(make_gen()))
+    print(mfor(make_gen())
+          .to_stream())
 
     # noinspection PyUnresolvedReferences
-    print((stream(5) >> (lambda x: stream(x * 2))))
+    print((iterator(5) >> (lambda x: iterator(x * 2)))
+          .to_stream())
 
-    print(stream()
-          .map(lambda x: x * 2))
+    print(iterator()
+          .map(lambda x: x * 2)
+          .to_stream())
 
-    print(stream(stream(1, 2, 3, 4, 5), stream(5, 4, 3, 2, 1))
-          .flat_map(lambda x: x.last_option()))
+    print(iterator(iterator(1, 2, 3, 4, 5), iterator(5, 4, 3, 2, 1))
+          .flat_map(lambda x: x.last_option())
+          .to_stream())
 
     n = 1000
     print(Iterator(itertools.count(1))
@@ -418,8 +425,9 @@ def main():
           .get())
 
     print(Iterator(itertools.count(1))
-          .take()
+          .take(n)
           .fold_left(1, operator.mul))
+
 
 if __name__ == '__main__':
     main()

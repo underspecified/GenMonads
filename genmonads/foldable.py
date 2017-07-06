@@ -203,7 +203,7 @@ class Foldable:
             Iterator[A]: the resulting python list
         """
         from genmonads.iterator import Iterator
-        return Iterator(self.to_list())
+        return Iterator.pure(*self.to_list())
 
     def to_list(self):
         return self.fold_left(
@@ -223,7 +223,7 @@ class Foldable:
             Stream[A]: the resulting python list
         """
         from genmonads.iterator import Stream
-        return Stream(self.to_list())
+        return Stream.pure(*self.to_list())
 
     def take_while_(self, p):
         """
