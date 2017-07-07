@@ -11,6 +11,15 @@ class Functor(object):
         return 'Functor'
 
     def fproduct(self, f):
+        """
+        Applies a function to the inner value of a functor and returns a product of the function's input and output.
+
+        Args:
+            f (Callable[[A],B]): the function to apply
+
+        Returns:
+            Functor[(A,B)]: the resulting functor
+        """
         return self.map(lambda x: (x, f(x)))
 
     # noinspection PyUnusedLocal
@@ -27,18 +36,6 @@ class Functor(object):
         """
         return self.map(f)
 
-    def map(self, f):
-        """
-        Applies a function to the inner value of a functor.
-
-        Args:
-            f (Callable[[A],B]): the function to apply
-
-        Returns:
-            Functor[B]: the resulting functor
-        """
-        raise NotImplementedError
-
     @staticmethod
     def lift(f):
         """
@@ -52,15 +49,14 @@ class Functor(object):
         """
         return lambda fa: fa.map(f)
 
-    @staticmethod
-    def pure(value):
+    def map(self, f):
         """
-        Injects a value into the functor.
+        Applies a function to the inner value of a functor.
 
         Args:
-            value (T): the value
+            f (Callable[[A],B]): the function to apply
 
         Returns:
-            Functor[T]: the resulting `Functor`
+            Functor[B]: the resulting functor
         """
         raise NotImplementedError

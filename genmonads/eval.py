@@ -7,6 +7,7 @@ from genmonads.util import is_thunk
 __all__ = ['Always', 'Eval', 'Later', 'Now', 'always', 'later', 'now']
 
 
+# noinspection PyMissingConstructor
 class Eval(Monad):
     """
     A monad that represents computations. It consists of the following type classes:
@@ -47,7 +48,7 @@ class Eval(Monad):
     def __mname__():
         """
         Returns:
-            str: the monad's name
+            str: the name of the type class
         """
         return 'Eval'
 

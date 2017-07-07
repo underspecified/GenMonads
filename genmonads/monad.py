@@ -3,21 +3,33 @@ import sys
 
 from pony.orm.decompiling import decompile
 
+from genmonads.applicative import Applicative
 from genmonads.flat_map import FlatMap
-from genmonads.functor import Functor
 from genmonads.gettable import Gettable
 from genmonads.monadtrans import ast2src
 
 __all__ = ['Monad', 'do', 'mfor']
 
 
-class Monad(FlatMap, Functor, Gettable):
+class Monad(Applicative, FlatMap, Gettable):
     """
     A base class for representing monads.
 
     Monadic computing is supported with `map()` and `flat_map() functions, and for-comprehensions can be formed
     by evaluating generators over monads with the `mfor()` function.
     """
+
+    def ap(self, ff):
+        """
+        Applies a function in the applicative functor to a value in the applicative functor.
+
+        Args:
+            ff (Applicative[Callable[[A],B]]): the function in the applicative functor
+
+        Returns:
+            Applicative[B]: the resulting value in the applicative functor
+        """
+        self.flat_map(lambda a: ff.map(lambda f: f(a)))
 
     def __iter__(self):
         """
@@ -30,7 +42,7 @@ class Monad(FlatMap, Functor, Gettable):
     def __mname__():
         """
         Returns:
-            str: the monad's name
+            str: the name of the type class
         """
         return 'Monad'
 

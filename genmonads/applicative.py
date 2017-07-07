@@ -1,63 +1,55 @@
-from genmonads.functor import Functor
-from genmonads.gettable import Gettable
+from genmonads.apply import Apply
 
 __all__ = ['Applicative', ]
 
 
-class Applicative(Functor, Gettable):
+# noinspection PyMissingConstructor
+class Applicative(Apply):
     """
     The applicative functor.
     """
-
-    def __init__(self, *args, **kwargs):
-        raise ValueError(
-            """Tried to call the constructor of abstract base class Try.
-            Use the try_to() or Try.pure() functions instead."""
-        )
 
     @staticmethod
     def __mname__():
         """
         Returns:
-            str: the monad's name
+            str: the name of the type class
         """
         return 'Applicative'
 
     def ap(self, ff):
-        raise NotImplementedError
+        """
+        Applies a function in the applicative functor to a value in the applicative functor.
 
-    def ap2(self, fb, ff):
-        def go(a_b_f):
-            a, (b, f) = a_b_f
-            return f(a, b)
-        return self.product(fb.product(ff)).map(go)
+        Args:
+            ff (Applicative[Callable[[A],B]]): the function in the applicative functor
 
-    def get(self):
+        Returns:
+            Applicative[B]: the resulting value in the applicative functor
+        """
         raise NotImplementedError
 
     def map(self, f):
+        """
+        Applies a function to the inner value of a applicative functor.
+
+        Args:
+            f (Callable[[A],B]): the function to apply
+
+        Returns:
+            Applicative[B]: the resulting applicative functor
+        """
         return self.ap(Applicative.pure(f))
-
-    def map2(self, fb, f):
-        def go(a_b):
-            a, b = a_b
-            return f(a, b)
-        return self.product(fb).map(go)
-
-    def map2_eval(self, fb, f):
-        return fb.map(lambda _fb: self.map2(_fb, f))
-
-    def product(self, fb):
-        return fb.ap(self.map(lambda a: lambda b: (a, b)))
 
     @staticmethod
     def pure(value):
+        """
+        Injects a value into the applicative functor.
+
+        Args:
+            value (T): the value
+
+        Returns:
+            Functor[T]: the resulting applicative functor
+        """
         raise NotImplementedError
-
-
-def main():
-    pass
-
-
-if __name__ == '__main__':
-    main()
