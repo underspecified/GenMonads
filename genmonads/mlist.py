@@ -238,6 +238,15 @@ class List(Foldable, MonadFilter):
         """
         return self.get()
 
+    def to_mlist(self):
+        """
+        Converts the List into a monadic list.
+
+        Returns:
+            List[T]: the resulting monadic list
+        """
+        return self
+
     def unpack(self):
         """
         Returns the inner value as a tuple to support unpacking

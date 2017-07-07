@@ -216,6 +216,15 @@ class NonEmptyList(Foldable, Monad):
         """
         return self.get()
 
+    def to_nel(self):
+        """
+        Converts the NonEmptyList into a NonEmptyList.
+
+        Returns:
+            NonEmptyList: the resulting NonEmptyList
+        """
+        return self
+
     def unpack(self):
         """
         Returns the inner value as a tuple to support unpacking
