@@ -82,7 +82,6 @@ class Iterator(Foldable, MonadFilter):
                 Iterator[T]: the empty instance for this `MonadFilter`
             """
             return (mtry(lambda: v.to_iter().to_list())
-                    .or_else(mtry(lambda: [x for x in v.unpack()]))
                     .get_or_else([v, ]))
 
         from genmonads.mtry import mtry

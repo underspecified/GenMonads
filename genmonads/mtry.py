@@ -111,6 +111,18 @@ class Try(Foldable, Monad):
         """
         raise NotImplementedError
 
+    def get_or_else(self, default):
+        """
+        Returns the `Try`'s inner value if an instance of `Success` or `default` if an instance of `Failure`.
+
+        Args:
+            default (T): the monad to return for `Failure[T]` instances
+
+        Returns:
+            T: the resulting `Try`
+        """
+        return self.get() if self.is_success() else default
+
     def is_failure(self):
         return isinstance(self, Failure)
 
@@ -119,7 +131,7 @@ class Try(Foldable, Monad):
 
     def or_else(self, default):
         """
-        Returns the `Try` if an instance of `Success` or `default` if an instance of `Failure` .
+        Returns the `Try` if an instance of `Success` or `default` if an instance of `Failure`.
 
         Args:
             default (Try[B]): the monad to return for `Failure[T]` instances

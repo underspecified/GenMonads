@@ -64,7 +64,7 @@ class NonEmptyList(Foldable, Monad):
             p (Callable[[T],bool]): the predicate
 
         Returns:
-            Union[List[T]|Nel[T]]: a list containing all inner values where the predicate is `True`
+            Union[List[T],NonEmptyList[T]]: a list containing all inner values where the predicate is `True`
         """
         res = self.to_mlist().filter(p)
         return res.to_nel().get_or_else(res)
@@ -93,7 +93,7 @@ class NonEmptyList(Foldable, Monad):
                 Iterator[T]: the empty instance for this `MonadFilter`
             """
             return (mtry(lambda: v.to_nel().get())
-                    .get_or_else((v,)))
+                    .get_or_else([v, ]))
 
         from genmonads.mtry import mtry
         return NonEmptyList(*[v
@@ -148,6 +148,16 @@ class NonEmptyList(Foldable, Monad):
             T: the last item
         """
         return self.get()[-1]
+
+    def last_option(self):
+        """
+        Safely returns the last item in the list by wrapping the attempt in `Option`.
+
+        Returns:
+            Option[T]: the first item wrapped in `Some`, or `Nothing` if the list is empty
+        """
+        from genmonads.mtry import mtry
+        return mtry(lambda: self.last()).to_option()
 
     def map(self, f):
         """
@@ -269,7 +279,9 @@ def main():
 
     print(mtry(lambda: nel().map(lambda x: x * 2)))
 
-    print(nel(nel(1, 2, 3, 4, 5), nel(5, 4, 3, 2, 1)).flatten())
+    print(nel(nel(1, 2, 3, 4, 5), nel(5, 4, 3, 2, 1))
+          .to_mlist()
+          .flat_map(lambda x: x.last_option()))
 
 
 if __name__ == '__main__':

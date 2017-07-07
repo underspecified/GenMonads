@@ -78,7 +78,6 @@ class List(Foldable, MonadFilter):
                 Iterator[T]: the empty instance for this `MonadFilter`
             """
             return (mtry(lambda: v.to_mlist().get())
-                    .or_else(mtry(lambda: v.unpack()))
                     .get_or_else((v,)))
 
         from genmonads.mtry import mtry
@@ -335,7 +334,8 @@ def main():
 
     print(nil().map(lambda x: x * 2))
 
-    print(mlist(mlist(1, 2, 3, 4, 5), mlist(5, 4, 3, 2, 1)).flat_map(lambda x: x.last_option()))
+    print(mlist(mlist(1, 2, 3, 4, 5), mlist(5, 4, 3, 2, 1))
+          .flat_map(lambda x: x.last_option()))
 
 
 if __name__ == '__main__':
