@@ -229,19 +229,22 @@ class List(Foldable, MonadFilter):
 
         return trampoline(go, a)
 
-    def to_nel(self):
+    def to_list(self):
         """
-        Tries to convert the `List` into a `NonEmptyList` monad.
+        Converts the `List` into a python list.
 
         Returns:
-            Option[NonEmptyList[A]]: the `NonEmptyList` wrapped in `Some` if the `List` is non-empty,
-            `Nothing` otherwise
+            typing.List[T]: the resulting python list
         """
-        from genmonads.mtry import mtry
-        from genmonads.nel import nel
-        return mtry(lambda: nel(*self.get())).to_option()
+        return self.get()
 
     def unpack(self):
+        """
+        Returns the inner value as a tuple to support unpacking
+
+        Returns:
+            Tuple[T]: the inner values as a tuple
+        """
         return tuple(self.get())
 
 

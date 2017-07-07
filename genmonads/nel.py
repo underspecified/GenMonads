@@ -216,26 +216,13 @@ class NonEmptyList(Foldable, Monad):
         """
         return self.get()
 
-    def to_mlist(self):
-        """
-        Converts the `NonEmptyList` into a `List` monad.
-
-        Returns:
-            List[T]: the resulting List monad
-        """
-        from genmonads.mlist import List
-        return List(*self.get())
-
-    def to_nel(self):
-        """
-        Converts the `NonEmptyList` into a `NonEmptyList`.
-
-        Returns:
-            NonEmptyList[T]: the resulting nel
-        """
-        return self
-
     def unpack(self):
+        """
+        Returns the inner value as a tuple to support unpacking
+
+        Returns:
+            Tuple[T]: the inner values as a tuple
+        """
         return tuple(self.get())
 
 

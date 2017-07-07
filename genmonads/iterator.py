@@ -300,6 +300,12 @@ class Iterator(Foldable, MonadFilter):
         return Stream(self.get())
 
     def unpack(self):
+        """
+        Returns the inner value as a tuple to support unpacking
+
+        Returns:
+            Tuple[T]: the inner values as a tuple
+        """
         return tuple(self.get())
 
 
@@ -341,7 +347,7 @@ class Stream(Iterator):
         Returns the iterator's inner value.
 
         Returns:
-            List[T]: the inner value
+            Typing.List[T]: the inner value
         """
         if self._memo is None:
             self._memo = [x for x in self._value]
@@ -362,6 +368,15 @@ class Stream(Iterator):
 
     def to_iter(self):
         return Iterator.from_iter(self._value)
+
+    def to_list(self):
+        """
+        Converts the `Stream` into a python list.
+
+        Returns:
+            typing.List[T]: the resulting python list
+        """
+        return self.get()
 
     def to_stream(self):
         return self

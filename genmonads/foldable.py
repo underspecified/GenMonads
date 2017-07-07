@@ -68,7 +68,7 @@ class Foldable:
             p (Callable[[A],bool]): the predicate
 
         Returns:
-            stream.List[A]: a list of consecutive elements at the beginning of the `Foldable` that `p` does not match
+            typing.List[A]: a list of consecutive elements at the beginning of the `Foldable` that `p` does not match
         """
         return self.fold_right(
             Now([]),
@@ -93,7 +93,7 @@ class Foldable:
             p (Callable[[A],bool]): the predicate
 
         Returns:
-            List[A]: a list of the elements that `p` matches
+            typing.List[A]: a list of the elements that `p` matches
         """
         return self.fold_left(
             [],
@@ -206,21 +206,46 @@ class Foldable:
         return Iterator.pure(*self.to_list())
 
     def to_list(self):
+        """
+        Converts the `Foldable` into a stream.
+
+        Returns:
+            typing.List[A]: the resulting python list
+        """
         return self.fold_left(
             [],
             lambda lst, a: lst + [a, ]
         )
 
     def to_mlist(self):
+        """
+        Converts the `Foldable` into a monadic list.
+
+        Returns:
+            List[A]: the resulting python list
+        """
+
         from genmonads.mlist import List
         return List(*self.to_list())
+
+    def to_nel(self):
+        """
+        Tries to convert the `Foldable` into a `NonEmptyList` monad.
+
+        Returns:
+            Option[NonEmptyList[A]]: the `NonEmptyList` wrapped in `Some` if the `List` is non-empty,
+            `Nothing` otherwise
+        """
+        from genmonads.mtry import mtry
+        from genmonads.nel import nel
+        return mtry(lambda: nel(*self.to_list())).to_option()
 
     def to_stream(self):
         """
         Converts the `Foldable` into a stream.
 
         Returns:
-            Stream[A]: the resulting python list
+            Stream[A]: the resulting Stream
         """
         from genmonads.iterator import Stream
         return Stream.pure(*self.to_list())
@@ -231,7 +256,7 @@ class Foldable:
             p (Callable[[A],bool]): the predicate
 
         Returns:
-            List[T]: a list of consecutive elements at the beginning of the `Foldable` that `p` matches
+            typing.List[T]: a list of consecutive elements at the beginning of the `Foldable` that `p` matches
         """
         self.fold_right(
             Now([]),

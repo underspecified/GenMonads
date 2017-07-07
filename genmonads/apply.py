@@ -1,9 +1,10 @@
+from genmonads.cartesian import Cartesian
 from genmonads.functor import Functor
 
 __all__ = ['Apply', ]
 
 
-class Apply(Functor):
+class Apply(Cartesian, Functor):
     """
     The applicative functor without pure().
     """

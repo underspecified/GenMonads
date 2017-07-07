@@ -59,25 +59,25 @@ class FlatMap(Functor):
 
     def followed_by(self, fb):
         """
-        Sequentially compose two `FlatMap`s, discarding the output of the first.
+        Sequentially compose two FlatMaps, discarding the output of the first.
 
         Args:
-            fb (FlatMap[B]): the `FlatMap` to return
+            fb (FlatMap[B]): the FlatMap to return
 
         Returns:
-            FlatMap[B]: the resulting `FlatMap` after evaluating the first and discarding its output
+            FlatMap[B]: the resulting FlatMap after evaluating the first and discarding its output
         """
         return self.flat_map(lambda _: fb)
 
     def for_effect(self, fb):
         """
-        Sequentially compose two `FlatMap`s, discarding the output of the first.
+        Sequentially compose two FlatMaps, discarding the output of the first.
 
         Args:
-            fb (FlatMap[B]): the `FlatMap` to return
+            fb (FlatMap[B]): the FlatMap to return
 
         Returns:
-            FlatMap[B]: the resulting `FlatMap` after evaluating the first and discarding its output
+            FlatMap[B]: the resulting FlatMap after evaluating the first and discarding its output
         """
         return self.flat_map(lambda a: fb.map(lambda _: a))
 

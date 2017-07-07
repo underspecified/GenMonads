@@ -84,9 +84,6 @@ class Identity(Monad):
     def is_gettable(self):
         return True
 
-    def is_identity(self):
-        return isinstance(self, Identity)
-
     @staticmethod
     def pure(value):
         """

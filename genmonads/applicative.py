@@ -50,6 +50,6 @@ class Applicative(Apply):
             value (T): the value
 
         Returns:
-            Functor[T]: the resulting applicative functor
+            Applicative: the resulting applicative functor
         """
         raise NotImplementedError
