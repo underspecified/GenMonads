@@ -8,6 +8,18 @@ class Cartesian:
     Allows functors and applicatives to work with functions of arbitrary arity.
     """
 
+    def __matmul__(self, fb):
+        """
+        Symbolic alias of @ for product.
+
+        Args:
+            fb (Cartesian): the second cartesian
+
+        Returns:
+            Cartesian[(A,B)]: the resulting cartesian
+        """
+        return self.product(fb)
+
     @staticmethod
     def __mname__():
         """

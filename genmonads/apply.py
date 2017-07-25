@@ -87,6 +87,9 @@ class Apply(Cartesian, Functor):
         """
         return fb.map(lambda _fb: self.map2(_fb, f))
 
+    def mapN(self, f):
+        pass
+
     def product(self, fb):
         """
         Constructs an applicative functor of the product of the inner values of two applicative functors.
