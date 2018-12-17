@@ -1,17 +1,21 @@
 from genmonads.foldable import Foldable
 from genmonads.monad import Monad
+from genmonads.mytypes import *
 
 __all__ = ['Either', 'Left', 'Right', 'left', 'right']
 
 
-class Either(Foldable, Monad):
+class Either(Foldable,
+             Monad):
     """
     A type that represents a disjoint union.
 
-    Instances of type `Either[A,B]` are either an instance of `Left[A]` or `Right[B]`.
+    Instances of type `Either[A, B]` are either an instance of `Left[A]` or
+    `Right[B]`.
 
-    Monadic computing is supported with right-biased `map()` and `flat_map()` functions, and for-comprehensions
-    can be formed by evaluating generators over monads with the `mfor()` function.
+    Monadic computing is supported with right-biased `map()` and `flat_map()`
+    functions, and for-comprehensions can be formed by evaluating generators
+    over monads with the `mfor()` function.
     """
 
     def __init__(self, *args, **kwargs):
@@ -20,13 +24,14 @@ class Either(Foldable, Monad):
                Use the left() , right() or Either.pure() functions instead."""
         )
 
-    def __eq__(self, other):
+    def __eq__(self, other: 'Either[AA, BB]') -> bool:
         """
         Args:
             other (Either[AA,BB]): the value to compare against
 
         Returns:
-            bool: `True` if outer type and inner values are equivalent, `False` otherwise
+            bool: `True` if outer type and inner values are equivalent, `False`
+                  otherwise
         """
         if type(self) == type(other):
             return self.get_or_none() == other.get_or_none()
@@ -43,8 +48,9 @@ class Either(Foldable, Monad):
 
     def cata(self, fa, fb):
         """
-        Transforms an `Either[A,B]` instance by applying `fa` to the inner value of instances of Left[A],
-        and `fb` to the inner value of instance of Right[B].
+        Transforms an `Either[A,B]` instance by applying `fa` to the inner
+        value of instances of Left[A], and `fb` to the inner value of instance
+        of Right[B].
 
         Args:
             fa (Callable[[A],C): the function to apply to instances of `Left[A]`
@@ -57,16 +63,16 @@ class Either(Foldable, Monad):
 
     def filter_or_else(self, p, zero):
         """
-        Filters this monad by applying the predicate `p` to the monad's inner value.
-        Returns this monad if the predicate is `True`, `zero` otherwise.
+        Filters this monad by applying the predicate `p` to the monad's inner
+        value. Returns this monad if the predicate is `True`, `zero` otherwise.
 
         Args:
             p (Callable[[T],bool]): the predicate
             zero (Either[A,B]): the value to return if `filter()` fails
 
         Returns:
-            Either[A,B]: this instance if the predicate is `True` when applied to its inner value,
-            otherwise `zero`
+            Either[A,B]: this instance if the predicate is `True` when applied
+            to its inner value, otherwise `zero`
         """
         return self if self.exists(p) else Left(zero)
 
@@ -97,8 +103,8 @@ class Either(Foldable, Monad):
 
     def fold_right(self, lb, f):
         """
-        Performs left-associated fold using `f`. Uses lazy evaluation, requiring type `Eval[B]`
-        for initial value and accumulation results.
+        Performs left-associated fold using `f`. Uses lazy evaluation,
+        requiring type `Eval[B]` for initial value and accumulation results.
 
         Args:
             lb (Eval[B]): the lazily-evaluated initial value
@@ -120,24 +126,28 @@ class Either(Foldable, Monad):
 
     def get_or_else(self, default):
         """
-        Returns the `Either`'s inner value if an instance of `Right` or `default` if instance of `Left`.
+        Returns the `Either`'s inner value if an instance of `Right` or
+        `default` if instance of `Left`.
 
         Args:
             default (C): the value to return for `Left[A]` instances
 
         Returns:
-            Union[B,C]: the `Either`'s inner value if an instance of `Right` or `default` if instance of `Left`
+            Union[B,C]: the `Either`'s inner value if an instance of `Right` or
+            `default` if instance of `Left`
         """
         return self.get() if self.is_right() else default
 
     def get_or_none(self):
         """
-        Returns the `Either`'s inner value if an instance of `Right` or `None` if instance of `Left`.
+        Returns the `Either`'s inner value if an instance of `Right` or `None`
+        if instance of `Left`.
 
         Provided as interface to code that expects `None` values.
 
         Returns:
-            Union[B,None]: the `Either`'s inner value if an instance of `Right` or `None` if instance of `Left`
+            Union[B,None]: the `Either`'s inner value if an instance of `Right`
+            or `None` if instance of `Left`
         """
         return self.get_or_else(None)
 
@@ -160,7 +170,8 @@ class Either(Foldable, Monad):
         """
         Injects a value into the `Either` monad.
 
-        This function should be used instead of calling `Either.__init__()` directly.
+        This function should be used instead of calling `Either.__init__()`
+        directly.
 
         Args:
             value (B): the value
@@ -181,7 +192,8 @@ class Either(Foldable, Monad):
 
     def to_option(self):
         """
-        Converts the `Either` into `Some` if an instance of `Right` and `Nothing` if an instance of `Left`.
+        Converts the `Either` into `Some` if an instance of `Right` and
+        `Nothing` if an instance of `Left`.
 
         Returns:
             Option[B]: the resulting `Option`
@@ -191,8 +203,8 @@ class Either(Foldable, Monad):
 
     def to_try(self, ex):
         """
-        Converts the `Either` into `Success` if an instance of `Right` and `ex` wrapped in `Failure`
-        if an instance of `Left`.
+        Converts the `Either` into `Success` if an instance of `Right` and `ex`
+        wrapped in `Failure` if an instance of `Left`.
 
         Returns:
             Try[B]: the resulting `Try`
@@ -202,12 +214,14 @@ class Either(Foldable, Monad):
 
 
 # noinspection PyMissingConstructor
-class Left(Either):
+class Left(Either,
+           Container[A]):
     """
-    A type that represents the presence of the leftmost type in a disjoint union.
+    A type that represents the presence of the leftmost type in a disjoint
+    union.
 
-    Forms the `Either` monad together with `Right[B]`. Idiomatically, Left[A] is
-    used to represent computations that failed.
+    Forms the `Either` monad together with `Right[B]`. Idiomatically, Left[A]
+    is used to represent computations that failed.
     """
 
     def __init__(self, value):
@@ -222,7 +236,8 @@ class Left(Either):
 
     def get(self):
         """
-        Returns the `Either`'s inner value. Raises a `ValueError` for instances of `Nothing[T]`.
+        Returns the `Either`'s inner value. Raises a `ValueError` for instances
+        of `Nothing[T]`.
 
         Returns:
             T: the inner value
@@ -244,12 +259,14 @@ def left(value):
 
 
 # noinspection PyMissingConstructor,PyPep8Naming
-class Right(Either):
+class Right(Either,
+            Container[B]):
     """
-    A type that represents the presence of the rightmost type in a disjoint union.
+    A type that represents the presence of the rightmost type in a disjoint
+    union.
 
-    Forms the `Either` monad together with `Left[A]`. Idiomatically, Right[B] is
-    used to represent computations that succeeded.
+    Forms the `Either` monad together with `Left[A]`. Idiomatically, Right[B]
+    is used to represent computations that succeeded.
     """
 
     # noinspection PyInitNewSignature

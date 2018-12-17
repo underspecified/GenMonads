@@ -1,17 +1,22 @@
 from genmonads.foldable import Foldable
 from genmonads.monadfilter import MonadFilter
+from genmonads.mytypes import *
 
 __all__ = ['Nothing', 'Option', 'Some', 'nothing', 'option', 'some']
 
 
-class Option(Foldable, MonadFilter):
+class Option(Foldable,
+             MonadFilter,
+             Generic[A]):
     """
     A type class that represents an optional value.
 
-    Instances of type `Option[T]` are either an instance of `Some[T]` or `Nothing[T]`.
+    Instances of type `Option[T]` are either an instance of `Some[T]` or
+    `Nothing[T]`.
 
-    Monadic computing is supported with `map()`, `flat_map()`, `flatten()`, and `filter()` functions,
-    and for-comprehensions can  be formed by evaluating generators over monads with the `mfor()` function.
+    Monadic computing is supported with `map()`, `flat_map()`, `flatten()`, and
+    `filter()` functions, and for-comprehensions can  be formed by evaluating
+    generators over monads with the `mfor()` function.
     """
 
     def __init__(self, *args, **kwargs):
@@ -26,7 +31,8 @@ class Option(Foldable, MonadFilter):
             other (Option[T]): the value to compare against
 
         Returns:
-            bool: `True` if other is an instance of `Some` and inner values are equivalent, `False` otherwise
+            bool: `True` if other is an instance of `Some` and inner values are
+                  equivalent, `False` otherwise
         """
         if type(self) != type(other):
             return False
@@ -47,8 +53,9 @@ class Option(Foldable, MonadFilter):
 
     def cata(self, f, default):
         """
-        Transforms an `Option[A]` instance by applying `f` to the inner value of instances of `Some[A]`,
-        and returning `default` in the case of `Nothing`.
+        Transforms an `Option[A]` instance by applying `f` to the inner value
+        of instances of `Some[A]`, and returning `default` in the case of
+        `Nothing`.
 
         Args:
             f (Callable[[A],B): the function to apply to instances of `Left[A]`
@@ -94,8 +101,8 @@ class Option(Foldable, MonadFilter):
 
     def fold_right(self, lb, f):
         """
-        Performs left-associated fold using `f`. Uses lazy evaluation, requiring type `Eval[B]`
-        for initial value and accumulation results.
+        Performs left-associated fold using `f`. Uses lazy evaluation,
+        requiring type `Eval[B]` for initial value and accumulation results.
 
         Args:
             lb (Eval[B]): the lazily-evaluated initial value
@@ -129,7 +136,8 @@ class Option(Foldable, MonadFilter):
         """
         Injects a value into the `Option` monad.
 
-        This function should be used instead of calling `Option.__init__()` directly.
+        This function should be used instead of calling `Option.__init__()`
+        directly.
 
         Args:
             value (T): the value
@@ -144,8 +152,8 @@ def option(value):
     """
     Constructs an `Option` instance from a value.
 
-    This function converts `None` into an instance of `Nothing[T]`. If this behavior is undesired, use
-    `Option.pure()` instead.
+    This function converts `None` into an instance of `Nothing[T]`. If this
+    behavior is undesired, use `Option.pure()` instead.
 
     Args:
         value (T): the value
@@ -182,7 +190,8 @@ class Some(Option):
 
     def get(self):
         """
-        Returns the `Option`'s inner value. Raises a `ValueError` for instances of `Nothing[T]`.
+        Returns the `Option`'s inner value. Raises a `ValueError` for instances
+        of `Nothing[T]`.
 
         Returns:
             T: the inner value
@@ -227,12 +236,14 @@ class Nothing(Option):
 
     def get(self):
         """
-        Returns the `Option`'s inner value. Raises a `ValueError` for instances of `Nothing`.
+        Returns the `Option`'s inner value. Raises a `ValueError` for instances
+        of `Nothing`.
 
         Returns:
             T: the inner value
         """
-        raise ValueError("Tried to access the non-existent inner value of a Nothing instance")
+        raise ValueError(
+            "Tried to access the non-existent inner value of a Nothing instance")
 
     # noinspection PyMethodMayBeStatic
     def unpack(self):

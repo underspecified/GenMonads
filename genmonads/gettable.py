@@ -7,8 +7,8 @@ class Gettable:
     """
     A type that represents a wrapped value with a `get()` accessor function.
 
-    This type is useful for implementing monads in python because it lacks the access to inner values
-    provided by pattern matching.
+    This type is useful for implementing monads in python because it lacks the
+    access to inner values provided by pattern matching.
     """
 
     def get(self):

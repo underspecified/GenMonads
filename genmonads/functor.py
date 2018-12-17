@@ -1,6 +1,10 @@
-class Functor(object):
+from genmonads.mytypes import *
+
+
+class Functor(Generic[T]):
     """
-    A type class representing covariant functors, i.e. things which can be mapped over."""
+    A type class representing covariant functors, i.e. things which can be
+    mapped over."""
 
     @staticmethod
     def __mname__():
@@ -10,9 +14,10 @@ class Functor(object):
         """
         return 'Functor'
 
-    def fproduct(self, f):
+    def fproduct(self, f: Callable[[A], B]) -> 'Functor[Tuple[A, B]]':
         """
-        Applies a function to the inner value of a functor and returns a product of the function's input and output.
+        Applies a function to the inner value of a functor and returns a
+        product of the function's input and output.
 
         Args:
             f (Callable[[A],B]): the function to apply
@@ -23,7 +28,10 @@ class Functor(object):
         return self.map(lambda x: (x, f(x)))
 
     # noinspection PyUnusedLocal
-    def imap(self, f, fi):
+    def imap(self,
+             f: Callable[[A], B],
+             fi: Callable[[B], A]
+             ) -> 'Functor[B]':
         """
         Applies a pair of functions to the inner value of a invariant functor.
 
@@ -37,7 +45,7 @@ class Functor(object):
         return self.map(f)
 
     @staticmethod
-    def lift(f):
+    def lift(f: Callable[[A], B]) -> Callable[['Functor[A]'], 'Functor[B]']:
         """
         Lifts a function to operate on functors.
 
@@ -49,7 +57,7 @@ class Functor(object):
         """
         return lambda fa: fa.map(f)
 
-    def map(self, f):
+    def map(self, f: Callable[[A], B]) -> 'Functor[B]':
         """
         Applies a function to the inner value of a functor.
 
