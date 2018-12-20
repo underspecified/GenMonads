@@ -1,10 +1,14 @@
+import typing
+
+from genmonads.convertible import Convertible
 from genmonads.monadfilter import MonadFilter
 from genmonads.mytypes import *
 
 __all__ = ['Nothing', 'Option', 'Some', 'nothing', 'option', 'some']
 
 
-class Option(MonadFilter[A]):
+class Option(MonadFilter[A],
+             Convertible[A]):
     """
     A base class for implementing Options for other types to depend on.
     """
@@ -110,6 +114,15 @@ class Option(MonadFilter[A]):
         """
         return Some(value)
 
+    def to_list(self) -> typing.List[A]:
+        """
+        Converts the `Option` into a python list.
+
+        Returns:
+            typing.List[A]: the resulting python list
+        """
+        return [] if self.is_empty() else [self.get(), ]
+
 
 def option(value: A) -> 'Option[A]':
     """
@@ -131,8 +144,7 @@ def option(value: A) -> 'Option[A]':
 
 
 # noinspection PyMissingConstructor
-class Some(Option,
-           Generic[A]):
+class Some(Option[A]):
     """
     A type that represents the presence of an optional value.
 
@@ -177,8 +189,7 @@ def some(value: A) -> Some[A]:
 
 
 # noinspection PyMissingConstructor,PyPep8Naming
-class Nothing(Option,
-              Generic[A]):
+class Nothing(Option):
     """
     A type that represents the absence of an optional value.
 
@@ -199,13 +210,10 @@ class Nothing(Option,
         """
         return 'Nothing'
 
-    def get(self) -> A:
+    def get(self):
         """
         Returns the `Option`'s inner value. Raises a `ValueError` for instances
         of `Nothing`.
-
-        Returns:
-            A: the inner value
         """
         raise ValueError(
             "Tried to access the non-existent inner value of a Nothing instance")

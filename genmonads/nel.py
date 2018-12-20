@@ -6,7 +6,7 @@ from genmonads.eval import Eval
 from genmonads.foldable import Foldable
 from genmonads.monad import Monad
 from genmonads.mlist import List as MList
-from genmonads.mtry import mtry
+from genmonads.mtry_base import mtry
 from genmonads.mytypes import *
 from genmonads.option_base import Some, Option
 from genmonads.tailrec import trampoline

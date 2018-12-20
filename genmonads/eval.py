@@ -1,9 +1,11 @@
 from functools import reduce
 import typing
 
+from genmonads.convertible import Convertible
 from genmonads.monad import Monad
 from genmonads.mytypes import *
-from genmonads.option_base import Option, Some, Nothing
+from genmonads.mtry_base import mtry
+from genmonads.option_base import Some, Nothing
 from genmonads.tailrec import trampoline
 from genmonads.util import is_thunk
 
@@ -13,7 +15,7 @@ __all__ = ['Always', 'Eval', 'Later', 'Now', 'always', 'defer', 'later', 'now']
 
 # noinspection PyMissingConstructor,PyUnresolvedReferences
 class Eval(Monad,
-           Generic[A]):
+           Convertible[A]):
     """
     A monad that represents computations. It consists of the following type
     classes:
@@ -183,12 +185,11 @@ class Eval(Monad,
         """
         return Now(value)
 
-    def to_mtry(self) -> 'Try[A]':
-        from genmonads.mtry import mtry
-        return mtry(lambda: self.get())
+    def to_list(self) -> typing.List[A]:
+        return self.to_mtry().to_list()
 
-    def to_option(self) -> 'Option[A]':
-        return self.to_mtry().to_option()
+    def to_mtry(self) -> 'Try[A]':
+        return mtry(lambda: self.get())
 
 
 # noinspection PyMissingConstructor

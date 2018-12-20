@@ -6,6 +6,7 @@ from genmonads.eval import Now, defer, Eval
 from genmonads.foldable import Foldable
 from genmonads.monad import Monad
 from genmonads.monadfilter import MonadFilter
+from genmonads.mtry_base import mtry
 from genmonads.mytypes import *
 from genmonads.option import Option
 from genmonads.tailrec import trampoline
@@ -13,8 +14,8 @@ from genmonads.tailrec import trampoline
 __all__ = ['Iterator', 'iterator', 'Stream', 'stream']
 
 
-class Iterator(Foldable,
-               MonadFilter,
+class Iterator(MonadFilter[A],
+               Foldable[A],
                Container[typing.Iterator[A]]):
     """
     A type that represents a lazy iterator of values. Useful for representing
@@ -89,7 +90,6 @@ class Iterator(Foldable,
                     .or_else(mtry(lambda: [x for x in v.unpack()]))
                     .get_or_else([v, ]))
 
-        from genmonads.mtry import mtry
         it = (v
               for vs in (f(v1) for v1 in self.to_list())
               for v in to_list(vs))
@@ -172,12 +172,10 @@ class Iterator(Foldable,
             Option[T]: the first item wrapped in `Some`, or `Nothing` if the
                        list is empty
         """
-        from genmonads.mtry import mtry
         return mtry(lambda: self.head).to_option()
 
     # noinspection PyUnresolvedReferences,PyAttributeOutsideInit
     def is_empty(self) -> bool:
-        from genmonads.mtry import mtry
         test, self._value = itertools.tee(self._value)
         return mtry(lambda: next(test)).is_failure()
 
@@ -211,7 +209,6 @@ class Iterator(Foldable,
             Option[A]: the first item wrapped in `Some`, or `Nothing` if the
                        list is empty
         """
-        from genmonads.mtry import mtry
         return mtry(lambda: self.last()).to_option()
 
     def map(self, f: F1[A, B]) -> 'Iterator[B]':
@@ -236,7 +233,6 @@ class Iterator(Foldable,
         Returns:
             Option[Iterator[A]]: the rest of the iterator
         """
-        from genmonads.mtry import mtry
         return mtry(lambda: self.tail()).to_option()
 
     @staticmethod
@@ -272,7 +268,6 @@ class Iterator(Foldable,
         Returns:
             Option[Iterator[A]]: the rest of the iterator
         """
-        from genmonads.mtry import mtry
         return mtry(lambda: self.tail()).to_option()
 
     # noinspection PyPep8Naming

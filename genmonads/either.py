@@ -1,7 +1,7 @@
 from genmonads.eval import Eval
 from genmonads.foldable import Foldable
 from genmonads.monad import Monad
-from genmonads.mtry import Try, Failure, Success
+from genmonads.mtry_base import Try, Failure, Success
 from genmonads.mytypes import *
 from genmonads.option import Option, Some, Nothing
 

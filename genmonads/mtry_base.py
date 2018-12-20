@@ -1,34 +1,18 @@
-from genmonads.eval import Eval
-from genmonads.foldable import Foldable
+import typing
+
+from genmonads.convertible import Convertible
 from genmonads.monad import Monad
-from genmonads.mtry_base import Try as TryBase
 from genmonads.mytypes import *
+from genmonads.option_base import Option, Some, Nothing
 from genmonads.util import is_thunk
 
 __all__ = ['Failure', 'Success', 'Try', 'failure', 'mtry', 'success']
 
 
-class Try(TryBase[A],
-          Monad[A],
-          Foldable[A]):
+class Try(Monad[A],
+          Convertible[A]):
     """
-    A type that represents a failable computation.
-
-    Instances of type `Try[A]` are either instances of `Success[A]` or
-    `Failure[A]`.
-    This monad uses eager evaluation. For lazy computations, see the `Eval`
-    monad.
-
-    Instances of `Try[A]` are constructed by passing a computation wrapped in
-    a thunk (i.e. a lambda expression with no arguments) to either the `mtry()`
-    or `Try.pure()` or functions. The thunk is evaluated immediately, and
-    successful computations return the result wrapped in `Success`, while
-    computations that raise an exception return that exception wrapped in
-    `Failure[A]`.
-
-    Monadic computing is supported with `map()`, `flat_map()`, `flatten()`,
-    and `filter()` functions, and for-comprehensions can be formed by
-    evaluating generators over monads with the `mfor()` function.
+    A base class for implementing Trys for other types to depend on.
     """
 
     def __init__(self, *args, **kwargs):
@@ -48,35 +32,41 @@ class Try(TryBase[A],
         return (type(self) == type(other) and
                 self.get_or_none() == other.get_or_none())
 
-    def fold_left(self, b: B, f: FoldLeft[B, A]) -> B:
+    @staticmethod
+    def __mname__() -> str:
         """
-        Performs left-associated fold using `f`. Uses eager evaluation.
+        Returns:
+            str: the monad's name
+        """
+        return 'Try'
+
+    def cata(self, fa: F1[A, B], fb: F1[Exception, B]) -> B:
+        """
+        Transforms an `Try[A]` instance by applying `fa` to the inner value of
+        instances of Success[A], and `fb` to the inner value of instance of
+        Failure.
 
         Args:
-            b (B): the initial value
-            f (FoldLeft[B, A]): the function to fold with
+            fa (F1[A, B]): the function to apply to instances of `Success[A]`
+            fb (F1[Exception, B]): the function to apply to instances of
+            `Failure`
 
         Returns:
-            B: the result of folding
+            B: the resulting `B` instance
         """
-        return f(b, self.get()) if self.is_success() else b
+        return fb(self.get()) if self.is_success() else fa(self.get())
 
-    def fold_right(self,
-                   lb: 'Eval[B]',
-                   f: FoldRight[A, 'Eval[B]']
-                   ) -> 'Eval[B]':
+    def flat_map(self, f: F1[A, 'Try[B]']) -> 'Try[B]':
         """
-        Performs left-associated fold using `f`. Uses lazy evaluation,
-        requiring type `Eval[B]` for initial value and accumulation results.
+        Applies a function to the inner value of a `Try`.
 
         Args:
-            lb (Eval[B]): the lazily-evaluated initial value
-            f (FoldRight[A, Eval[B]]): the function to fold with
+            f (F1[A, Try[B]]): the function to apply
 
         Returns:
-            Eval[B]: the result of folding
+            Try[B]: the resulting monad
         """
-        return f(self.get(), lb) if self.is_success() else lb
+        return f(self.get()) if self.is_success() else self
 
     def get(self) -> Union[A, Exception]:
         """
@@ -93,6 +83,19 @@ class Try(TryBase[A],
     def is_success(self) -> bool:
         return isinstance(self, Success)
 
+    def or_else(self, default: 'Try[A]') -> 'Try[A]':
+        """
+        Returns the `Try` if an instance of `Success` or `default` if an
+        instance of `Failure` .
+
+        Args:
+            default (Try[A]): the monad to return for `Failure[A]` instances
+
+        Returns:
+            Try[A]: the resulting `Try`
+        """
+        return self if self.is_success() else default
+
     @staticmethod
     def pure(value: Union[A, Thunk[A]]) -> 'Try[A]':
         """
@@ -106,7 +109,7 @@ class Try(TryBase[A],
 
         Returns:
             Try[A]: the resulting `Try`
-            
+
         Raises:
             ValueError: if the argument is not a zero arity lambda function
         """
@@ -117,6 +120,60 @@ class Try(TryBase[A],
                 return Failure(ex)
         else:
             return Success(value)
+
+    def recover(self, f: F1[Exception, B]) -> 'Try[B]':
+        """
+        Recovers from a failed computation by applying `f` to the exception.
+
+        Essentially, a map on the `Failure` instance.
+
+        Args:
+            f (F1[Exception,B]): the function to call on the `Failure[A]`'s
+                                 exception
+
+        Returns:
+            Try[B]: the resulting `Try`
+        """
+        return self if self.is_success() else f(self.get())
+
+    def recover_with(self, f: F1[Exception, 'Try[B]']) -> 'Try[B]':
+        """
+        Recovers from a failed computation by applying `f` to the `Failure`
+        instance.
+
+        Essentially, a flat_map on the `Failure` instance.
+
+        Args:
+            f (F1[Exception, 'Try[B]']): the function to call on the `Failure`
+
+        Returns:
+            Try[B]: the resulting `Try[B]`
+        """
+        return self if self.is_success() else f(self)
+
+    def to_list(self) -> typing.List[A]:
+        """
+        Converts an instance of `Try[A]` to a pythonic list.
+
+        `Success[A]` is mapped to a singleton list containing the value,
+         and `Failure[A]` is mapped to the empty list.
+
+        Returns:
+            typing.List[A]: the corresponding list
+        """
+        return [self.get(), ] if self.is_success() else []
+
+    def to_option(self) -> 'Option[A]':
+        """
+        Converts an instance of `Try[A]` to a pythonic list.
+
+        `Success[A]` is mapped to Some[A] containing the value,
+         and `Failure[A]` is mapped to Nothing.
+
+        Returns:
+            Option[A]: the corresponding Option
+        """
+        return Some(self.get()) if self.is_success() else Nothing()
 
 
 def mtry(thunk: Thunk[A]) -> Try[A]:

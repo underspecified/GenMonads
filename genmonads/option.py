@@ -1,6 +1,3 @@
-import typing
-
-from genmonads.convertible import Convertible
 from genmonads.eval import Eval
 from genmonads.foldable import Foldable
 from genmonads.monadfilter import MonadFilter
@@ -12,8 +9,7 @@ __all__ = ['Nothing', 'Option', 'Some', 'nothing', 'option', 'some']
 
 class Option(OptionBase[A],
              MonadFilter[A],
-             Foldable[A],
-             Convertible[A]):
+             Foldable[A]):
     """
     A type class that represents an optional value.
 
@@ -30,6 +26,24 @@ class Option(OptionBase[A],
             """Tried to call the constructor of abstract base class Option.
                Use the option() or Option.pure() functions instead."""
         )
+
+    def __eq__(self, other: 'Option[A]') -> bool:
+        """
+        Args:
+            other (Option[A]): the value to compare against
+
+        Returns:
+            bool: `True` if other is an instance of `Some` and inner values are
+                  equivalent, `False` otherwise
+        """
+        if type(self) != type(other):
+            return False
+        elif self.is_defined() and other.is_defined():
+            return self.get_or_none() == other.get_or_none()
+        elif self.is_empty() and other.is_empty():
+            return True
+        else:
+            return False
 
     def fold_left(self, b: B, f: FoldLeft[B, A]) -> B:
         """
@@ -89,15 +103,6 @@ class Option(OptionBase[A],
         """
         return Some(value)
 
-    def to_list(self) -> typing.List[A]:
-        """
-        Converts the `Convertible` into a python list.
-
-        Returns:
-            typing.List[A]: the resulting python list
-        """
-        raise NotImplementedError
-
 
 def option(value: A) -> 'Option[A]':
     """
@@ -119,8 +124,7 @@ def option(value: A) -> 'Option[A]':
 
 
 # noinspection PyMissingConstructor
-class Some(Option,
-           Generic[A]):
+class Some(Option[A]):
     """
     A type that represents the presence of an optional value.
 
@@ -150,15 +154,6 @@ class Some(Option,
         """
         return self._value
 
-    def to_list(self) -> typing.List[A]:
-        """
-        Converts the `Convertible` into a python list.
-
-        Returns:
-            typing.List[A]: the resulting python list
-        """
-        return [self.get(), ]
-
 
 def some(value: A) -> Some[A]:
     """
@@ -174,8 +169,7 @@ def some(value: A) -> Some[A]:
 
 
 # noinspection PyMissingConstructor,PyPep8Naming
-class Nothing(Option,
-              Generic[A]):
+class Nothing(Option):
     """
     A type that represents the absence of an optional value.
 
@@ -196,29 +190,13 @@ class Nothing(Option,
         """
         return 'Nothing'
 
-    def get(self) -> A:
+    def get(self):
         """
         Returns the `Option`'s inner value. Raises a `ValueError` for instances
         of `Nothing`.
-
-        Returns:
-            A: the inner value
         """
         raise ValueError(
             "Tried to access the non-existent inner value of a Nothing instance")
-
-    def to_list(self) -> typing.List[A]:
-        """
-        Converts the `Convertible` into a python list.
-
-        Returns:
-            typing.List[A]: the resulting python list
-        """
-        return []
-
-    # noinspection PyMethodMayBeStatic
-    def unpack(self):
-        return ()
 
 
 def nothing() -> Nothing:
