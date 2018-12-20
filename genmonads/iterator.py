@@ -1,70 +1,81 @@
 import itertools
+import typing
 
-from genmonads.eval import Now, defer
+from genmonads.either import Either
+from genmonads.eval import Now, defer, Eval
 from genmonads.foldable import Foldable
+from genmonads.monad import Monad
 from genmonads.monadfilter import MonadFilter
+from genmonads.mytypes import *
+from genmonads.option import Option
 from genmonads.tailrec import trampoline
 
 __all__ = ['Iterator', 'iterator', 'Stream', 'stream']
 
 
-class Iterator(Foldable, MonadFilter):
+class Iterator(Foldable,
+               MonadFilter,
+               Container[typing.Iterator[A]]):
     """
-    A type that represents a lazy iterator of values. Useful for representing python iterators and generators.
+    A type that represents a lazy iterator of values. Useful for representing
+    python iterators and generators.
 
-    Monadic computing is supported with `map()`, `flat_map()`, `flatten()`, and `filter()` functions,
-    and for-comprehensions can be formed by evaluating generators over monads with the `mfor()` function.
+    Monadic computing is supported with `map()`, `flat_map()`, `flatten()`, and
+    `filter()` functions, and for-comprehensions can be formed by evaluating
+    generators over monads with the `mfor()` function.
     """
 
-    def __init__(self, it):
+    def __init__(self, it: 'Iterator[A]'):
         self._value = it
 
-    def __eq__(self, other):
+    # noinspection PyProtectedMember
+    def __eq__(self, other: 'Iterator[A]'):
         """
         Args:
             other (Iterator[T]): the value to compare against
 
         Returns:
-            bool: `True` if other is an instance of `Iterator` and inner values are equivalent, `False` otherwise
+            bool: `True` if other is an instance of `Iterator` and inner values
+                  are equivalent, `False` otherwise
         """
         return type(self) == type(other) and self._value == other._value
 
     @staticmethod
-    def __mname__():
+    def __mname__() -> str:
         """
         Returns:
             str: the monad's name
         """
         return 'Iterator'
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         """
         Returns:
             str: a string representation of the Iterator
         """
         return 'Iterator(%s)' % str(self._value)
 
-    def drop(self, n):
-        return Iterator.from_iter(itertools.islice(self.get(), start=n))
+    def drop(self, n: int) -> 'Iterator[A]':
+        return Iterator.from_iter(itertools.islice(self.get(), start=n, stop=None))
 
-    def drop_while(self, p):
-        return Iterator.from_iter(itertools.dropwhile(self.get(), p))
+    def drop_while(self, p: Predicate[A]) -> 'Iterator[A]':
+        return Iterator.from_iter(itertools.dropwhile(p, self.get()))
 
     @staticmethod
-    def empty():
+    def empty() -> 'Iterator[A]':
         """
         Returns:
-            Iterator[T]: the empty instance for this `MonadFilter`
+            Iterator[A]: the empty instance for this `MonadFilter`
         """
         return Iterator.from_iter((x for x in []))
 
-    def filter(self, p):
+    def filter(self, p: Predicate[A]) -> 'Iterator[A]':
         return Iterator.from_iter(filter(p, self.get()))
 
-    def flat_map(self, f):
+    def flat_map(self, f: F1[A, 'Iterator[B]']) -> 'Iterator[B]':
         """
-        Applies a function that produces a iterator from unwrapped values to a iterator's inner value
-        and flattens the nested result.
+        Applies a function that produces a iterator from unwrapped values to an
+        iterator's inner value and flattens the nested result.
 
         Args:
             f (Callable[[A],Iterator[B]]): the function to apply
@@ -73,14 +84,7 @@ class Iterator(Foldable, MonadFilter):
             Iterator[B]: the resulting iterator
         """
 
-        def to_list(v):
-            """
-            Args:
-                v (Union[F[T],T]): the value
-
-            Returns:
-                Iterator[T]: the empty instance for this `MonadFilter`
-            """
+        def to_list(v: Union['Monad[T]', T]) -> 'Iterator[T]':
             return (mtry(lambda: v.to_iter().to_list())
                     .or_else(mtry(lambda: [x for x in v.unpack()]))
                     .get_or_else([v, ]))
@@ -91,7 +95,7 @@ class Iterator(Foldable, MonadFilter):
               for v in to_list(vs))
         return Iterator.from_iter(it)
 
-    def fold_left(self, b, f):
+    def fold_left(self, b: B, f: FoldLeft[B, A]) -> B:
         """
         Performs left-associated fold using `f`. Uses eager evaluation.
 
@@ -106,10 +110,13 @@ class Iterator(Foldable, MonadFilter):
             b = f(b, a)
         return b
 
-    def fold_right(self, lb, f):
+    def fold_right(self,
+                   lb: Eval[B],
+                   f: FoldRight[A, Eval[B]]
+                   ) -> Eval[B]:
         """
-        Performs right-associated fold using `f`. Uses lazy evaluation, requiring type `Eval[B]`
-        for initial value and accumulation results.
+        Performs right-associated fold using `f`. Uses lazy evaluation,
+        requiring type `Eval[B]` for initial value and accumulation results.
 
         Args:
             lb (Eval[B]): the lazily-evaluated initial value
@@ -129,59 +136,61 @@ class Iterator(Foldable, MonadFilter):
         return Now(self).flat_map(go)
 
     @staticmethod
-    def from_iter(it):
+    def from_iter(it: typing.Iterator[A]) -> 'Iterator[A]':
         return Iterator(it)
 
-    def get(self):
+    def get(self) -> typing.Iterator[A]:
         """
         Returns the iterator's inner value.
 
         Returns:
-            Iterator[T]: the inner value
+            Iterator[A]: the inner value
         """
         return self._value
 
-    def head(self):
+    def head(self) -> A:
         """
         Returns the first item in the iterator.
 
         Returns:
-            T: the first item
+            A: the first item
 
         Throws:
             StopIteration: if the iterator is empty
         """
         return next(self._value)
 
-    def head_and_tail(self):
+    def head_and_tail(self) -> Tuple[A, typing.Iterator[A]]:
         return next(self._value), self
 
-    def head_option(self):
+    def head_option(self) -> Option[A]:
         """
-        Safely returns the first item in the iterator by wrapping the attempt in `Option`.
+        Safely returns the first item in the iterator by wrapping the attempt
+        in `Option`.
 
         Returns:
-            Option[T]: the first item wrapped in `Some`, or `Nothing` if the list is empty
+            Option[T]: the first item wrapped in `Some`, or `Nothing` if the
+                       list is empty
         """
         from genmonads.mtry import mtry
         return mtry(lambda: self.head).to_option()
 
     # noinspection PyUnresolvedReferences,PyAttributeOutsideInit
-    def is_empty(self):
+    def is_empty(self) -> bool:
         from genmonads.mtry import mtry
         test, self._value = itertools.tee(self._value)
         return mtry(lambda: next(test)).is_failure()
 
     # noinspection PyMethodMayBeStatic
-    def is_gettable(self):
+    def is_gettable(self) -> bool:
         return True
 
-    def last(self):
+    def last(self) -> A:
         """
         Returns the last item in the iterator.
 
         Returns:
-            T: the last item
+            A: the last item
 
         Throws:
             StopIteration: if the iterator is empty
@@ -193,60 +202,62 @@ class Iterator(Foldable, MonadFilter):
         except StopIteration:
             return x
 
-    def last_option(self):
+    def last_option(self) -> Option[A]:
         """
-        Safely returns the last item in the list by wrapping the attempt in `Option`.
+        Safely returns the last item in the list by wrapping the attempt in
+        `Option`.
 
         Returns:
-            Option[T]: the first item wrapped in `Some`, or `Nothing` if the list is empty
+            Option[A]: the first item wrapped in `Some`, or `Nothing` if the
+                       list is empty
         """
         from genmonads.mtry import mtry
         return mtry(lambda: self.last()).to_option()
 
-    def map(self, f):
+    def map(self, f: F1[A, B]) -> 'Iterator[B]':
         """
         Applies a function to the inner value of a monad.
 
         Args:
-            f (Callable[[A],B]): the function to apply
+            f (Callable[[A], B]): the function to apply
 
         Returns:
-            Monad[B]: the resulting monad
+            Iterator[B]: the resulting Iterator
         """
         return Iterator.from_iter((f(x) for x in self.get()))
 
-    def memoize(self):
+    def memoize(self) -> 'Stream[A]':
         return self.to_stream()
 
-    def mtail_option(self):
+    def mtail_option(self) -> Option['Iterator[A]']:
         """
         Returns the tail of the list as an option.
 
         Returns:
-            Option[Iterator[T]]: the rest of the iterator
+            Option[Iterator[A]]: the rest of the iterator
         """
         from genmonads.mtry import mtry
         return mtry(lambda: self.tail()).to_option()
 
     @staticmethod
-    def pure(*values):
+    def pure(*values: A) -> 'Iterator[A]':
         """
         Injects a value into the `Iterator` monad.
 
         Args:
-            values (T): the values
+            values (A): the values
 
         Returns:
-            Iterator[T]: the resulting `Iterator`
+            Iterator[A]: the resulting `Iterator`
         """
         return Iterator.from_iter((x for x in values))
 
-    def tail(self):
+    def tail(self) -> 'Iterator[A]':
         """
         Returns the tail of the iterator.
 
         Returns:
-            Iterator[T]: the tail of the list
+            Iterator[A]: the tail of the list
 
         Throws:
             StopIteration: if the iterator is empty
@@ -254,32 +265,34 @@ class Iterator(Foldable, MonadFilter):
         next(self._value)
         return self
 
-    def tail_option(self):
+    def tail_option(self) -> Option['Iterator[A]']:
         """
         Returns the tail of the iterator as an option.
 
         Returns:
-            Option[Iterator[T]]: the rest of the iterator
+            Option[Iterator[A]]: the rest of the iterator
         """
         from genmonads.mtry import mtry
         return mtry(lambda: self.tail()).to_option()
 
     # noinspection PyPep8Naming
     @staticmethod
-    def tailrecM(f, a):
+    def tailrecM(f: F1[A, 'Iterator[Either[A, B]]'],
+                 a: A
+                 ) -> 'Iterator[B]':
         """
         Applies a tail-recursive function in a stack safe manner.
 
         Args:
-            f (Callable[[A],F[Either[A,B]]]): the function to apply
-            a: the recursive function's input
+            f (Callable[[A], Iterator[Either[A, B]]]): the function to apply
+            a (A): the recursive function's input
 
         Returns:
-            F[B]: an `F` instance containing the result of applying the tail-recursive function to
-            its argument
+            Iterator[B]: an `F` instance containing the result of applying the
+            tail-recursive function to its argument
         """
 
-        def go(a1):
+        def go(a1: A) -> 'Iterator[A]':
             fa = f(a1)
             e = fa.head()
             a2 = e.get()
@@ -287,116 +300,117 @@ class Iterator(Foldable, MonadFilter):
 
         return trampoline(go, a)
 
-    def take(self, n):
+    def take(self, n: int) -> 'Iterator[A]':
         return Iterator(itertools.islice(self.get(), n))
 
-    def take_while(self, p):
-        return Iterator(itertools.dropwhile(self.get(), p))
+    def take_while(self, p: Predicate[A]) -> 'Iterator[A]':
+        return Iterator(itertools.dropwhile(p, self.get()))
 
-    def to_iter(self):
+    def to_iter(self) -> 'Iterator[A]':
         return self
 
-    def to_stream(self):
+    def to_stream(self) -> 'Stream[A]':
         return Stream(self.get())
 
-    def unpack(self):
+    def unpack(self) -> Tuple[A, ...]:
         """
         Returns the inner value as a tuple to support unpacking
 
         Returns:
-            Tuple[T]: the inner values as a tuple
+            Tuple[A, ...]: the inner values as a tuple
         """
         return tuple(self.get())
 
 
-def iterator(*values):
+def iterator(*values: A) -> 'Iterator[A]':
     """
     Constructs a `Iterator` instance from a tuple of values.
 
     Args:
-        values (T): the values
+        values (A): the values
 
     Returns:
-        Iterator[T]: the resulting `Iterator`
+        Iterator[A]: the resulting `Iterator`
     """
     return Iterator.pure(*values)
 
 
 # noinspection PyMissingConstructor
-class Stream(Iterator):
+class Stream(Iterator[A]):
     """
     A type that represents a memoized, lazy stream of values.
 
-    Monadic computing is supported with `map()`, `flat_map()`, `flatten()`, and `filter()` functions,
-    and for-comprehensions can be formed by evaluating generators over monads with the `mfor()` function.
+    Monadic computing is supported with `map()`, `flat_map()`, `flatten()`, and
+    `filter()` functions, and for-comprehensions can be formed by evaluating
+    generators over monads with the `mfor()` function.
     """
 
-    def __init__(self, it):
+    def __init__(self, it: typing.Iterator):
         self._value = it
         self._memo = None
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return 'Stream(%s)' % ', '.join(repr(x) for x in self.get())
 
     @staticmethod
-    def from_iter(it):
+    def from_iter(it: typing.Iterator[A]) -> 'Stream[A]':
         return Stream(it)
 
-    def get(self):
+    def get(self) -> typing.List[A]:
         """
-        Returns the iterator's inner value.
+        Returns the stream's inner value.
 
         Returns:
-            Typing.List[T]: the inner value
+            typing.List[A]: the inner value
         """
         if self._memo is None:
             self._memo = [x for x in self._value]
         return self._memo
 
     @staticmethod
-    def pure(*values):
+    def pure(*values: A) -> 'Stream[A]':
         """
         Injects a value into the `Stream` monad.
 
         Args:
-            values (T): the values
+            values (A): the values
 
         Returns:
-            Stream[T]: the resulting `Iterator`
+            Stream[A]: the resulting `Stream`
         """
         return Stream((x for x in values))
 
-    def to_iter(self):
+    def to_iter(self) -> Iterator[A]:
         return Iterator.from_iter(self._value)
 
-    def to_list(self):
+    def to_list(self) -> typing.List[A]:
         """
         Converts the `Stream` into a python list.
 
         Returns:
-            typing.List[T]: the resulting python list
+            typing.List[A]: the resulting python list
         """
         return self.get()
 
-    def to_stream(self):
+    def to_stream(self) -> 'Stream[A]':
         return self
 
 
-def stream(*values):
+def stream(*values: A) -> Stream[A]:
     """
     Constructs a `Iterator` instance from a tuple of values.
 
     Args:
-        values (T): the values
+        values (A): the values
 
     Returns:
-        Stream[T]: the resulting `Iterator`
+        Stream[A]: the resulting `Iterator`
     """
     return Stream.pure(*values)
 
 
 def main():
-    from genmonads.monad import mfor
+    from genmonads.syntax import mfor
     import operator
 
     print(iterator(2, 3)
@@ -436,7 +450,8 @@ def main():
 
     n = 1000
     print(Iterator(itertools.count(1))
-          .fold_right(Now(1), lambda a, lb: lb.map(lambda b: a * b) if a < n else Now(a))
+          .fold_right(Now(1),
+                      lambda a, lb: lb.map(lambda b: a * b) if a < n else Now(a))
           .get())
 
     print(Iterator(itertools.count(1))

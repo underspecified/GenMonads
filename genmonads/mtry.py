@@ -1,25 +1,37 @@
-from genmonads.util import is_thunk
+import typing
 
+from genmonads.convertible import Convertible
+from genmonads.eval import Eval
 from genmonads.foldable import Foldable
 from genmonads.monad import Monad
+from genmonads.mytypes import *
+from genmonads.option_base import Option, Some, Nothing
+from genmonads.util import is_thunk
 
 __all__ = ['Failure', 'Success', 'Try', 'failure', 'mtry', 'success']
 
 
-class Try(Foldable, Monad):
+class Try(Monad[A],
+          Foldable[A],
+          Convertible[A]):
     """
     A type that represents a failable computation.
 
-    Instances of type `Try[T]` are either instances of `Success[T]` or `Failure[T]`.
-    This monad uses eager evaluation. For lazy computations, see the `Eval` monad.
+    Instances of type `Try[A]` are either instances of `Success[A]` or
+    `Failure[A]`.
+    This monad uses eager evaluation. For lazy computations, see the `Eval`
+    monad.
 
-    Instances of `Try[T]` are constructed by passing a computation wrapped in a thunk (i.e. a lambda expression
-    with no arguments) to either the `mtry()` or `Try.pure()` or functions. The thunk is evaluated immediately,
-    and successful computations return the result wrapped in `Success`, while computations that raise an exception
-    return that exception wrapped in `Failure[T]`.
+    Instances of `Try[A]` are constructed by passing a computation wrapped in
+    a thunk (i.e. a lambda expression with no arguments) to either the `mtry()`
+    or `Try.pure()` or functions. The thunk is evaluated immediately, and
+    successful computations return the result wrapped in `Success`, while
+    computations that raise an exception return that exception wrapped in
+    `Failure[A]`.
 
-    Monadic computing is supported with `map()`, `flat_map()`, `flatten()`, and `filter()` functions, and
-    for-comprehensions can be formed by evaluating generators over monads with the `mfor()` function.
+    Monadic computing is supported with `map()`, `flat_map()`, `flatten()`,
+    and `filter()` functions, and for-comprehensions can be formed by
+    evaluating generators over monads with the `mfor()` function.
     """
 
     def __init__(self, *args, **kwargs):
@@ -28,183 +40,209 @@ class Try(Foldable, Monad):
             Use the try_to() or Try.pure() functions instead."""
         )
 
-    def __eq__(self, other):
+    def __eq__(self, other: 'Try[A]') -> bool:
         """
         Args:
-            other (Try[T]): the value to compare against
+            other (Try[A]): the value to compare against
 
         Returns:
             bool: `True` if inner values are equivalent, `False` otherwise
         """
-        if type(self) == type(other):
-            return self.get_or_none() == other.get_or_none()
-        else:
-            return False
+        return (type(self) == type(other) and
+                self.get_or_none() == other.get_or_none())
 
     @staticmethod
-    def __mname__():
+    def __mname__() -> str:
         """
         Returns:
             str: the monad's name
         """
         return 'Try'
 
-    def cata(self, fa, fb):
+    def cata(self, fa: F1[A, B], fb: F1[Exception, B]) -> B:
         """
-        Transforms an `Either[A,B]` instance by applying `fa` to the inner value of instances of Left[A],
-        and `fb` to the inner value of instance of Right[B].
+        Transforms an `Try[A]` instance by applying `fa` to the inner value of
+        instances of Success[A], and `fb` to the inner value of instance of
+        Failure.
 
         Args:
-            fa (Callable[[A],C): the function to apply to instances of `Left[A]`
-            fb (Callable[[B],C): the function to apply to instances of `Right[B]`
+            fa (F1[A, B]): the function to apply to instances of `Success[A]`
+            fb (F1[Exception, B]): the function to apply to instances of
+            `Failure`
 
         Returns:
-            C: the resulting `C` instance
+            B: the resulting `B` instance
         """
         return fb(self.get()) if self.is_success() else fa(self.get())
 
-    def flat_map(self, f):
+    def flat_map(self, f: F1[A, 'Try[B]']) -> 'Try[B]':
         """
         Applies a function to the inner value of a `Try`.
 
         Args:
-            f (Callable[[B],Try[C]): the function to apply
+            f (F1[A, Try[B]]): the function to apply
 
         Returns:
-            Try[C]: the resulting monad
+            Try[B]: the resulting monad
         """
         return f(self.get()) if self.is_success() else self
 
-    def fold_left(self, b, f):
+    def fold_left(self, b: B, f: FoldLeft[B, A]) -> B:
         """
         Performs left-associated fold using `f`. Uses eager evaluation.
 
         Args:
             b (B): the initial value
-            f (Callable[[B,A],B]): the function to fold with
+            f (FoldLeft[B, A]): the function to fold with
 
         Returns:
             B: the result of folding
         """
         return f(b, self.get()) if self.is_success() else b
 
-    def fold_right(self, lb, f):
+    def fold_right(self,
+                   lb: 'Eval[B]',
+                   f: FoldRight[A, 'Eval[B]']
+                   ) -> 'Eval[B]':
         """
-        Performs left-associated fold using `f`. Uses lazy evaluation, requiring type `Eval[B]`
-        for initial value and accumulation results.
+        Performs left-associated fold using `f`. Uses lazy evaluation,
+        requiring type `Eval[B]` for initial value and accumulation results.
 
         Args:
             lb (Eval[B]): the lazily-evaluated initial value
-            f (Callable[[A,Eval[B]],Eval[B]]): the function to fold with
+            f (FoldRight[A, Eval[B]]): the function to fold with
 
         Returns:
             Eval[B]: the result of folding
         """
         return f(self.get(), lb) if self.is_success() else lb
 
-    def get(self):
+    def get(self) -> Union[A, Exception]:
         """
         Returns the Try's inner value.
 
         Returns:
-            Union[T,Exception]: the inner value
+            Union[A, Exception]: the inner value
         """
         raise NotImplementedError
 
-    def is_failure(self):
+    def is_failure(self) -> bool:
         return isinstance(self, Failure)
 
-    def is_success(self):
+    def is_success(self) -> bool:
         return isinstance(self, Success)
 
-    def or_else(self, default):
+    def or_else(self, default: 'Try[A]') -> 'Try[A]':
         """
-        Returns the `Try` if an instance of `Success` or `default` if an instance of `Failure` .
+        Returns the `Try` if an instance of `Success` or `default` if an
+        instance of `Failure` .
 
         Args:
-            default (Try[B]): the monad to return for `Failure[T]` instances
+            default (Try[A]): the monad to return for `Failure[A]` instances
 
         Returns:
-            Try[B]: the resulting `Try`
+            Try[A]: the resulting `Try`
         """
         return self if self.is_success() else default
 
     @staticmethod
-    def pure(value):
+    def pure(value: Union[A, Thunk[A]]) -> 'Try[A]':
         """
-        Injects a value into the `Try` monad.
+        Evaluates a thunk and injects the result into the `Try` monad.
 
-        This function should be used instead of calling `Try.__init__()` directly.
+        This function should be used instead of calling `Try.__init__()`
+        directly.
 
         Args:
-            value (T): the value
+            value (Union[A, Thunk[A]]): a thunk or value
 
         Returns:
-            Try[T]: the resulting `Try`
+            Try[A]: the resulting `Try`
             
         Raises:
             ValueError: if the argument is not a zero arity lambda function
         """
-        return Success(value)
+        if is_thunk(value):
+            try:
+                return Success(value())
+            except Exception as ex:
+                return Failure(ex)
+        else:
+            return Success(value)
 
-    def recover(self, f):
+    def recover(self, f: F1[Exception, B]) -> 'Try[B]':
         """
         Recovers from a failed computation by applying `f` to the exception.
 
         Essentially, a map on the `Failure` instance.
 
         Args:
-            f (Callable[[Exception],B): the function to call on the `Failure[T]`'s exception
+            f (F1[Exception,B]): the function to call on the `Failure[A]`'s
+                                 exception
 
         Returns:
             Try[B]: the resulting `Try`
         """
         return self if self.is_success() else f(self.get())
 
-    def recover_with(self, f):
+    def recover_with(self, f: F1[Exception, 'Try[B]']) -> 'Try[B]':
         """
-        Recovers from a failed computation by applying `f` to the `Failure[T]` instance.
+        Recovers from a failed computation by applying `f` to the `Failure`
+        instance.
 
         Essentially, a flat_map on the `Failure` instance.
 
         Args:
-            f (Callable[[Exception],Try[B]): the function to call on the `Failure[T]`
+            f (F1[Exception, 'Try[B]']): the function to call on the `Failure`
 
         Returns:
-            Try[B]: the resulting `Try`
+            Try[B]: the resulting `Try[B]`
         """
         return self if self.is_success() else f(self)
 
-    def to_option(self):
+    def to_list(self) -> typing.List[A]:
         """
-        Converts an instance of `Try[T]` to `Option[T]`.
+        Converts an instance of `Try[A]` to a pythonic list.
 
-        `Success[T]` is mapped to `Some[T]`, and `Failure[T]` is mapped to `Nothing[T]`.
+        `Success[A]` is mapped to a singleton list containing the value,
+         and `Failure[A]` is mapped to the empty list.
 
         Returns:
-            Option[T]: the corresponding `Option`
+            typing.List[A]: the corresponding list
         """
-        from genmonads.option import Some
-        return Some(self.get()) if self.is_success() else None
+        return [self.get(), ] if self.is_success() else []
+
+    def to_option(self) -> 'Option[A]':
+        """
+        Converts an instance of `Try[A]` to a pythonic list.
+
+        `Success[A]` is mapped to Some[A] containing the value,
+         and `Failure[A]` is mapped to Nothing.
+
+        Returns:
+            Option[A]: the corresponding Option
+        """
+        return Some(self.get()) if self.is_success() else Nothing()
 
 
-def mtry(thunk):
+def mtry(thunk: Thunk[A]) -> Try[A]:
     """
     Evaluates a failable computation in the `Try` monad.
 
     This function should be used instead of calling `Try.__init__()` directly.
 
     Args:
-        thunk (Callable[[None],T]): the computation
+        thunk (Thunk[A]): the computation
 
     Returns:
-        Try[T]: the resulting `Try`
+        Try[A]: the resulting `Try`
 
     Raises:
         ValueError: if the argument is not a zero arity lambda function
     """
     if not is_thunk(thunk):
-        raise ValueError('Try.pure(%s) requires a thunk as an argument!' % thunk)
+        raise ValueError(
+            'mtry(%s) requires a thunk as an argument!' % thunk)
     try:
         return Success(thunk())
     except Exception as ex:
@@ -212,58 +250,59 @@ def mtry(thunk):
 
 
 # noinspection PyMissingConstructor
-class Success(Try):
-    def __init__(self, value):
-        self._value = value
+class Success(Try,
+              Generic[A]):
+    def __init__(self, value: A):
+        self._value: A = value
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         """
         Returns:
             str: a string representation of monad
         """
         return 'Success(%s)' % repr(self.get())
 
-    def get(self):
+    def get(self) -> A:
         """
-        Returns the `Try`'s inner value.
+        Returns the inner value of the `Success[A]`.
 
         Returns:
-            Union[T,Exception]: the inner value
+            A: the inner value
         """
         return self._value
 
 
-def success(value):
+def success(value: A) -> Success[A]:
     """
     Injects a value into the `Success` monad.
 
     Args:
-        value (T): the value
+        value (A): the value
 
     Returns:
-        Try[T]: the resulting monad
+        Success[A]: the resulting monad
     """
     return Success(value)
 
 
 # noinspection PyMissingConstructor
 class Failure(Try):
-    def __init__(self, ex):
-        self._value = ex
+    def __init__(self, ex: Exception):
+        self._value: Exception = ex
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         """
         Returns:
             str: a string representation of the monad
         """
         return 'Failure(%s)' % repr(self.get())
 
-    def get(self):
+    def get(self) -> Exception:
         """
-        Returns the `Try`'s inner value.
+        Returns the `Failure`'s inner value.
 
         Returns:
-            Union[T,Exception]: the inner value
+            Exception: the inner value
         """
         return self._value
 
@@ -277,7 +316,7 @@ class Failure(Try):
         raise self.get()
 
 
-def failure(ex):
+def failure(ex: Exception) -> Failure:
     """
     Injects an exception into the `Failure` monad.
 
@@ -285,13 +324,13 @@ def failure(ex):
         ex (Exception): the exception
 
     Returns:
-        Failure[T]: the resulting `Failure`
+        Failure: the resulting `Failure`
     """
     return Failure(ex)
 
 
 def main():
-    from genmonads.monad import mfor
+    from genmonads.syntax import mfor
 
     print(mtry(lambda: 2)
           .flat_map(lambda x: mtry(lambda: 5)

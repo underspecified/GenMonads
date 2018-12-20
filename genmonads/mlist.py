@@ -1,45 +1,55 @@
+import typing
+
+from genmonads.convertible import Convertible
+from genmonads.either import Either
+from genmonads.eval import Eval
 from genmonads.foldable import Foldable
 from genmonads.monadfilter import MonadFilter
+from genmonads.mtry import mtry
+from genmonads.mytypes import *
+from genmonads.option_base import Option
 from genmonads.tailrec import trampoline
 
 __all__ = ['List', 'Nil', 'mlist', 'nil']
 
 
-class List(Foldable, MonadFilter):
+class List(MonadFilter[A],
+           Foldable[A],
+           Convertible[A]):
     """
     A type that represents list of values of the same type.
 
-    Instances are either of type `List[T]` or `Nil[T]`.
+    Instances are either of type `List[A]` or `Nil`.
 
-    Monadic computing is supported with `map()`, `flat_map()`, `flatten()`, and `filter()` functions,
-    and for-comprehensions can be formed by evaluating generators over monads with the `mfor()` function.
+    Monadic computing is supported with `map()`, `flat_map()`, `flatten()`, and
+    `filter()` functions, and for-comprehensions can be formed by evaluating
+    generators over monads with the `mfor()` function.
     """
 
-    def __init__(self, *values):
-        self._value = list(values)
+    def __init__(self, *values: A):
+        self._value: typing.List[A] = list(values)
 
-    def __eq__(self, other):
+    def __eq__(self, other: 'List[A]') -> bool:
         """
         Args:
-            other (List[T]): the value to compare against
+            other (List[A]): the value to compare against
 
         Returns:
-            bool: `True` if other is an instance of `List` and inner values are equivalent, `False` otherwise
+            bool: `True` if other is an instance of `List` and inner values are
+             equivalent, `False` otherwise
         """
-        if type(self) == type(other):
-            return self.get_or_none() == other.get_or_none()
-        else:
-            return False
+        return (type(self) == type(other)
+                and self.get_or_none() == other.get_or_none())
 
     @staticmethod
-    def __mname__():
+    def __mname__() -> str:
         """
         Returns:
             str: the monad's name
         """
         return 'List'
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         """
         Returns:
             str: a string representation of the List
@@ -47,52 +57,54 @@ class List(Foldable, MonadFilter):
         return 'List(%s)' % ', '.join(repr(v) for v in self.get())
 
     @staticmethod
-    def empty():
+    def empty() -> 'Nil':
         """
         Returns:
-            List[T]: `Nil`, the empty instance for this `MonadFilter`
+            List[A]: `Nil`, the empty instance for this `MonadFilter`
         """
         return Nil()
 
-    def flat_map(self, f):
+    def flat_map(self, f: F1[A, 'List[B]']) -> 'List[B]':
         """
-        Applies a function that produces an Monad from unwrapped values to an Monad's inner value and flattens the
-        nested result.
+        Applies a function that produces an Monad from unwrapped values to a
+        Monad's inner value and flattens the nested result.
 
-        If the inner values can be converted to an instance of `List` by having an implementation of
-        `to_mlist()`, the inner values will be converted to `List` before flattening. This allows for
-        flattening of `List[Option[T]]` into `List[T]`, as is done in Scala.
+        If the inner values can be converted to an instance of `List` by having
+        an implementation of to_mlist()`, the inner values will be converted to
+        `List` before flattening. This allows for flattening of
+        `List[Option[A]]` into `List[A]`, as is done in Scala.
 
         Args:
-            f (Callable[[A],List[B]]): the function to apply
+            f (F1[A, List[B]]): the function to apply
 
         Returns:
             List[B]: the resulting monad
         """
-        def to_mlist(v):
+        from genmonads.mtry import mtry
+
+        def to_mlist(v: Union[A, 'List[A]']):
             """
             Args:
-                v (Union[F[T],T]): the value
+                v (Union[A, List[A]): the value
 
             Returns:
-                Iterator[T]: the empty instance for this `MonadFilter`
+                Iterator[A]: the empty instance for this `MonadFilter`
             """
             return (mtry(lambda: v.to_mlist().get())
                     .or_else(mtry(lambda: v.unpack()))
                     .get_or_else((v,)))
 
-        from genmonads.mtry import mtry
         return List(*[v
                       for vs in (f(v1)for v1 in self.get())
                       for v in to_mlist(vs)])
 
-    def fold_left(self, b, f):
+    def fold_left(self, b: B, f: FoldLeft[B, A]) -> B:
         """
         Performs left-associated fold using `f`. Uses eager evaluation.
 
         Args:
             b (B): the initial value
-            f (Callable[[B,A],B]): the function to fold with
+            f (FoldLeft[B, A]): the function to fold with
 
         Returns:
             B: the result of folding
@@ -101,14 +113,14 @@ class List(Foldable, MonadFilter):
             b = f(b, a)
         return b
 
-    def fold_right(self, lb, f):
+    def fold_right(self, lb: 'Eval[B]', f: FoldRight[A, B]) -> 'Eval[B]':
         """
-        Performs left-associated fold using `f`. Uses lazy evaluation, requiring type `Eval[B]`
-        for initial value and accumulation results.
+        Performs left-associated fold using `f`. Uses lazy evaluation,
+        requiring type `Eval[B]` for initial value and accumulation results.
 
         Args:
             lb (Eval[B]): the lazily-evaluated initial value
-            f (Callable[[A,Eval[B]],Eval[B]]): the function to fold with
+            f (FoldRight[A, B]): the function to fold with
 
         Returns:
             Eval[B]: the result of folding
@@ -117,111 +129,112 @@ class List(Foldable, MonadFilter):
             lb = f(a, lb)
         return lb
 
-    def get(self):
+    def get(self) -> typing.List[A]:
         """
         Returns the `List`'s inner value.
 
         Returns:
-            list[T]: the inner value
+            typing.List[A]: the inner value
         """
         return self._value
 
-    def head(self):
+    def head(self) -> A:
         """
         Returns the first item in the list.
 
         Returns:
-            T: the first item
+            A: the first item
 
         Throws:
             IndexError: if the list is empty
         """
         return self.get()[0]
 
-    def head_option(self):
+    def head_option(self) -> Option[A]:
         """
-        Safely returns the first item in the list by wrapping the attempt in `Option`.
+        Safely returns the first item in the list by wrapping the attempt in
+        `Option`.
 
         Returns:
-            Option[T]: the first item wrapped in `Some`, or `Nothing` if the list is empty
+            Option[A]: the first item wrapped in `Some`, or `Nothing` if the
+                       list is empty
         """
-        from genmonads.mtry import mtry
         return mtry(lambda: self.head).to_option()
 
     # noinspection PyMethodMayBeStatic
-    def is_gettable(self):
+    def is_gettable(self) -> bool:
         return True
 
-    def last(self):
+    def last(self) -> A:
         """
         Returns the last item in the list.
 
         Returns:
-            T: the last item
+            A: the last item
 
         Throws:
             IndexError: if the list is empty
         """
         return self.get()[-1]
 
-    def last_option(self):
+    def last_option(self) -> Option[A]:
         """
-        Safely returns the last item in the list by wrapping the attempt in `Option`.
+        Safely returns the last item in the list by wrapping the attempt in
+        `Option`.
 
         Returns:
-            Option[T]: the first item wrapped in `Some`, or `Nothing` if the list is empty
+            Option[A]: the first item wrapped in `Some`, or `Nothing` if the
+                       list is empty
         """
-        from genmonads.mtry import mtry
         return mtry(lambda: self.last()).to_option()
 
-    def mtail(self):
+    def mtail(self) -> 'List[A]':
         """
         Returns the tail of the list as a monadic List.
 
         Returns:
-            List[T]: the rest of the nel
+            List[A]: the rest of the list
         """
-        from genmonads.mtry import mtry
-        return mtry(lambda: self.tail()).to_option().to_mlist()
+        return mtry(lambda: self.tail()).to_mlist()
 
     @staticmethod
-    def pure(*values):
+    def pure(*values) -> 'List[A]':
         """
         Injects a value into the `List` monad.
 
         Args:
-            values (T): the values
+            values (A): the values
 
         Returns:
-            List[T]: the resulting `List`
+            List[A]: the resulting `List`
         """
         return List(*values) if values else Nil()
 
-    def tail(self):
+    def tail(self) -> typing.List[A]:
         """
         Returns the tail of the list.
 
         Returns:
-            typing.List[T]: the tail of the list
+            typing.List[A]: the tail of the list
         """
         return self.get()[1:]
 
     # noinspection PyPep8Naming
     @staticmethod
-    def tailrecM(f, a):
+    def tailrecM(f: F1[A, 'List[Either[A, B]]'], a: A) -> 'List[B]':
         """
         Applies a tail-recursive function in a stack safe manner.
 
         Args:
-            f (Callable[[A],F[Either[A,B]]]): the function to apply
-            a: the recursive function's input
+            f (F1[A, 'List[Either[A, B]]']): the function to apply
+            a (A): the recursive function's input
 
         Returns:
-            F[B]: an `F` instance containing the result of applying the tail-recursive function to
-            its argument
+            F[B]: an `F` instance containing the result of applying the
+                  tail-recursive function to its argument
         """
 
-        def go(a1):
+        def go(a1: A) -> Union[A, 'List[A]']:
             fa = f(a1)
             e = fa.head()
             a2 = e.get()
@@ -229,43 +242,34 @@ class List(Foldable, MonadFilter):
 
         return trampoline(go, a)
 
-    def to_list(self):
+    def to_list(self) -> typing.List[A]:
         """
         Converts the `List` into a python list.
 
         Returns:
-            typing.List[T]: the resulting python list
+            typing.List[A]: the resulting python list
         """
         return self.get()
 
-    def to_mlist(self):
-        """
-        Converts the List into a monadic list.
-
-        Returns:
-            List[T]: the resulting monadic list
-        """
-        return self
-
-    def unpack(self):
+    def unpack(self) -> Tuple[A, ...]:
         """
         Returns the inner value as a tuple to support unpacking
 
         Returns:
-            Tuple[T]: the inner values as a tuple
+            Tuple[A]: the inner values as a tuple
         """
         return tuple(self.get())
 
 
-def mlist(*values):
+def mlist(*values: A) -> 'List[A]':
     """
     Constructs a `List` instance from a tuple of values.
 
     Args:
-        values (T): the values
+        values (A): the values
 
     Returns:
-        stream.List[T]: the resulting `List`
+        stream.List[A]: the resulting `List`
     """
     return List.pure(*values)
 
@@ -278,22 +282,19 @@ class Nil(List):
 
     # noinspection PyInitNewSignature
     def __init__(self):
-        self._value = []
+        self._value: typing.List = []
 
-    def __eq__(self, other):
+    def __eq__(self, other: 'List[A]'):
         """
         Args:
-            other (List[T]): the value to compare against
+            other (List[A]): the value to compare against
 
         Returns:
             bool: `True` if other is instance of `Nil`, `False` otherwise
         """
-        if isinstance(other, Nil):
-            return True
-        else:
-            return False
+        return isinstance(other, Nil)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         """
         Returns:
             str: a string representation of the `List`
@@ -301,18 +302,18 @@ class Nil(List):
         return 'Nil'
 
 
-def nil():
+def nil() -> Nil:
     """
     Constructs a `Nil` instance.
 
     Returns:
-        Nil[T]: the resulting `Nil`
+        Nil: the resulting `Nil`
     """
     return Nil()
 
 
 def main():
-    from genmonads.monad import mfor
+    from genmonads.syntax import mfor
 
     print(mlist(2, 3).flat_map(lambda x: List.pure(x + 5)))
 
@@ -335,7 +336,8 @@ def main():
 
     print(nil().map(lambda x: x * 2))
 
-    print(mlist(mlist(1, 2, 3, 4, 5), mlist(5, 4, 3, 2, 1)).flat_map(lambda x: x.last_option()))
+    print(mlist(mlist(1, 2, 3, 4, 5), mlist(5, 4, 3, 2, 1))
+          .flat_map(lambda x: x.last_option()))
 
 
 if __name__ == '__main__':

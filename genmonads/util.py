@@ -9,7 +9,7 @@ def arity(f):
     Returns the arity, or number of arguments of function `f`.
 
     Args:
-        f (Callable[A,B]): the function to check
+        f (Callable[..., B]): the function to check
 
     Returns:
         int: the arity of `f`
@@ -36,7 +36,7 @@ def is_lambda(f):
     Checks if function `f` is a lambda expression.
     
     Args:
-        f (Callable[A,B]): the function to check
+        f (Callable[..., B]): the function to check
 
     Returns:
         bool: True if `f` is a lambda expression, False otherwise
@@ -49,7 +49,7 @@ def is_thunk(f):
     Checks if function `f` is a thunk, that is a lambda expression of arity zero.
 
     Args:
-        f (Callable[A,B]): thw function to check
+        f (Callable[..., B]): the function to check
 
     Returns:
         bool: True if `f` is a thunk, False otherwise

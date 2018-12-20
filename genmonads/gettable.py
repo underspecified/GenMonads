@@ -1,9 +1,10 @@
 from genmonads.match import match, matches
+from genmonads.mytypes import *
 
 __all__ = ['Gettable', ]
 
 
-class Gettable:
+class Gettable(Container[A]):
     """
     A type that represents a wrapped value with a `get()` accessor function.
 
@@ -11,40 +12,54 @@ class Gettable:
     access to inner values provided by pattern matching.
     """
 
-    def get(self):
+    def __contains__(self, elem: A) -> bool:
+        """
+        Checks if any of this monad's inner values is equivalent to `elem`.
+
+        Args:
+            elem (A): the element
+
+        Returns:
+            bool: True if any of this monad's inner values is equivalent to
+                  `elem`
+        """
+        return self.get() == elem
+
+    def get(self) -> A:
         """
         Returns the `Gettable`'s inner value.
 
         Returns:
-            T: the inner value
+            A: the inner value
         """
         raise NotImplementedError
 
-    def get_or_else(self, default):
+    def get_or_else(self, default: A) -> A:
         """
         Returns the `Gettable`'s inner value if defined or `default` otherwise.
 
         Args:
-            default (T): the value to return for `Nothing` instances
+            default (A): the value to return for `Nothing` instances
 
         Returns:
-            T: the `Gettable`'s inner value if defined or `default` otherwise
+            A: the `Gettable`'s inner value if defined or `default` otherwise
         """
         return self.get() if self.is_gettable() else default
 
-    def get_or_none(self):
+    def get_or_none(self) -> Optional[A]:
         """
         Returns the `Gettable`'s inner value if defined or `None` otherwise.
 
         Provided as interface to code that expects `None` values.
 
         Returns:
-            Union[T,None]: the `Gettable`'s inner value if defined or `None` otherwise
+            Optional[A]: the `Gettable`'s inner value if defined or `None`
+            otherwise
         """
         return self.get_or_else(None)
 
     # noinspection PyMethodMayBeStatic
-    def is_gettable(self):
+    def is_gettable(self) -> bool:
         """
         Returns true if this type class implements the `get()` method.
 
@@ -53,12 +68,14 @@ class Gettable:
         """
         return True
 
-    # noinspection PyProtectedMember
-    def match(self, conditions):
+    # noinspection PyProtectedMember,PyUnresolvedReferences
+    def match(self, conditions: Dict['Gettable[A]', F1[A, B]]) -> Optional[B]:
         """
-        Checks a `Gettable[A]` type class instance `x` against dictionary of pattern => action mappings, and when a
-        match is found, returns the results from calling the associated action on `x`'s inner value. Wildcard matches
-        (`_`) are supported in both the type class and inner values.
+        Checks a `Gettable[A]` type class instance `x` against dictionary of
+        pattern => action mappings, and when a match is found, returns the
+        results from calling the associated action on `x`'s inner value.
+        Wildcard matches (`_`) are supported in both the type class and inner
+        values.
 
         >>> from genmonads.match import _
         >>> from genmonads.option import Some, Nothing, option
@@ -76,30 +93,33 @@ class Gettable:
         Some(_) matches Some(5): 5
 
         Args:
-            conditions (Dict[Gettable[A],Callable[[A],B]): a dictionary of pattern => action mappings
+            conditions (Dict[Gettable[A], F1[A, B]]): a dictionary of
+                                                      pattern => action mappings
 
         Returns:
-            Union[B,None]: the result of calling the matched action on `x`'s inner value or `None` if no match is found
+            Optional[B]: the result of calling the matched action on `x`'s
+                         inner value or `None` if no match is found
         """
         return match(self, conditions)
 
-    def matches(self, other):
+    def matches(self, other: 'Gettable[B]') -> bool:
         """
-        Checks if `self` matches `other`, taking into account wildcards in both type classes and arguments.
+        Checks if `self` matches `other`, taking into account wildcards in both
+        type classes and arguments.
 
         Args:
-            other: the type class to match against
+            other (Gettable[B]): the type class to match against
 
         Returns:
             bool: True if `self` matches `other`, False otherwise
         """
         return matches(self, other)
 
-    def unpack(self):
+    def unpack(self) -> Tuple[A, ...]:
         """
         Returns the `Gettable`'s inner value as a tuple to support unpacking
 
         Returns:
-            Tuple[T]: the inner value
+            Tuple[A]: the inner value
         """
         return self.get(),

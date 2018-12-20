@@ -5,6 +5,7 @@ from genmonads.mytypes import *
 __all__ = ['Apply', ]
 
 
+# noinspection PyUnresolvedReferences
 class Apply(Functor,
             Cartesian,
             Generic[A],):

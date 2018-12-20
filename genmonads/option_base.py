@@ -1,28 +1,12 @@
-import typing
-
-from genmonads.convertible import Convertible
-from genmonads.eval import Eval
-from genmonads.foldable import Foldable
 from genmonads.monadfilter import MonadFilter
 from genmonads.mytypes import *
-from genmonads.option_base import Option as OptionBase
 
 __all__ = ['Nothing', 'Option', 'Some', 'nothing', 'option', 'some']
 
 
-class Option(OptionBase[A],
-             MonadFilter[A],
-             Foldable[A],
-             Convertible[A]):
+class Option(MonadFilter[A]):
     """
-    A type class that represents an optional value.
-
-    Instances of type `Option[A]` are either an instance of `Some[A]` or
-    `Nothing`.
-
-    Monadic computing is supported with `map()`, `flat_map()`, `flatten()`, and
-    `filter()` functions, and for-comprehensions can  be formed by evaluating
-    generators over monads with the `mfor()` function.
+    A base class for implementing Options for other types to depend on.
     """
 
     def __init__(self, *args, **kwargs):
@@ -31,44 +15,81 @@ class Option(OptionBase[A],
                Use the option() or Option.pure() functions instead."""
         )
 
-    def fold_left(self, b: B, f: FoldLeft[B, A]) -> B:
+    def __eq__(self, other: 'Option[A]') -> bool:
         """
-        Performs left-associated fold using `f`. Uses eager evaluation.
-
         Args:
-            b (B): the initial value
-            f (Callable[[B, A], B]): the function to fold with
+            other (Option[A]): the value to compare against
 
         Returns:
-            B: the result of folding
+            bool: `True` if other is an instance of `Some` and inner values are
+                  equivalent, `False` otherwise
         """
-        return f(b, self.get()) if self.is_defined() else b
+        if type(self) != type(other):
+            return False
+        elif self.is_defined() and other.is_defined():
+            return self.get_or_none() == other.get_or_none()
+        elif self.is_empty() and other.is_empty():
+            return True
+        else:
+            return False
 
-    def fold_right(self,
-                   lb: 'Eval[B]',
-                   f: FoldRight[A, 'Eval[B]']
-                   ) -> 'Eval[B]':
+    @staticmethod
+    def __mname__():
         """
-        Performs left-associated fold using `f`. Uses lazy evaluation,
-        requiring type `Eval[B]` for initial value and accumulation results.
+        Returns:
+            str: the monad's name
+        """
+        return 'Option'
+
+    def cata(self, f: F1[A, B], default: B) -> B:
+        """
+        Transforms an `Option[A]` instance by applying `f` to the inner value
+        of instances of `Some[A]`, and returning `default` in the case of
+        `Nothing`.
 
         Args:
-            lb (Eval[B]): the lazily-evaluated initial value
-            f (Callable[[A,Eval[B]],Eval[B]]): the function to fold with
+            f (Callable[[A], B]): the function to apply to instances of `Left[A]`
+            default (B): the function to apply to instances of `Right[B]`
 
         Returns:
-            Eval[B]: the result of folding
+            B: the resulting `B` instance
         """
-        return f(self.get(), lb) if self.is_defined() else lb
+        return f(self.get()) if self.is_defined() else default
 
-    def get(self):
+    @staticmethod
+    def empty() -> 'Option[A]':
+        """
+        Returns:
+            Option[A]: `Nothing`, the empty instance for this `MonadFilter`
+        """
+        return Nothing()
+
+    def flat_map(self, f: F1[B, 'Option[C]']) -> 'Option[C]':
+        """
+        Applies a function to the inner value of a `Try`.
+
+        Args:
+            f (Callable[[B], Option[C]]): the function to apply
+
+        Returns:
+            Option[C]: the resulting monad
+        """
+        return f(self.get()) if self.is_defined() else self
+
+    def get(self) -> A:
         """
         Returns the `Gettable`'s inner value.
 
         Returns:
-            T: the inner value
+            A: the inner value
         """
         raise NotImplementedError
+
+    def is_defined(self) -> bool:
+        return self.is_gettable()
+
+    def is_empty(self) -> bool:
+        return not self.is_defined()
 
     def is_gettable(self) -> bool:
         return isinstance(self, Some)
@@ -88,15 +109,6 @@ class Option(OptionBase[A],
             Option[A]: the resulting `Option`
         """
         return Some(value)
-
-    def to_list(self) -> typing.List[A]:
-        """
-        Converts the `Convertible` into a python list.
-
-        Returns:
-            typing.List[A]: the resulting python list
-        """
-        raise NotImplementedError
 
 
 def option(value: A) -> 'Option[A]':
@@ -150,15 +162,6 @@ class Some(Option,
         """
         return self._value
 
-    def to_list(self) -> typing.List[A]:
-        """
-        Converts the `Convertible` into a python list.
-
-        Returns:
-            typing.List[A]: the resulting python list
-        """
-        return [self.get(), ]
-
 
 def some(value: A) -> Some[A]:
     """
@@ -206,15 +209,6 @@ class Nothing(Option,
         """
         raise ValueError(
             "Tried to access the non-existent inner value of a Nothing instance")
-
-    def to_list(self) -> typing.List[A]:
-        """
-        Converts the `Convertible` into a python list.
-
-        Returns:
-            typing.List[A]: the resulting python list
-        """
-        return []
 
     # noinspection PyMethodMayBeStatic
     def unpack(self):

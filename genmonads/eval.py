@@ -1,15 +1,17 @@
 from functools import reduce
+import typing
 
+from genmonads.monad import Monad
 from genmonads.mytypes import *
+from genmonads.option_base import Option, Some, Nothing
 from genmonads.tailrec import trampoline
 from genmonads.util import is_thunk
-from genmonads.monad import Monad
 
 
-__all__ = ['Always', 'Eval', 'Later', 'Now', 'always', 'later', 'now']
+__all__ = ['Always', 'Eval', 'Later', 'Now', 'always', 'defer', 'later', 'now']
 
 
-# noinspection PyMissingConstructor
+# noinspection PyMissingConstructor,PyUnresolvedReferences
 class Eval(Monad,
            Generic[A]):
     """
@@ -40,10 +42,10 @@ class Eval(Monad,
             instead."""
         )
 
-    def __eq__(self, other):
+    def __eq__(self, other: 'Eval[B]') -> bool:
         """
         Args:
-            other (Eval[T]): the value to compare against
+            other (Eval[B]): the value to compare against
 
         Returns:
             bool: `True` if inner values are equivalent, `False` otherwise
@@ -54,7 +56,7 @@ class Eval(Monad,
             return False
 
     @staticmethod
-    def __mname__():
+    def __mname__() -> str:
         """
         Returns:
             str: the name of the type class
@@ -62,91 +64,92 @@ class Eval(Monad,
         return 'Eval'
 
     # noinspection PyUnresolvedReferences,PyProtectedMember
-    def flat_map(self, f):
+    def flat_map(self, f: Callable[[B], 'Eval[C]']) -> 'Eval[C]':
         """
         Applies a function to the inner value of a `Eval`.
 
         Args:
-            f (Callable[[B],Eval[C]): the function to apply
+            f (Callable[[B], Eval[C]]): the function to apply
 
         Returns:
             Eval[C]: the resulting monad
         """
         if self.is_compute():
-            return Compute(self.start, lambda s: Compute(lambda: self.run(s), f))
+            return Compute(self.start,
+                           lambda s: Compute(lambda: self.run(s), f))
         elif self.is_call():
             return Compute(self._thunk, f)
         else:
             return Compute(lambda: self, f)
 
-    def get(self):
+    def get(self) -> Union[T, Exception]:
         """
         Returns the Eval's inner value.
 
         Returns:
-            Union[T,Exception]: the inner value
+            Union[T, Exception]: the inner value
         """
         raise NotImplementedError
 
-    def is_always(self):
+    def is_always(self) -> bool:
         """
         Returns:
             bool: True if `self` is instance of `Always`, False otherwise
         """
         return type(self) == Always
 
-    def is_call(self):
+    def is_call(self) -> bool:
         """
         Returns:
             bool: True if `self` is instance of `Call`, False otherwise
         """
         return type(self) == Call
 
-    def is_compute(self):
+    def is_compute(self) -> bool:
         """
         Returns:
             bool: True if `self` is instance of `Compute`, False otherwise
         """
         return type(self) == Compute
 
-    def is_later(self):
+    def is_later(self) -> bool:
         """
         Returns:
             bool: True if `self` is instance of `Later`, False otherwise
         """
         return type(self) == Later
 
-    def is_now(self):
+    def is_now(self) -> bool:
         """
         Returns:
             bool: True if `self` is instance of `Now`, False otherwise
         """
         return type(self) == Now
 
-    def map(self, f):
+    def map(self, f: Callable[[B], 'Eval[C]']) -> 'Eval[C]':
         """
         Applies a function to the inner value of a `Eval`.
 
         Args:
-            f (Callable[[B],Eval[C]): the function to apply
+            f (Callable[[B], Eval[C]]): the function to apply
 
         Returns:
             Eval[C]: the resulting monad
         """
         return self.flat_map(lambda x: Now(f(x)))
 
-    def memoize(self):
+    def memoize(self) -> 'Eval[A]':
         """
         Memoize this instance of `Eval`. Will convert `Always` into a `Later`
         instance.
 
         Returns:
-            Eval[T]: a memoized version of `self`. 
+            Eval[A]: a memoized version of `self`.
         """
         raise NotImplementedError
 
     @staticmethod
-    def now(value):
+    def now(value: A) -> 'Now[A]':
         """
         Injects a value into the eager evaluation `Eval.Now` monad.
 
@@ -154,10 +157,10 @@ class Eval(Monad,
         directly.
 
         Args:
-            value (T): the value
+            value (A): the value
 
         Returns:
-            Now[T]: the resulting `Eval`
+            Now[A]: the resulting `Eval`
 
         Raises:
             ValueError: if the argument is not a zero arity lambda function
@@ -165,7 +168,7 @@ class Eval(Monad,
         return Now(value)
 
     @staticmethod
-    def pure(value):
+    def pure(value: A) -> 'Eval[A]':
         """
         Injects a value into the `Eval` monad.
 
@@ -173,42 +176,42 @@ class Eval(Monad,
         directly.
 
         Args:
-            value (T): the value
+            value (A): the value
 
         Returns:
-            Eval[T]: the resulting `Eval`
+            Eval[A]: the resulting `Eval`
         """
         return Now(value)
 
-    def to_mtry(self):
+    def to_mtry(self) -> 'Try[A]':
         from genmonads.mtry import mtry
         return mtry(lambda: self.get())
 
-    def to_option(self):
+    def to_option(self) -> 'Option[A]':
         return self.to_mtry().to_option()
 
 
 # noinspection PyMissingConstructor
-class Now(Eval):
+class Now(Eval[A]):
     """
     A monad representing an eager computation that is evaluated once and
     memoized.
     """
 
-    def __init__(self, value):
+    def __init__(self, value: A):
         self._value = value
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return 'Now(%s)' % self.get()
 
-    def get(self):
+    def get(self) -> A:
         return self._value
 
-    def memoize(self):
+    def memoize(self) -> 'Now[A]':
         return self
 
 
-def now(x):
+def now(x: Union[A, Thunk[A]]) -> 'Now[A]':
     """
     Eagerly evaluates a value in the `Eval` monad.
 
@@ -216,7 +219,7 @@ def now(x):
     directly.
 
     Args:
-        x (Union[T,Callable[[None],T]]): a value or computation
+        x (Union[A, Callable[[], A]]): a value or computation
 
     Returns:
         Now[T]: the resulting `Now`
@@ -228,7 +231,7 @@ def now(x):
 
 
 # noinspection PyMissingConstructor
-class Later(Eval):
+class Later(Eval[A]):
     """
     A monad representing a lazy computation that is evaluated once and memoized.
     
@@ -236,48 +239,46 @@ class Later(Eval):
     Upon its evaluation, the closure containing the computation will be cleared.
     """
 
-    def __init__(self, thunk):
-        self._thunk = thunk
-        self._value = None
+    def __init__(self, thunk: Thunk[A]):
+        self._thunk: Thunk[A] = thunk
+        self._value: Some[A] = Nothing()
 
-    def __eq__(self, other):
+    def __eq__(self, other: 'Later[A]') -> bool:
         """
         Args:
-            other (Later[T]): the value to compare against
+            other (Later[A]): the value to compare against
 
         Returns:
             bool: `True` if the thunks or inner values are equivalent, `False`
             otherwise
         """
-        if type(self) == type(other):
-            return (self._thunk, self._value) == (other._thunk, other._value)
-        else:
-            return False
+        return (type(self) == type(other) and
+                (self._thunk, self._value) == (other._thunk, other._value))
 
-    def __repr__(self):
-        return 'Later(%s)' % str('<thunk>' if self._value is None else self.get())
+    def __repr__(self) -> str:
+        return 'Later(%s)' % self._value.get_or_else('<thunk>')
 
-    def get(self):
-        if self._value is None:
-            self._value = self._thunk()
+    def get(self) -> A:
+        if self._value.is_empty():
+            self._value = Some(self._thunk())
             self._thunk = None  # clear the closure after evaluation
-        return self._value
+        return self._value.get()
 
-    def memoize(self):
+    def memoize(self) -> 'Later[A]':
         return self
 
 
-def later(thunk):
+def later(thunk: Thunk[A]) -> Later[A]:
     """
     Lazily evaluates a computation in the `Eval` monad.
 
     This function should be used instead of calling `Eval.__init__()` directly.
 
     Args:
-        thunk (Callable[[None],T]): the computation
+        thunk (Thunk[A]): the computation
 
     Returns:
-        Later[T]: the resulting `Later`
+        Later[A]: the resulting `Later`
 
     Raises:
         ValueError: if the argument is not a zero arity lambda function
@@ -289,19 +290,19 @@ def later(thunk):
 
 
 # noinspection PyMissingConstructor
-class Always(Eval):
+class Always(Eval[A]):
     """
     A monad representing a lazy computation that is evaluated every time its
     result is requested.
     """
 
-    def __init__(self, thunk):
+    def __init__(self, thunk: Thunk[A]):
         self._thunk = thunk
 
-    def __eq__(self, other):
+    def __eq__(self, other: 'Always[A]') -> bool:
         """
         Args:
-            other (Always[T]): the value to compare against
+            other (Always[A]): the value to compare against
 
         Returns:
             bool: `True` if the thunks or inner values are equivalent,
@@ -312,27 +313,27 @@ class Always(Eval):
         else:
             return False
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return 'Always(<thunk>)'
 
-    def get(self):
+    def get(self) -> A:
         return self._thunk()
 
-    def memoize(self):
+    def memoize(self) -> Later[A]:
         return Later(self._thunk)
 
 
-def always(thunk):
+def always(thunk: Thunk[A]) -> Always[A]:
     """
     Repeatedly evaluates a computation in the `Eval` monad.
 
     This function should be used instead of calling `Eval.__init__()` directly.
 
     Args:
-        thunk (Callable[[None],T]): the computation
+        thunk (Thunk[A]): the computation
 
     Returns:
-        Always[T]: the resulting `Always`
+        Always[A]: the resulting `Always`
 
     Raises:
         ValueError: if the argument is not a zero arity lambda function
@@ -344,7 +345,7 @@ def always(thunk):
 
 
 # noinspection PyMissingConstructor
-class Call(Eval):
+class Call(Eval[A]):
     """
     A monad representing a lazy computation that is evaluated once and memoized.
 
@@ -352,13 +353,13 @@ class Call(Eval):
     Upon its evaluation, the closure containing the computation will be cleared.
     """
 
-    def __init__(self, thunk):
+    def __init__(self, thunk: Thunk[A]):
         self._thunk = thunk
 
-    def __eq__(self, other):
+    def __eq__(self, other: 'Call[A]'):
         """
         Args:
-            other (Call[T]): the value to compare against
+            other (Call[A]): the value to compare against
 
         Returns:
             bool: `True` if the thunks or inner values are equivalent,
@@ -369,70 +370,48 @@ class Call(Eval):
         else:
             return False
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return 'Call(<thunk>)'
 
     @staticmethod
-    def _loop(fa):
-        """
-        Args:
-            fa (Call[T])
-
-        Returns:
-            Call[T]
-        """
-
-        # noinspection PyUnresolvedReferences
-        def go(_fa):
-            """
-            Args:
-                _fa (Call[T])
-            Returns:
-                Call[T]
-            """
+    def _loop(fa: 'Call[A]') -> 'Call[A]':
+        # noinspection PyProtectedMember
+        def go(_fa: Union['Call[A]', 'Compute[A]', Thunk[A]]
+               ) -> Union['Call[A]', 'Compute[A]', Thunk[A]]:
             if _fa.is_call():
                 return lambda: go(_fa._thunk())
             elif _fa.is_compute():
                 return Compute(
-                    lambda: _fa.start(), lambda s: Call._loop1(_fa.run(s)))
+                    lambda: _fa.start(),
+                    lambda s: Call._loop1(_fa.run(s))
+                )
             else:
                 return _fa
 
         return trampoline(go, fa)
 
     @staticmethod
-    def _loop1(fa):
-        """
-        Args:
-            fa (Call[T])
-
-        Returns:
-            Call[T]
-        """
+    def _loop1(fa: 'Call[A]') -> 'Call[A]':
         return Call._loop(fa)
 
-    def get(self):
-        """
-        Returns:
-            T
-        """
+    def get(self) -> A:
         return Call._loop(self).get()
 
-    def memoize(self):
+    def memoize(self) -> 'Later[A]':
         return Later(lambda: self.get())
 
 
-def defer(thunk):
+def defer(thunk: Thunk[A]) -> 'Eval[A]':
     """
     Defer a computation that produces an `Eval` monad.
 
     This function should be used instead of calling `Eval.__init__()` directly.
 
     Args:
-        thunk (Callable[[None],Eval[T]]): the computation
+        thunk (Thunk[A]): the computation
 
     Returns:
-        Eval[T]: an `Eval` that will contain the value of the computation once
+        Eval[A]: an `Eval` that will contain the value of the computation once
                  evaluated
 
     Raises:
@@ -445,16 +424,16 @@ def defer(thunk):
 
 
 # noinspection PyMissingConstructor
-class Compute(Eval):
+class Compute(Eval[A]):
     def __init__(self, start, run):
         self.start = start
         self.run = run
-        self._value = None
+        self._value = Nothing()
 
-    def __eq__(self, other):
+    def __eq__(self, other: 'Compute[A]') -> bool:
         """
         Args:
-            other (Compute[T]): the value to compare against
+            other (Compute[A]): the value to compare against
 
         Returns:
             bool: `True` if the thunks or inner values are equivalent,
@@ -466,14 +445,15 @@ class Compute(Eval):
         else:
             return False
 
-    def __repr__(self):
-        if self._value is None:
-            return 'Compute(<thunk>)'
-        else:
-            return 'Compute(%s)' % self.get()
+    def __repr__(self) -> str:
+        return 'Compute(%s)' % self._value.get_or_else('<thunk>')
 
-    def get(self):
-        def go(curr, fs):
+    def get(self) -> A:
+        def go(curr: Union['Compute[A]', Thunk[A]],
+               fs: typing.List[F1[A, Call[A]]]
+               ) -> Union[A,
+                          Tuple[Union['Compute[A]', typing.List[Thunk[A]],
+                                      typing.List[F1[A, Call[A]]]]]]:
             if curr.is_compute():
                 cc = curr.start()
                 if cc.is_compute():
@@ -486,16 +466,17 @@ class Compute(Eval):
             else:
                 return curr.get()
 
-        if self._value is None:
-            self._value = trampoline(go, self, [])
-        return self._value
+        if self._value.is_empty():
+            # noinspection PyAttributeOutsideInit
+            self._value = Some(trampoline(go, self, []))
+        return self._value.get_or_none()
 
-    def memoize(self):
+    def memoize(self) -> 'Later[A]':
         return Later(lambda: self.get())
 
 
 def main():
-    from genmonads.monad import mfor
+    from genmonads.syntax import mfor
 
     print(now(2))
     print(now(lambda: 3))
@@ -532,6 +513,7 @@ def main():
                  range(1, n + 1),
                  later(lambda: 1))
           .get())
+
     from genmonads.option import option
     print(reduce(lambda x, y: x.flat_map(lambda xx: option(xx * y)),
                  range(1, n + 1),
