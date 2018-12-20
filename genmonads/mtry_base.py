@@ -175,6 +175,13 @@ class Try(Monad[A],
         """
         return Some(self.get()) if self.is_success() else Nothing()
 
+    # noinspection PyUnresolvedReferences
+    def upgrade(self) -> 'TryDeluxe[A]':
+        from genmonads.mtry import mtry as mtry_deluxe
+        return mtry_deluxe(
+            lambda: self.raise_ex() if self.is_failure() else self.get()
+        )
+
 
 def mtry(thunk: Thunk[A]) -> Try[A]:
     """

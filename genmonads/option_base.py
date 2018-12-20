@@ -123,6 +123,11 @@ class Option(MonadFilter[A],
         """
         return [] if self.is_empty() else [self.get(), ]
 
+    # noinspection PyUnresolvedReferences
+    def upgrade(self) -> 'OptionDeluxe[A]':
+        from genmonads.option import option as option_deluxe
+        return option_deluxe(self.get_or_none())
+
 
 def option(value: A) -> 'Option[A]':
     """
