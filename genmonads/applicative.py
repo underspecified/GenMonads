@@ -1,10 +1,12 @@
 from genmonads.apply import Apply
+from genmonads.mytypes import *
 
 __all__ = ['Applicative', ]
 
 
 # noinspection PyMissingConstructor
-class Applicative(Apply):
+class Applicative(Apply,
+                  Generic[A]):
     """
     The applicative functor.
     """
@@ -17,19 +19,21 @@ class Applicative(Apply):
         """
         return 'Applicative'
 
-    def ap(self, ff):
+    def ap(self, ff: 'Applicative[Callable[[A], B]]') -> 'Applicative[B]':
         """
-        Applies a function in the applicative functor to a value in the applicative functor.
+        Applies a function in the applicative functor to a value in the
+        applicative functor.
 
         Args:
-            ff (Applicative[Callable[[A],B]]): the function in the applicative functor
+            ff (Applicative[Callable[[A],B]]): the function in the applicative
+                                               functor
 
         Returns:
             Applicative[B]: the resulting value in the applicative functor
         """
         raise NotImplementedError
 
-    def map(self, f):
+    def map(self, f: Callable[[A], B]) -> 'Applicative[B]':
         """
         Applies a function to the inner value of a applicative functor.
 
@@ -42,14 +46,14 @@ class Applicative(Apply):
         return self.ap(Applicative.pure(f))
 
     @staticmethod
-    def pure(value):
+    def pure(value: A) -> 'Applicative[A]':
         """
         Injects a value into the applicative functor.
 
         Args:
-            value (T): the value
+            value (A): the value
 
         Returns:
-            Applicative: the resulting applicative functor
+            Applicative[A]: the resulting applicative functor
         """
         raise NotImplementedError

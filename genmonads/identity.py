@@ -7,8 +7,9 @@ class Identity(Monad):
     """
     A type that represents a value.
 
-    Monadic computing is supported with `map()` and `flat_map()`, and for-comprehensions can be formed by evaluating
-    generators over monads with the `mfor()` function.
+    Monadic computing is supported with `map()` and `flat_map()`, and
+    for-comprehensions can be formed by evaluating generators over monads with
+    the `mfor()` function.
     """
 
     def __init__(self, value):
@@ -20,7 +21,8 @@ class Identity(Monad):
             other (Identity[T]): the value to compare against
 
         Returns:
-            bool: `True` if other is an instance of `Identity` and inner values are equivalent, `False` otherwise
+            bool: `True` if other is an instance of `Identity` and inner values
+                  are equivalent, `False` otherwise
         """
         if type(self) == type(other):
             return self.get_or_none() == other.get_or_none()
@@ -151,8 +153,8 @@ def identity(value):
 
 
 def main():
-    from genmonads.monad import mfor
     from genmonads.mtry import mtry
+    from genmonads.syntax import mfor
 
     print(mfor(x + y
                for x in identity(2)

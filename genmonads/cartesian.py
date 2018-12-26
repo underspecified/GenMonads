@@ -1,7 +1,7 @@
-__all__ = ['Cartesian', ]
+from genmonads.mytypes import *
 
 
-class Cartesian:
+class Cartesian(Generic[A]):
     """
     A type class to construct products from type classes.
     
@@ -21,21 +21,24 @@ class Cartesian:
         return self.product(fb)
 
     @staticmethod
-    def __mname__():
+    def __mname__() -> str:
         """
         Returns:
             str: the name of the type class
         """
         return 'Cartesian'
 
-    def product(self, fb):
+    def product(self,
+                fb: 'Cartesian[[Tuple[A, B]]]'
+                ) -> 'Cartesian[[Tuple[A, B]]]':
         """
-        Constructs a cartesian of the product of the inner values of two cartesians.
+        Constructs a cartesian of the product of the inner values of two
+        cartesians.
 
         Args:
             fb (Cartesian): the second cartesian
 
         Returns:
-            Cartesian[(A,B)]: the resulting cartesian
+            Cartesian[(A, B)]: the resulting cartesian
         """
         raise NotImplementedError

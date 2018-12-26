@@ -1,24 +1,16 @@
-from genmonads.eval import Eval
-from genmonads.foldable import Foldable
+import typing
+
+from genmonads.convertible import Convertible
 from genmonads.monadfilter import MonadFilter
 from genmonads.mytypes import *
-from genmonads.option_base import Option as OptionBase
 
 __all__ = ['Nothing', 'Option', 'Some', 'nothing', 'option', 'some']
 
 
-class Option(OptionBase[A],
-             MonadFilter[A],
-             Foldable[A]):
+class Option(MonadFilter[A],
+             Convertible[A]):
     """
-    A type class that represents an optional value.
-
-    Instances of type `Option[A]` are either an instance of `Some[A]` or
-    `Nothing`.
-
-    Monadic computing is supported with `map()`, `flat_map()`, `flatten()`, and
-    `filter()` functions, and for-comprehensions can  be formed by evaluating
-    generators over monads with the `mfor()` function.
+    A base class for implementing Options for other types to depend on.
     """
 
     def __init__(self, *args, **kwargs):
@@ -45,44 +37,63 @@ class Option(OptionBase[A],
         else:
             return False
 
-    def fold_left(self, b: B, f: FoldLeft[B, A]) -> B:
+    @staticmethod
+    def __mname__():
         """
-        Performs left-associated fold using `f`. Uses eager evaluation.
+        Returns:
+            str: the monad's name
+        """
+        return 'Option'
+
+    def cata(self, f: F1[A, B], default: B) -> B:
+        """
+        Transforms an `Option[A]` instance by applying `f` to the inner value
+        of instances of `Some[A]`, and returning `default` in the case of
+        `Nothing`.
 
         Args:
-            b (B): the initial value
-            f (Callable[[B, A], B]): the function to fold with
+            f (Callable[[A], B]): the function to apply to instances of `Left[A]`
+            default (B): the function to apply to instances of `Right[B]`
 
         Returns:
-            B: the result of folding
+            B: the resulting `B` instance
         """
-        return f(b, self.get()) if self.is_defined() else b
+        return f(self.get()) if self.is_defined() else default
 
-    def fold_right(self,
-                   lb: 'Eval[B]',
-                   f: FoldRight[A, 'Eval[B]']
-                   ) -> 'Eval[B]':
+    @staticmethod
+    def empty() -> 'Option[A]':
         """
-        Performs left-associated fold using `f`. Uses lazy evaluation,
-        requiring type `Eval[B]` for initial value and accumulation results.
+        Returns:
+            Option[A]: `Nothing`, the empty instance for this `MonadFilter`
+        """
+        return Nothing()
+
+    def flat_map(self, f: F1[B, 'Option[C]']) -> 'Option[C]':
+        """
+        Applies a function to the inner value of a `Try`.
 
         Args:
-            lb (Eval[B]): the lazily-evaluated initial value
-            f (Callable[[A,Eval[B]],Eval[B]]): the function to fold with
+            f (Callable[[B], Option[C]]): the function to apply
 
         Returns:
-            Eval[B]: the result of folding
+            Option[C]: the resulting monad
         """
-        return f(self.get(), lb) if self.is_defined() else lb
+        return f(self.get()) if self.is_defined() else self
 
-    def get(self):
+    def get(self) -> A:
         """
         Returns the `Gettable`'s inner value.
 
         Returns:
-            T: the inner value
+            A: the inner value
         """
         raise NotImplementedError
+
+    def is_defined(self) -> bool:
+        return self.is_gettable()
+
+    def is_empty(self) -> bool:
+        return not self.is_defined()
 
     def is_gettable(self) -> bool:
         return isinstance(self, Some)
@@ -102,6 +113,20 @@ class Option(OptionBase[A],
             Option[A]: the resulting `Option`
         """
         return Some(value)
+
+    def to_list(self) -> typing.List[A]:
+        """
+        Converts the `Option` into a python list.
+
+        Returns:
+            typing.List[A]: the resulting python list
+        """
+        return [] if self.is_empty() else [self.get(), ]
+
+    # noinspection PyUnresolvedReferences
+    def upgrade(self) -> 'OptionDeluxe[A]':
+        from genmonads.option import option as option_deluxe
+        return option_deluxe(self.get_or_none())
 
 
 def option(value: A) -> 'Option[A]':
@@ -197,6 +222,10 @@ class Nothing(Option):
         """
         raise ValueError(
             "Tried to access the non-existent inner value of a Nothing instance")
+
+    # noinspection PyMethodMayBeStatic
+    def unpack(self):
+        return ()
 
 
 def nothing() -> Nothing:

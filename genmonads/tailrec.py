@@ -1,7 +1,9 @@
+from genmonads.mytypes import *
+
 __all__ = ['trampoline', ]
 
 
-def trampoline(f, *args, **kwargs):
+def trampoline(f: Thunk[T], *args, **kwargs) -> T:
     g = lambda: f(*args, **kwargs)
     while callable(g):
         g = g()
@@ -10,7 +12,7 @@ def trampoline(f, *args, **kwargs):
 
 def main():
     from genmonads.either import left, right
-    from genmonads.mtry import Failure, Success, Try
+    from genmonads.mtry import Try, Failure, Success
 
     def factorial(args):
         n, acc = args[0:]

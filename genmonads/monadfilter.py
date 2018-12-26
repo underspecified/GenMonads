@@ -2,32 +2,34 @@
 import sys
 
 from genmonads.monad import Monad
+from genmonads.mytypes import *
 from genmonads.tailrec import trampoline
 
 __all__ = ['MonadFilter', ]
 
 
-class MonadFilter(Monad):
+class MonadFilter(Monad[A]):
     """
     A base class for monads that can implement a `filter()` function.
 
-    The monad must define an empty instance of the monad that is returned when `filter()` fails and represents a
-    `False` value for the monad.
+    The monad must define an empty instance of the monad that is returned when
+    `filter()` fails and represents a `False` value for the monad.
     """
 
-    def __bool__(self):
+    def __bool__(self) -> bool:
         """
         Returns:
-            bool: `False` if equal to this monad's empty instance, `True` otherwise
+            bool: `False` if equal to this monad's empty instance,
+                  `True` otherwise
         """
         return not self.is_empty()
 
-    def contains(self, x):
+    def contains(self, x: A) -> bool:
         """
         Checks if any of this monad's inner values is equivalent to `x`.
 
         Args:
-            x T: the value
+            x (A): the value
 
         Returns:
             bool: True if any of this monad's inner values is equivalent to `x`
@@ -35,87 +37,94 @@ class MonadFilter(Monad):
         return self.exists(lambda xx: x == xx)
 
     @staticmethod
-    def empty():
+    def empty() -> 'MonadFilter[A]':
         """
         Returns:
-            MonadFilter[T]: the empty instance for this monad
+            MonadFilter[A]: the empty instance for this monad
         """
         raise NotImplementedError
 
-    def exists(self, p):
+    def exists(self, p: Predicate[A]) -> bool:
         """
-        Checks if the predicate is `True` for any of this monad's inner values .
+        Checks if the predicate is `True` for any of this monad's inner values.
 
         Args:
-            p (Callable[[T],bool]): the predicate
+            p (Predicate[A]): the predicate
 
         Returns:
-            bool: True if the predicate is `True` for any of this monad's inner values
+            bool: True if the predicate is `True` for any of this monad's inner
+                  values
         """
         return self.filter(p).non_empty()
 
-    def filter(self, p):
+    def filter(self, p: Predicate[A]) -> 'MonadFilter[A]':
         """
-        Filters this monad by applying the predicate `p` to the monad's inner value.
-        Returns this monad if the predicate is `True`, this monad's empty instance otherwise.
+        Filters this monad by applying the predicate `p` to the monad's inner
+        value.
+        Returns this monad if the predicate is `True`, this monad's empty
+        instance otherwise.
 
         Args:
-            p (Callable[[T],bool]): the predicate
+            p (Predicate[A]): the predicate
 
         Returns:
-            MonadFilter[T]: this instance if the predicate is `True` when applied to its inner value,
-            otherwise the monad's empty instance
+            MonadFilter[T]: this instance if the predicate is `True` when
+                            applied to its inner value, otherwise the monad's
+                            empty instance
         """
         return self.flat_map(lambda x: self.pure(x) if p(x) else self.empty())
 
-    def filter_not(self, p):
+    def filter_not(self, p: Predicate[A]) -> 'MonadFilter[A]':
         """
-        Filters this monad by applying the predicate `p` to the monad's inner value.
-        Returns this monad if the predicate is `True`, this monad's empty instance otherwise.
+        Filters this monad by applying the predicate `p` to the monad's inner
+        value.
+        Returns this monad if the predicate is `True`, this monad's empty
+        instance otherwise.
 
         Args:
-            p (Callable[[T],bool]): the predicate
+            p (Predicate[A]): the predicate
 
         Returns:
-            MonadFilter[T]: this instance if the predicate is `True` when applied to its inner value,
-            otherwise the monad's empty instance
+            MonadFilter[A]: this instance if the predicate is `True` when
+            applied to its inner value, otherwise the monad's empty instance
         """
         return self.flat_map(lambda x: self.pure(x) if not p(x) else self.empty())
 
-    def flat_map(self, f):
+    def flat_map(self, f: F1[A, 'MonadFilter[B]']) -> 'MonadFilter[B]':
         """
         Applies a function to the inner value of a `MonadFilter`.
 
         Args:
-            f (Callable[[B],MonadFilter[C]): the function to apply
+            f (F1[A, MonadFilter[B]]): the function to apply
 
         Returns:
-            MonadFilter[C]: the resulting monad
+            MonadFilter[B]: the resulting monad
         """
         raise NotImplementedError
 
-    def forall(self, p):
+    def forall(self, p: Predicate[A]) -> bool:
         """
-        Checks if the predicate is `True` for all of this monad's inner values or the monad is empty.
+        Checks if the predicate is `True` for all of this monad's inner values
+        or the monad is empty.
 
         Args:
-            p (Callable[[T],bool]): the predicate
+            p (Predicate[A]): the predicate
 
         Returns:
-            bool: True if the predicate is True for all of this monad's inner values or the monad is empty,
-            False otherwise
+            bool: True if the predicate is True for all of this monad's inner
+                  values or the monad is empty, False otherwise
         """
         return self.is_empty() or p(self.get())
 
-    def get(self):
+    def get(self) -> A:
         """
         Returns the `Monad`'s inner value.
         Returns:
-            T: the inner value
+            A: the inner value
         """
         raise NotImplementedError
 
-    def is_empty(self):
+    def is_empty(self) -> bool:
         """
         Checks if the monad is equal to the empty value for its type class.
 
@@ -124,7 +133,7 @@ class MonadFilter(Monad):
         """
         return self == self.empty()
 
-    def non_empty(self):
+    def non_empty(self) -> bool:
         """
         Checks if the monad is unequal to the empty value for its type class.
 
@@ -134,30 +143,33 @@ class MonadFilter(Monad):
         return not self.is_empty()
 
     @staticmethod
-    def pure(value):
+    def pure(value: A) -> 'MonadFilter[A]':
         """
         Injects a value into the monad.
 
         Args:
-            value (T): the value
+            value (A): the value
 
         Returns:
-            Monad[T]: the monadic value
+            MonadFilter[A]: the monadic value
         """
         raise NotImplementedError
 
-    # noinspection PyPep8Naming
+    # noinspection PyUnresolvedReferences
     @staticmethod
-    def tailrecM(f, a):
+    def tailrecM(f: F1[A, 'MonadFilter[Either[A, B]]'],
+                 a: A
+                 ) -> 'MonadFilter[B]':
         """
         Applies a tail-recursive function in a stack safe manner.
 
         Args:
-            f (Callable[[A],F[Either[A,B]]]): the function to apply
-            a: the recursive function's input
+            f (F1[A, MonadFilter[[Either[A, B]]]): the function to apply
+            a (A): the recursive function's input
 
         Returns:
-            F[B]: an `F` instance containing the result of applying the tail-recursive function to its argument
+            MonadFilter: an `F` instance containing the result of applying the
+                         tail-recursive function to its argument
         """
         def go(a1):
             fa = f(a1)
