@@ -185,8 +185,8 @@ class Eval(Monad,
         """
         return Now(value)
 
-    def to_list(self) -> typing.List[A]:
-        return self.to_mtry().to_list()
+    def to_iterator(self) -> typing.Iterator[A]:
+        return self.to_mtry().to_iterator()
 
     def to_mtry(self) -> 'Try[A]':
         return mtry(lambda: self.get())

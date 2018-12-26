@@ -72,7 +72,7 @@ class Reader(Monad[A],
         Injects a value into the `Reader` monad.
 
         Args:
-            run (F1[A, B]): the function to run
+            run (F1[A, B]): the function to _run
 
         Returns:
             Reader[A, B]: the resulting `Reader`

@@ -225,6 +225,15 @@ class NonEmptyList(Monad[A],
 
         return trampoline(go, a)
 
+    def to_iterator(self) -> typing.Iterator[A]:
+        """
+        Converts the `NonEmptyList` into a python iterator.
+
+        Returns:
+            typing.Iterator[A]: the resulting python iterator
+        """
+        return (x for x in self.get())
+
     def to_list(self) -> typing.List[A]:
         """
         Converts the `NonEmptyList` into a python list.
@@ -232,7 +241,7 @@ class NonEmptyList(Monad[A],
         Returns:
             typing.List[A]: the resulting python list
         """
-        return self.get()
+        return self.get
 
     def to_nel(self) -> 'NonEmptyList[A]':
         """

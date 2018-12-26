@@ -114,14 +114,14 @@ class Option(MonadFilter[A],
         """
         return Some(value)
 
-    def to_list(self) -> typing.List[A]:
+    def to_iterator(self) -> typing.Iterator[A]:
         """
-        Converts the `Option` into a python list.
+        Converts the `Option` into a python iterator.
 
         Returns:
-            typing.List[A]: the resulting python list
+            typing.Iterator[A]: the resulting python iterator
         """
-        return [] if self.is_empty() else [self.get(), ]
+        return (x for x in (self.get() if self.non_empty() else []))
 
     # noinspection PyUnresolvedReferences
     def upgrade(self) -> 'OptionDeluxe[A]':

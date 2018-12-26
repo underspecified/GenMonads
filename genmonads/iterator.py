@@ -1,10 +1,10 @@
 import itertools
 import typing
 
+from genmonads.convertible import Convertible
 from genmonads.either import Either
 from genmonads.eval import Now, defer, Eval
 from genmonads.foldable import Foldable
-from genmonads.monad import Monad
 from genmonads.monadfilter import MonadFilter
 from genmonads.mtry_base import mtry
 from genmonads.mytypes import *
@@ -16,6 +16,7 @@ __all__ = ['Iterator', 'iterator', 'Stream', 'stream']
 
 class Iterator(MonadFilter[A],
                Foldable[A],
+               Convertible[A],
                Container[typing.Iterator[A]]):
     """
     A type that represents a lazy iterator of values. Useful for representing
@@ -57,10 +58,12 @@ class Iterator(MonadFilter[A],
         return 'Iterator(%s)' % str(self._value)
 
     def drop(self, n: int) -> 'Iterator[A]':
-        return Iterator.from_iter(itertools.islice(self.get(), start=n, stop=None))
+        return Iterator.from_iterator(itertools.islice(self.get(),
+                                                       start=n,
+                                                       stop=None))
 
     def drop_while(self, p: Predicate[A]) -> 'Iterator[A]':
-        return Iterator.from_iter(itertools.dropwhile(p, self.get()))
+        return Iterator.from_iterator(itertools.dropwhile(p, self.get()))
 
     @staticmethod
     def empty() -> 'Iterator[A]':
@@ -68,10 +71,10 @@ class Iterator(MonadFilter[A],
         Returns:
             Iterator[A]: the empty instance for this `MonadFilter`
         """
-        return Iterator.from_iter((x for x in []))
+        return Iterator.from_iterator((x for x in []))
 
     def filter(self, p: Predicate[A]) -> 'Iterator[A]':
-        return Iterator.from_iter(filter(p, self.get()))
+        return Iterator.from_iterator(filter(p, self.get()))
 
     def flat_map(self, f: F1[A, 'Iterator[B]']) -> 'Iterator[B]':
         """
@@ -85,14 +88,31 @@ class Iterator(MonadFilter[A],
             Iterator[B]: the resulting iterator
         """
 
-        def to_list(v: Union['Monad[T]', T]) -> 'Iterator[T]':
-            return (mtry(lambda: v.to_iter().to_list())
-                    .get_or_else([v, ]))
+        # def to_list(v: Union['Monad[T]', T]) -> 'Iterator[T]':
+        #     return (mtry(lambda: v.to_iterator().to_list())
+        #             .get_or_else([v, ]))
+
+        def unpack(v: 'Union[A, Convertible[A]]') -> typing.Iterator[A]:
+            """
+            Args:
+                v (Union[A, Convertible[A]): the value
+
+            Returns:
+                Iterator[A]: the unpacked result
+            """
+            if isinstance(v, Iterator):
+                return v._value
+            elif isinstance(v, Convertible):
+                return v.to_iterator()
+            elif hasattr('unpack', v):
+                return (x for x in v.unpack())
+            else:
+                return (x for x in [v, ])
 
         it = (v
-              for vs in (f(v1) for v1 in self.to_list())
-              for v in to_list(vs))
-        return Iterator.from_iter(it)
+              for vs in (f(v1) for v1 in self.to_iterator())
+              for v in unpack(vs))
+        return Iterator.from_iterator(it)
 
     def fold_left(self, b: B, f: FoldLeft[B, A]) -> B:
         """
@@ -135,7 +155,7 @@ class Iterator(MonadFilter[A],
         return Now(self).flat_map(go)
 
     @staticmethod
-    def from_iter(it: typing.Iterator[A]) -> 'Iterator[A]':
+    def from_iterator(it: typing.Iterator[A]) -> 'Iterator[A]':
         return Iterator(it)
 
     def get(self) -> typing.Iterator[A]:
@@ -220,7 +240,7 @@ class Iterator(MonadFilter[A],
         Returns:
             Iterator[B]: the resulting Iterator
         """
-        return Iterator.from_iter((f(x) for x in self.get()))
+        return Iterator.from_iterator((f(x) for x in self.get()))
 
     def memoize(self) -> 'Stream[A]':
         return self.to_stream()
@@ -245,7 +265,7 @@ class Iterator(MonadFilter[A],
         Returns:
             Iterator[A]: the resulting `Iterator`
         """
-        return Iterator.from_iter((x for x in values))
+        return Iterator.from_iterator((x for x in values))
 
     def tail(self) -> 'Iterator[A]':
         """
@@ -300,7 +320,7 @@ class Iterator(MonadFilter[A],
     def take_while(self, p: Predicate[A]) -> 'Iterator[A]':
         return Iterator(itertools.dropwhile(p, self.get()))
 
-    def to_iter(self) -> 'Iterator[A]':
+    def to_iterator(self) -> 'Iterator[A]':
         return self
 
     def to_stream(self) -> 'Stream[A]':
@@ -347,7 +367,7 @@ class Stream(Iterator[A]):
         return 'Stream(%s)' % ', '.join(repr(x) for x in self.get())
 
     @staticmethod
-    def from_iter(it: typing.Iterator[A]) -> 'Stream[A]':
+    def from_iterator(it: typing.Iterator[A]) -> 'Stream[A]':
         return Stream(it)
 
     def get(self) -> typing.List[A]:
@@ -374,8 +394,8 @@ class Stream(Iterator[A]):
         """
         return Stream((x for x in values))
 
-    def to_iter(self) -> Iterator[A]:
-        return Iterator.from_iter(self._value)
+    def to_iterator(self) -> Iterator[A]:
+        return Iterator.from_iterator(self._value)
 
     def to_list(self) -> typing.List[A]:
         """

@@ -20,7 +20,7 @@ class MonadTranslator(PythonTranslator):
               if y % 2 != 0))
     Some(7)
 
-    The above generator is automatically translated into the following at run-time:
+    The above generator is automatically translated into the following at _run-time:
 
     >>> print(option(2)
                   .filter(lambda x: x < 10)

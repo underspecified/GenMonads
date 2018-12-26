@@ -241,6 +241,15 @@ class List(MonadFilter[A],
 
         return trampoline(go, a)
 
+    def to_iterator(self) -> typing.Iterator[A]:
+        """
+        Converts the `List` into a python iterator.
+
+        Returns:
+            typing.Iterator[A]: the resulting python iterator
+        """
+        return (x for x in self.get())
+
     def to_list(self) -> typing.List[A]:
         """
         Converts the `List` into a python list.

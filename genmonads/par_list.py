@@ -1,3 +1,4 @@
+import itertools
 import typing
 from multiprocessing import cpu_count
 
@@ -5,15 +6,21 @@ from multiprocess.pool import Pool
 
 from genmonads.convertible import Convertible
 from genmonads.either import Either
-from genmonads.eval import Eval
+from genmonads.eval import Eval, Now, defer
 from genmonads.foldable import Foldable
 from genmonads.monadfilter import MonadFilter
-from genmonads.mtry import mtry
+from genmonads.mtry_base import mtry
 from genmonads.mytypes import *
 from genmonads.option_base import Option
 from genmonads.tailrec import trampoline
 
 __all__ = ['ParList', 'Nil', 'par_list', 'nil']
+
+default_pool_settings = {'processes': cpu_count(),
+                         'chunksize': 1000}
+
+
+Transform = F1[Pool, typing.Iterable[A]]
 
 
 class ParList(MonadFilter[A],
@@ -29,10 +36,8 @@ class ParList(MonadFilter[A],
     generators over monads with the `mfor()` function.
     """
 
-    def __init__(self, *values: A, workers=cpu_count(), **pool_settings):
-        self._value: typing.List[A] = list(values)
-        self.pool_settings = pool_settings
-        self.pool_settings.setdefault('processes', workers)
+    def __init__(self, run: Transform[A]):
+        self._run: Transform[A] = run
 
     def __eq__(self, other: 'ParList[A]') -> bool:
         """
@@ -44,7 +49,7 @@ class ParList(MonadFilter[A],
              equivalent, `False` otherwise
         """
         return (type(self) == type(other)
-                and self.get_or_none() == other.get_or_none())
+                and self._run == other._run)
 
     @staticmethod
     def __mname__() -> str:
@@ -59,7 +64,7 @@ class ParList(MonadFilter[A],
         Returns:
             str: a string representation of the List
         """
-        return 'ParList(%s)' % ', '.join(repr(v) for v in self.get())
+        return 'ParList(%s)' % self._run
 
     @staticmethod
     def empty() -> 'Nil':
@@ -85,25 +90,30 @@ class ParList(MonadFilter[A],
         Returns:
             ParList[B]: the resulting monad
         """
-        from genmonads.mtry import mtry
-
         # noinspection PyUnresolvedReferences
-        def unpack(v: 'Convertible[A]') -> Tuple[A, ...]:
+        def unpack(v: 'Union[A, Convertible[A]]',
+                   pool: Pool
+                   ) -> typing.Iterator[A]:
             """
             Args:
-                v (Union[A, List[A]): the value
+                v (Union[A, Convertible[A]): the value
+                pool (Pool): the process pool
 
             Returns:
-                Tuple[A, ...]: the unpacked result
+                Iterator[A]: the unpacked result
             """
-            return (mtry(lambda: v.to_mlist().get())
-                    .or_else(mtry(lambda: v.unpack()))
-                    .get_or_else((v,)))
+            if isinstance(v, ParList):
+                return v._run(pool)
+            elif isinstance(v, Convertible):
+                return v.to_iterator()
+            elif hasattr('unpack', v):
+                return (x for x in v.unpack())
+            else:
+                return (x for x in [v, ])
 
-        values = [v
-                  for vv in self.map(lambda v: unpack(f(v))).to_list()
-                  for v in vv]
-        return ParList(*values)
+        return ParList(lambda pool: (b
+                                     for a in self._run(pool)
+                                     for b in unpack(f(a), pool)))
 
     def fold_left(self, b: B, f: FoldLeft[B, A]) -> B:
         """
@@ -132,18 +142,27 @@ class ParList(MonadFilter[A],
         Returns:
             Eval[B]: the result of folding
         """
-        for a in reversed(self.get()):
-            lb = f(a, lb)
-        return lb
+        def go(s):
+            if s.is_empty():
+                return lb
+            else:
+                head, tail = next(s), s
+                return f(head, defer(lambda: tail.fold_right(lb, f)))
 
-    def get(self) -> typing.List[A]:
+        return Now(self.get()).flat_map(go)
+
+    @staticmethod
+    def from_iterator(it) -> 'ParList[A]':
+        return ParList(lambda pool: it)
+
+    def get(self) -> typing.Iterator[A]:
         """
         Returns the `List`'s inner value.
 
         Returns:
-            typing.List[A]: the inner value
+            typing.Iterator[A]: the inner value
         """
-        return self._value
+        return self.run()
 
     def head(self) -> A:
         """
@@ -153,9 +172,9 @@ class ParList(MonadFilter[A],
             A: the first item
 
         Throws:
-            IndexError: if the list is empty
+            StopIteration: if the iterator is empty
         """
-        return self.get()[0]
+        return next(self.get())
 
     def head_option(self) -> Option[A]:
         """
@@ -174,15 +193,21 @@ class ParList(MonadFilter[A],
 
     def last(self) -> A:
         """
-        Returns the last item in the list.
+        Returns the last item in the iterator.
 
         Returns:
             A: the last item
 
         Throws:
-            IndexError: if the list is empty
+            StopIteration: if the iterator is empty
         """
-        return self.get()[-1]
+        xs = self.get()
+        x = next(xs)
+        try:
+            while True:
+                x = next(xs)
+        except StopIteration:
+            return x
 
     def last_option(self) -> Option[A]:
         """
@@ -196,9 +221,9 @@ class ParList(MonadFilter[A],
         return mtry(lambda: self.last()).to_option()
 
     def map(self, f: F1[A, B]) -> 'ParList[B]':
-        with Pool(**self.pool_settings) as pool:
-            values: typing.List[B] = pool.map(f, self.get())
-        return ParList.pure(*values)
+        return ParList(lambda pool: pool.map(f,
+                                             self._run(pool),
+                                             chunksize=pool.chunksize))
 
     def mtail(self) -> 'ParList[A]':
         """
@@ -207,10 +232,10 @@ class ParList(MonadFilter[A],
         Returns:
             ParList[A]: the rest of the list
         """
-        return ParList.pure(*mtry(lambda: self.tail()).to_list())
+        return ParList(lambda pool: mtry(self._run(pool).tail()).to_iterator())
 
     @staticmethod
-    def pure(*values) -> 'ParList[A]':
+    def pure(*values: A) -> 'ParList[A]':
         """
         Injects a value into the `List` monad.
 
@@ -220,16 +245,31 @@ class ParList(MonadFilter[A],
         Returns:
             ParList[A]: the resulting `List`
         """
-        return ParList(*values) if values else Nil()
+        return ParList(lambda pool: list(values)) if values else Nil()
 
-    def tail(self) -> typing.List[A]:
+    def run(self, **pool_settings) -> typing.Iterator[A]:
+        if not pool_settings:
+            pool_settings = default_pool_settings
+        chunksize = pool_settings.pop('chunksize')
+        with Pool(**pool_settings) as pool:
+            pool.__setattr__('chunksize', chunksize)
+            values = self._run(pool)
+        return values
+
+    def tail(self) -> typing.Iterator[A]:
         """
         Returns the tail of the list.
 
         Returns:
-            typing.List[A]: the tail of the list
+            typing.Iterator[A]: the tail of the list
+
+        Throws:
+            StopIteration: if the iterator is empty
+
         """
-        return self.get()[1:]
+        xs = self.get()
+        next(xs)
+        return xs
 
     # noinspection PyPep8Naming
     @staticmethod
@@ -254,12 +294,12 @@ class ParList(MonadFilter[A],
 
         return trampoline(go, a)
 
-    def to_list(self) -> typing.List[A]:
+    def to_iterator(self) -> typing.Iterator[A]:
         """
-        Converts the `List` into a python list.
+        Converts the `List` into a python iterator.
 
         Returns:
-            typing.List[A]: the resulting python list
+            typing.Iterator[A]: the resulting python iterator
         """
         return self.get()
 
@@ -294,7 +334,7 @@ class Nil(ParList):
 
     # noinspection PyInitNewSignature
     def __init__(self):
-        self._value: typing.List = []
+        self.run = lambda pool: []
 
     def __eq__(self, other: 'ParList[A]'):
         """
@@ -313,6 +353,15 @@ class Nil(ParList):
         """
         return 'Nil'
 
+    def get(self):
+        return []
+
+    def flat_map(self, f: F1[A, ParList[B]]) -> 'Nil':
+        return self
+
+    def map(self, f: F1[A, B]) -> 'Nil':
+        return self
+
 
 def nil() -> Nil:
     """
@@ -327,44 +376,70 @@ def nil() -> Nil:
 def main():
     from genmonads.syntax import mfor
 
-    print(par_list(1, 2, 3, 4, 5)
-          .flat_map(lambda x: ParList(x * 2))
-          .flat_map(lambda x: ParList(x - 1)))
+    # print(par_list(1, 2, 3, 4, 5)
+    #       .get())
+    #
+    # print(par_list(1, 2, 3, 4, 5)
+    #       .map(lambda x: x + 1)
+    #       .get())
+    #
+    # print(par_list(1, 2, 3, 4, 5)
+    #       .flat_map(lambda x: par_list(x * 2))
+    #       .flat_map(lambda x: par_list(x - 1))
+    #       .get())
+    #
+    # def f(x, factory=ParList.pure):
+    #     return factory(x + 5)
+    #
+    # print(par_list(2, 3)
+    #       .flat_map(lambda x: f(x))
+    #       .get())
+    #
+    # print(par_list(2, 3)
+    #       .flat_map(lambda x: par_list(x + 5))
+    #       .get())
+    #
+    # print(par_list(2, 4, 6)
+    #       .filter(lambda x: x < 10)
+    #       .flat_map(lambda x: par_list(5, 7, 9)
+    #                 .filter(lambda y: y % 2 != 0)
+    #                 .map(lambda y: x + y))
+    #       .get())
+    #
+    # print(mfor(x + y
+    #            for x in par_list(2, 4, 6)
+    #            if x < 10
+    #            for y in par_list(5, 7, 9)
+    #            if y % 2 != 0)
+    #       .get())
+    #
+    # def make_gen():
+    #     for x in par_list(4):
+    #         if x > 2:
+    #             for y in par_list(10):
+    #                 if y % 2 == 0:
+    #                     yield x - y
+    #
+    # print(mfor(make_gen())
+    #       .get())
+    #
+    # print((par_list(5) >> (lambda x: par_list(x * 2)))
+    #       .get())
+    #
+    # print(nil()
+    #       .map(lambda x: x * 2)
+    #       .get())
+    #
+    # print(par_list(par_list(1, 2, 3, 4, 5), par_list(5, 4, 3, 2, 1))
+    #       .flat_map(lambda x: x.last_option())
+    #       .get())
 
-    def f(x, factory=ParList.pure):
-        return factory(x + 5)
-
-    print(par_list(2, 3).flat_map(lambda x: f(x)))
-
-    print(par_list(2, 3).flat_map(lambda x: par_list(x + 5)))
-
-    print(par_list(2, 4, 6)
-          .filter(lambda x: x < 10)
-          .flat_map(lambda x: par_list(5, 7, 9)
-                    .filter(lambda y: y % 2 != 0)
-                    .map(lambda y: x + y)))
-
-    print(mfor(x + y
-               for x in par_list(2, 4, 6)
-               if x < 10
-               for y in par_list(5, 7, 9)
-               if y % 2 != 0))
-
-    def make_gen():
-        for x in par_list(4):
-            if x > 2:
-                for y in par_list(10):
-                    if y % 2 == 0:
-                        yield x - y
-
-    print(mfor(make_gen()))
-
-    print(par_list(5) >> (lambda x: par_list(x * 2)))
-
-    print(nil().map(lambda x: x * 2))
-
-    print(par_list(par_list(1, 2, 3, 4, 5), par_list(5, 4, 3, 2, 1))
-          .flat_map(lambda x: x.last_option()))
+    import fileinput
+    lines = itertools.islice(fileinput.input(), 1000000)
+    out: ParList[str] = mfor(x[::-1].upper()
+                             for x in ParList.from_iterator(lines))
+    for line in out.run(chunksize=1000):
+        print(line)
 
 
 if __name__ == '__main__':

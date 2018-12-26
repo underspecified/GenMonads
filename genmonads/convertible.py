@@ -9,7 +9,16 @@ class Convertible(Generic[A]):
     A type that can be converted to and from pythonic lists.
     """
 
-    def to_iterator(self) -> 'Iterator[A]':
+    def to_iterator(self) -> typing.Iterator[A]:
+        """
+        Converts the `Convertible` into an iterator.
+
+        Returns:
+            typing.Iterator[A]: the resulting python iterator
+        """
+        raise NotImplementedError
+
+    def to_miterator(self) -> 'Iterator[A]':
         """
         Converts the `Convertible` into an iterator.
 
@@ -17,7 +26,7 @@ class Convertible(Generic[A]):
             genmonads.iterator.Iterator[A]: the resulting python iterator
         """
         from genmonads.iterator import Iterator
-        return Iterator.pure(*self.to_list())
+        return Iterator.from_iterator(self.to_iterator())
 
     def to_list(self) -> typing.List[A]:
         """
@@ -26,7 +35,7 @@ class Convertible(Generic[A]):
         Returns:
             typing.List[A]: the resulting python list
         """
-        raise NotImplementedError
+        return [x for x in self.to_iterator()]
 
     def to_mlist(self) -> 'List[A]':
         """
@@ -36,7 +45,7 @@ class Convertible(Generic[A]):
             genmonads.mlist.List[A]: the resulting python list
         """
         from genmonads.mlist import List
-        return List.pure(*self.to_list())
+        return List.pure(*self.to_iterator())
 
     def to_onel(self) -> 'Option[NonEmptyList[A]]':
         """
@@ -48,7 +57,11 @@ class Convertible(Generic[A]):
                                      otherwise
         """
         from genmonads.nel import onel
-        return onel(*self.to_list())
+        return onel(*self.to_iterator())
+
+    def to_par_list(self) -> 'ParList[A]':
+        from genmonads.par_list import ParList
+        return ParList.from_iterator(self.to_iterator())
 
     def to_stream(self) -> 'Stream[A]':
         """
@@ -58,4 +71,4 @@ class Convertible(Generic[A]):
             genmonads.iterator.Stream[A]: the resulting Stream
         """
         from genmonads.iterator import Stream
-        return Stream.pure(*self.to_list())
+        return Stream.from_iterator(self.to_iterator())

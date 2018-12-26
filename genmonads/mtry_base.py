@@ -151,21 +151,21 @@ class Try(Monad[A],
         """
         return self if self.is_success() else f(self)
 
-    def to_list(self) -> typing.List[A]:
+    def to_iterator(self) -> typing.Iterator[A]:
         """
-        Converts an instance of `Try[A]` to a pythonic list.
+        Converts an instance of `Try[A]` to a pythonic iterator.
 
-        `Success[A]` is mapped to a singleton list containing the value,
-         and `Failure[A]` is mapped to the empty list.
+        `Success[A]` is mapped to a singleton iterator containing the value,
+         and `Failure[A]` is mapped to the empty iterator.
 
         Returns:
-            typing.List[A]: the corresponding list
+            typing.Iterator[A]: the corresponding iterator
         """
-        return [self.get(), ] if self.is_success() else []
+        return (x for x in (self.get() if self.is_success() else []))
 
     def to_option(self) -> 'Option[A]':
         """
-        Converts an instance of `Try[A]` to a pythonic list.
+        Converts an instance of `Try[A]` to an option.
 
         `Success[A]` is mapped to Some[A] containing the value,
          and `Failure[A]` is mapped to Nothing.
