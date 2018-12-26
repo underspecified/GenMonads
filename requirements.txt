@@ -1,3 +1,5 @@
+dill
+multiprocess
 pony
 Sphinx
 sphinx-rtd-theme
