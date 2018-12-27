@@ -33,7 +33,7 @@ class Reader(Monad[A],
         """
         return 'Reader'
 
-    def flat_map(self, f: F1[B, 'Reader[B, C]']) -> 'Reader[B, C]':
+    def flat_map(self, f: F1[B, 'Reader[B, C]']) -> 'Reader[A, C]':
         """
         Applies a function to the inner value of a `Try`.
 
@@ -54,7 +54,7 @@ class Reader(Monad[A],
         """
         raise NotImplementedError
 
-    def map(self, f: F1[B, C]) -> 'Reader[B, C]':
+    def map(self, f: F1[B, C]) -> 'Reader[A, C]':
         """
         Applies a function to the inner value of a `Try`.
 
@@ -106,6 +106,11 @@ def main():
           .map(lambda y: y - 10)
           .map(lambda z: "RESULT: %d %d" % (z, z))
           .run(5))
+
+    print(reader(lambda pool: [1, 2, 3])
+          .map(lambda xs: map(lambda x: x + 1, xs))
+          .map(lambda xs: list(xs))
+          .run(()))
 
 
 if __name__ == '__main__':
