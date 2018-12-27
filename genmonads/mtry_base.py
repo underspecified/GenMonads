@@ -21,6 +21,9 @@ class Try(Monad[A],
             Use the try_to() or Try.pure() functions instead."""
         )
 
+    def __bool__(self) -> bool:
+        return self.is_success()
+
     def __eq__(self, other: 'Try[A]') -> bool:
         """
         Args:
@@ -151,29 +154,32 @@ class Try(Monad[A],
         """
         return self if self.is_success() else f(self)
 
+    def to_list(self) -> typing.List[A]:
+        """
+        Converts the `Try` into a python list.
+
+        Returns:
+            typing.List[A]: the resulting python list
+        """
+        return self.map(lambda x: [x, ]).get_or_else([])
+
     def to_iterator(self) -> typing.Iterator[A]:
         """
-        Converts an instance of `Try[A]` to a pythonic iterator.
-
-        `Success[A]` is mapped to a singleton iterator containing the value,
-         and `Failure[A]` is mapped to the empty iterator.
+        Converts the `Try` into a python iterator.
 
         Returns:
-            typing.Iterator[A]: the corresponding iterator
+            typing.Iterator[A]: the resulting python iterator
         """
-        return (x for x in (self.get() if self.is_success() else []))
+        return (x for x in self.to_list())
 
-    def to_option(self) -> 'Option[A]':
+    def to_option(self) -> Option[A]:
         """
-        Converts an instance of `Try[A]` to an option.
-
-        `Success[A]` is mapped to Some[A] containing the value,
-         and `Failure[A]` is mapped to Nothing.
+        Converts the Try into an Option.
 
         Returns:
-            Option[A]: the corresponding Option
+            Option[A]: the resulting python option
         """
-        return Some(self.get()) if self.is_success() else Nothing()
+        return self.map(lambda x: Some(x)).get_or_else(Nothing())
 
     # noinspection PyUnresolvedReferences
     def upgrade(self) -> 'TryDeluxe[A]':
@@ -309,6 +315,8 @@ def main():
     print(mtry(lambda: 1 / 0).or_else(Success(0)))
     print(mtry(lambda: 1 / 0).recover(lambda _: 0))
     print(mtry(lambda: 1 / 0).recover_with(lambda _: Success(0)))
+    print(mtry(lambda: 1 / 0).to_list())
+    print(mtry(lambda: 1 / 0).to_option())
 
 
 if __name__ == '__main__':
