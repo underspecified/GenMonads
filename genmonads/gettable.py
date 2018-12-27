@@ -12,6 +12,9 @@ class Gettable(Container[A]):
     access to inner values provided by pattern matching.
     """
 
+    def __bool__(self) -> bool:
+        return self.is_gettable()
+
     def __contains__(self, elem: A) -> bool:
         """
         Checks if any of this monad's inner values is equivalent to `elem`.
@@ -44,7 +47,7 @@ class Gettable(Container[A]):
         Returns:
             A: the `Gettable`'s inner value if defined or `default` otherwise
         """
-        return self.get() if self.is_gettable() else default
+        return self.get() if self else default
 
     def get_or_none(self) -> Optional[A]:
         """
