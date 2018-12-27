@@ -3,7 +3,7 @@ from genmonads.mytypes import *
 __all__ = ['trampoline', ]
 
 
-def trampoline(f: Thunk[T], *args, **kwargs) -> T:
+def trampoline(f: Callable[..., T], *args, **kwargs) -> T:
     g = lambda: f(*args, **kwargs)
     while callable(g):
         g = g()
