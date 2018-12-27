@@ -14,13 +14,13 @@ from genmonads.mytypes import *
 from genmonads.option_base import Option
 from genmonads.tailrec import trampoline
 
-__all__ = ['ParList', 'Nil', 'par_list', 'nil']
+__all__ = ['ParList', 'Nil', 'par_list', 'nil', 'default_pool_settings']
 
 default_pool_settings = {'processes': cpu_count(),
                          'chunksize': 1000}
 
 
-Transform = F1[Pool, typing.Iterable[A]]
+EvalWithPool = F1[Pool, typing.Iterable[A]]
 
 
 class ParList(MonadFilter[A],
@@ -36,8 +36,8 @@ class ParList(MonadFilter[A],
     generators over monads with the `mfor()` function.
     """
 
-    def __init__(self, run: Transform[A]):
-        self._run: Transform[A] = run
+    def __init__(self, run: EvalWithPool[A]):
+        self._run: EvalWithPool[A] = run
 
     def __eq__(self, other: 'ParList[A]') -> bool:
         """
