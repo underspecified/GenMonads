@@ -110,8 +110,9 @@ class Iterator(MonadFilter[A],
                 return (x for x in [v, ])
 
         it = (v
-              for vs in (f(v1) for v1 in self.to_iterator())
+              for vs in (f(v1) for v1 in self._value)
               for v in unpack(vs))
+
         return Iterator.from_iterator(it)
 
     def fold_left(self, b: B, f: FoldLeft[B, A]) -> B:
@@ -315,13 +316,13 @@ class Iterator(MonadFilter[A],
         return trampoline(go, a)
 
     def take(self, n: int) -> 'Iterator[A]':
-        return Iterator(itertools.islice(self.get(), n))
+        return Iterator.from_iterator(itertools.islice(self.get(), n))
 
     def take_while(self, p: Predicate[A]) -> 'Iterator[A]':
-        return Iterator(itertools.dropwhile(p, self.get()))
+        return Iterator.from_iterator(itertools.dropwhile(p, self.get()))
 
-    def to_iterator(self) -> 'Iterator[A]':
-        return self
+    def to_iterator(self) -> typing.Iterator[A]:
+        return self._value
 
     def to_stream(self) -> 'Stream[A]':
         return Stream(self.get())
@@ -359,7 +360,7 @@ class Stream(Iterator[A]):
     generators over monads with the `mfor()` function.
     """
 
-    def __init__(self, it: typing.Iterator):
+    def __init__(self, it: typing.Iterator[A]):
         self._value = it
         self._memo = None
 
@@ -426,6 +427,9 @@ def stream(*values: A) -> Stream[A]:
 def main():
     from genmonads.syntax import mfor
     import operator
+
+    print(iterator(2, 3)
+          .to_stream())
 
     print(iterator(2, 3)
           .flat_map(lambda x: Iterator.pure(x + 5))
