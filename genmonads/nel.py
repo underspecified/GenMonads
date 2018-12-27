@@ -4,8 +4,8 @@ from genmonads.convertible import Convertible
 from genmonads.either import Either
 from genmonads.eval import Eval
 from genmonads.foldable import Foldable
-from genmonads.monad import Monad
-from genmonads.mlist import List as MList
+from genmonads.mlist import List as MList, Nil
+from genmonads.monadfilter import MonadFilter
 from genmonads.mtry_base import mtry
 from genmonads.mytypes import *
 from genmonads.option_base import Some, Option
@@ -14,7 +14,7 @@ from genmonads.tailrec import trampoline
 __all__ = ['NonEmptyList', 'nel', 'onel']
 
 
-class NonEmptyList(Monad[A],
+class NonEmptyList(MonadFilter[A],
                    Foldable[A],
                    Convertible[A]):
     """
@@ -66,9 +66,14 @@ class NonEmptyList(Monad[A],
         """
         return 'NonEmptyList(%s)' % ', '.join(repr(v) for v in self.get())
 
+    # noinspection PyTypeChecker
+    @staticmethod
+    def empty() -> MList[A]:
+        return Nil
+
     def filter(self,
                p: Predicate[A]
-               ) -> Union[typing.List[A], 'NonEmptyList[A]']:
+               ) -> MList[A]:
         """
         Filters this monad by applying the predicate `f` to the monad's inner
         value.
@@ -79,12 +84,11 @@ class NonEmptyList(Monad[A],
             p (Predicate[A]): the predicate
 
         Returns:
-            Union[typing.List[A],
+            Union[MList[A],
                   NonEmptyList[A]]: a list containing all inner values where
                                     the predicate is `True`
         """
-        res = self.to_mlist().filter(p)
-        return res.to_onel().get_or_else(res)
+        return self.to_mlist().filter(p)
 
     def flat_map(self, f: F1[A, 'NonEmptyList[B]']) -> 'NonEmptyList[B]':
         """
@@ -241,7 +245,7 @@ class NonEmptyList(Monad[A],
         Returns:
             typing.List[A]: the resulting python list
         """
-        return self.get
+        return self.get()
 
     def to_nel(self) -> 'NonEmptyList[A]':
         """
@@ -322,9 +326,11 @@ def main():
 
     print(mtry(lambda: nel().map(lambda x: x * 2)))
 
-    print(onel().map(lambda x: x * 2))
+    print(mtry(lambda: 1/0).to_option())
 
-    print(nel(nel(1, 2, 3, 4, 5), nel(5, 4, 3, 2, 1)).flatten())
+    #print(onel().map(lambda x: x * 2))
+
+    #print(nel(nel(1, 2, 3, 4, 5), nel(5, 4, 3, 2, 1)).flatten())
 
 
 if __name__ == '__main__':
