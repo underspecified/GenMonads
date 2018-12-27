@@ -231,6 +231,10 @@ def main():
 
     print(option(None).map(lambda x: x * 2))
 
+    print(option(5).to_list())
+
+    print(option(5).to_stream())
+
 
 if __name__ == '__main__':
     main()

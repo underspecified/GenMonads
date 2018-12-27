@@ -114,6 +114,15 @@ class Option(MonadFilter[A],
         """
         return Some(value)
 
+    def to_list(self) -> typing.List[A]:
+        """
+        Converts the `Option` into a python list.
+
+        Returns:
+            typing.List[A]: the resulting python list
+        """
+        return self.map(lambda x: [x, ]).get_or_else([])
+
     def to_iterator(self) -> typing.Iterator[A]:
         """
         Converts the `Option` into a python iterator.
@@ -121,7 +130,7 @@ class Option(MonadFilter[A],
         Returns:
             typing.Iterator[A]: the resulting python iterator
         """
-        return (x for x in (self.get() if self.non_empty() else []))
+        return (x for x in self.to_list())
 
     # noinspection PyUnresolvedReferences
     def upgrade(self) -> 'OptionDeluxe[A]':
@@ -259,6 +268,10 @@ def main():
     print(option(5) >> (lambda x: option(x * 2)))
 
     print(option(None).map(lambda x: x * 2))
+
+    print(option(5).to_list())
+
+    print(option(5).to_stream())
 
 
 if __name__ == '__main__':
