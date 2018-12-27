@@ -245,6 +245,8 @@ def main():
     print(mtry(lambda: 1 / 0).or_else(Success(0)))
     print(mtry(lambda: 1 / 0).recover(lambda _: 0))
     print(mtry(lambda: 1 / 0).recover_with(lambda _: Success(0)))
+    print(mtry(lambda: 1 / 0).to_list())
+    print(mtry(lambda: 1 / 0).to_option())
 
 
 if __name__ == '__main__':
