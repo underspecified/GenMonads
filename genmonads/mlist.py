@@ -347,6 +347,12 @@ def main():
     print(mlist(mlist(1, 2, 3, 4, 5), mlist(5, 4, 3, 2, 1))
           .flat_map(lambda x: x.last_option()))
 
+    xs = [1, 2, 3]
+    ys = ['a', 'b', 'c']
+    print(mfor((x, y)
+               for x in mlist(*xs)
+               for y in mlist(*ys)))
+
 
 if __name__ == '__main__':
     main()

@@ -12,7 +12,7 @@ __all__ = ['do', 'mfor']
 
 
 # noinspection PyShadowingBuiltins,PyProtectedMember
-def mfor(gen: Generator[T, None, None], frame_depth: int = 10):
+def mfor(gen: Generator[T, None, None], frame_depth: int = 5):
     """The monadic for-comprehension
     Evaluates a generator over a monadic value, translating it into the
     equivalent for-comprehension.
@@ -44,13 +44,15 @@ def mfor(gen: Generator[T, None, None], frame_depth: int = 10):
             monad = gen.gi_frame.f_locals['.0'].monad
         else:
             monad = Monad
-        code = re.sub(r'''^\.0''', 'monad', ast2src(ast_))
+        src = ast2src(ast_)
+        #print('src:', src, file=sys.stderr)
+        code = re.sub(r'''^\.0''', 'monad', src)
         #print('code:', code, file=sys.stderr)
 
         # next we insert the original monad into the code's locals and return
         # the results of its evaluation
         i = frame_depth
-        while i >= 0:
+        while i > 0:
             # noinspection PyBroadException,PyUnusedLocal
             try:
                 globals = sys._getframe(i).f_globals
@@ -59,8 +61,10 @@ def mfor(gen: Generator[T, None, None], frame_depth: int = 10):
                 #print('code@%d:' % i, code, file=sys.stderr)
                 #print('globals@%d:' % i, globals, file=sys.stderr)
                 #print('locals@%d:' % i, locals, file=sys.stderr)
-                return eval(code, globals, locals)
-            except ValueError as ex:
+                for k in locals:
+                    globals[k] = locals[k]
+                return eval(code, globals)
+            except (NameError, ValueError) as ex:
                 #print('Exception@%d' % i, type(ex), ex, file=sys.stderr)
                 i -= 1
         if i < 0:
@@ -71,7 +75,7 @@ def mfor(gen: Generator[T, None, None], frame_depth: int = 10):
         raise ex
 
 
-def do(gen: Generator[T, None, None], frame_depth: int = 10):
+def do(gen: Generator[T, None, None], frame_depth: int = 5):
     """
     A synonym for `mfor`.
 
