@@ -11,7 +11,7 @@ from genmonads.mytypes import *
 from genmonads.option import Option
 from genmonads.tailrec import trampoline
 
-__all__ = ['Iterator', 'iterator', 'Stream', 'stream']
+__all__ = ['Iterator', 'miter', 'miter_vals', 'Stream', 'stream']
 
 
 class Iterator(MonadFilter[A],
@@ -58,12 +58,12 @@ class Iterator(MonadFilter[A],
         return 'Iterator(%s)' % str(self._value)
 
     def drop(self, n: int) -> 'Iterator[A]':
-        return Iterator.from_iterator(itertools.islice(self.get(),
-                                                       start=n,
-                                                       stop=None))
+        return Iterator.pure(itertools.islice(self.get(),
+                                              start=n,
+                                              stop=None))
 
     def drop_while(self, p: Predicate[A]) -> 'Iterator[A]':
-        return Iterator.from_iterator(itertools.dropwhile(p, self.get()))
+        return Iterator.pure(itertools.dropwhile(p, self.get()))
 
     @staticmethod
     def empty() -> 'Iterator[A]':
@@ -71,25 +71,25 @@ class Iterator(MonadFilter[A],
         Returns:
             Iterator[A]: the empty instance for this `MonadFilter`
         """
-        return Iterator.from_iterator((x for x in []))
+        return Iterator.pure((x for x in []))
 
     def filter(self, p: Predicate[A]) -> 'Iterator[A]':
-        return Iterator.from_iterator(filter(p, self.get()))
+        return Iterator.pure(filter(p, self.get()))
 
     def flat_map(self, f: F1[A, 'Iterator[B]']) -> 'Iterator[B]':
         """
-        Applies a function that produces a iterator from unwrapped values to an
-        iterator's inner value and flattens the nested result.
+        Applies a function that produces an iterator from unwrapped values to
+        a monadic iterator's inner value and flattens the nested result.
 
         Args:
             f (Callable[[A],Iterator[B]]): the function to apply
 
         Returns:
-            Iterator[B]: the resulting iterator
+            Iterator[B]: the resulting monadic iterator
         """
 
         # def to_list(v: Union['Monad[T]', T]) -> 'Iterator[T]':
-        #     return (mtry(lambda: v.to_iterator().to_list())
+        #     return (mtry(lambda: v.to_iter().to_list())
         #             .get_or_else([v, ]))
 
         def unpack(v: 'Union[A, Convertible[A]]') -> typing.Iterator[A]:
@@ -103,7 +103,7 @@ class Iterator(MonadFilter[A],
             if isinstance(v, Iterator):
                 return v._value
             elif isinstance(v, Convertible):
-                return v.to_iterator()
+                return v.to_iter()
             elif hasattr('unpack', v):
                 return (x for x in v.unpack())
             else:
@@ -113,7 +113,7 @@ class Iterator(MonadFilter[A],
               for vs in (f(v1) for v1 in self._value)
               for v in unpack(vs))
 
-        return Iterator.from_iterator(it)
+        return Iterator.pure(it)
 
     def fold_left(self, b: B, f: FoldLeft[B, A]) -> B:
         """
@@ -156,12 +156,25 @@ class Iterator(MonadFilter[A],
         return Now(self).flat_map(go)
 
     @staticmethod
-    def from_iterator(it: typing.Iterator[A]) -> 'Iterator[A]':
-        return Iterator(it)
+    def from_iter(it: typing.Iterator[A]) -> 'Iterator[A]':
+        return Iterator.pure(it)
+
+    @staticmethod
+    def from_values(*values: A) -> 'Iterator[A]':
+        """
+        Injects a value into the `Iterator` monad.
+
+        Args:
+            values (A): the values
+
+        Returns:
+            Iterator[A]: the resulting `Iterator`
+        """
+        return Iterator.pure((a for a in values))
 
     def get(self) -> typing.Iterator[A]:
         """
-        Returns the iterator's inner value.
+        Returns the monadic iterator's inner value.
 
         Returns:
             Iterator[A]: the inner value
@@ -170,13 +183,13 @@ class Iterator(MonadFilter[A],
 
     def head(self) -> A:
         """
-        Returns the first item in the iterator.
+        Returns the first item in the monadic iterator.
 
         Returns:
             A: the first item
 
         Throws:
-            StopIteration: if the iterator is empty
+            StopIteration: if the monadic iterator is empty
         """
         return next(self._value)
 
@@ -185,8 +198,8 @@ class Iterator(MonadFilter[A],
 
     def head_option(self) -> Option[A]:
         """
-        Safely returns the first item in the iterator by wrapping the attempt
-        in `Option`.
+        Safely returns the first item in the monadic iterator by wrapping
+        the attempt in `Option`.
 
         Returns:
             Option[T]: the first item wrapped in `Some`, or `Nothing` if the
@@ -205,13 +218,13 @@ class Iterator(MonadFilter[A],
 
     def last(self) -> A:
         """
-        Returns the last item in the iterator.
+        Returns the last item in the miter.
 
         Returns:
             A: the last item
 
         Throws:
-            StopIteration: if the iterator is empty
+            StopIteration: if the miter is empty
         """
         x = next(self._value)
         try:
@@ -241,7 +254,7 @@ class Iterator(MonadFilter[A],
         Returns:
             Iterator[B]: the resulting Iterator
         """
-        return Iterator.from_iterator((f(x) for x in self.get()))
+        return Iterator.pure((f(x) for x in self.get()))
 
     def memoize(self) -> 'Stream[A]':
         return self.to_stream()
@@ -251,42 +264,42 @@ class Iterator(MonadFilter[A],
         Returns the tail of the list as an option.
 
         Returns:
-            Option[Iterator[A]]: the rest of the iterator
+            Option[Iterator[A]]: the rest of the miter
         """
         return mtry(lambda: self.tail()).to_option()
 
     @staticmethod
-    def pure(*values: A) -> 'Iterator[A]':
+    def pure(it: typing.Iterator[A]) -> 'Iterator[A]':
         """
         Injects a value into the `Iterator` monad.
 
         Args:
-            values (A): the values
+            it (typing.Iterator[A]): the iterator
 
         Returns:
             Iterator[A]: the resulting `Iterator`
         """
-        return Iterator.from_iterator((x for x in values))
+        return Iterator(it)
 
     def tail(self) -> 'Iterator[A]':
         """
-        Returns the tail of the iterator.
+        Returns the tail of the miter.
 
         Returns:
             Iterator[A]: the tail of the list
 
         Throws:
-            StopIteration: if the iterator is empty
+            StopIteration: if the miter is empty
         """
         next(self._value)
         return self
 
     def tail_option(self) -> Option['Iterator[A]']:
         """
-        Returns the tail of the iterator as an option.
+        Returns the tail of the miter as an option.
 
         Returns:
-            Option[Iterator[A]]: the rest of the iterator
+            Option[Iterator[A]]: the rest of the miter
         """
         return mtry(lambda: self.tail()).to_option()
 
@@ -316,12 +329,12 @@ class Iterator(MonadFilter[A],
         return trampoline(go, a)
 
     def take(self, n: int) -> 'Iterator[A]':
-        return Iterator.from_iterator(itertools.islice(self.get(), n))
+        return Iterator.pure(itertools.islice(self.get(), n))
 
     def take_while(self, p: Predicate[A]) -> 'Iterator[A]':
-        return Iterator.from_iterator(itertools.dropwhile(p, self.get()))
+        return Iterator.pure(itertools.dropwhile(p, self.get()))
 
-    def to_iterator(self) -> typing.Iterator[A]:
+    def to_iter(self) -> typing.Iterator[A]:
         return self._value
 
     def to_stream(self) -> 'Stream[A]':
@@ -337,7 +350,20 @@ class Iterator(MonadFilter[A],
         return tuple(self.get())
 
 
-def iterator(*values: A) -> 'Iterator[A]':
+def miter(it: typing.Iterator[A]) -> 'Iterator[A]':
+    """
+    Constructs a `Iterator` instance from a tuple of values.
+
+    Args:
+        it (typing.Iterator[A]): the miter
+
+    Returns:
+        Iterator[A]: the resulting `Iterator`
+    """
+    return Iterator.pure(it)
+
+
+def miter_vals(*values: A) -> 'Iterator[A]':
     """
     Constructs a `Iterator` instance from a tuple of values.
 
@@ -347,7 +373,7 @@ def iterator(*values: A) -> 'Iterator[A]':
     Returns:
         Iterator[A]: the resulting `Iterator`
     """
-    return Iterator.pure(*values)
+    return Iterator.from_values(*values)
 
 
 # noinspection PyMissingConstructor
@@ -365,10 +391,13 @@ class Stream(Iterator[A]):
         self._memo = None
 
     def __repr__(self) -> str:
+        return 'Stream(%s)' % repr(self._value)
+
+    def __str__(self) -> str:
         return 'Stream(%s)' % ', '.join(repr(x) for x in self.get())
 
     @staticmethod
-    def from_iterator(it: typing.Iterator[A]) -> 'Stream[A]':
+    def from_iter(it: typing.Iterator[A]) -> 'Stream[A]':
         return Stream(it)
 
     def get(self) -> typing.List[A]:
@@ -395,8 +424,8 @@ class Stream(Iterator[A]):
         """
         return Stream((x for x in values))
 
-    def to_iterator(self) -> Iterator[A]:
-        return Iterator.from_iterator(self._value)
+    def to_iter(self) -> Iterator[A]:
+        return Iterator.pure(self._value)
 
     def to_list(self) -> typing.List[A]:
         """
@@ -428,25 +457,25 @@ def main():
     from genmonads.syntax import mfor
     import operator
 
-    print(iterator(2, 3)
+    print(miter_vals(2, 3)
           .to_stream())
 
-    print(iterator(2, 3)
-          .flat_map(lambda x: Iterator.pure(x + 5))
+    print(miter_vals(2, 3)
+          .flat_map(lambda x: miter_vals(x + 5))
           .to_stream())
 
     # noinspection PyUnresolvedReferences
     print(mfor(x + y
-               for x in iterator(2, 4, 6)
+               for x in miter_vals(2, 4, 6)
                if x < 5
-               for y in iterator(5, 7, 9)
+               for y in miter_vals(5, 7, 9)
                if y % 3 != 0)
           .to_stream())
 
     def make_gen():
-        for x in iterator(4):
+        for x in miter_vals(4):
             if x > 2:
-                for y in iterator(10):
+                for y in miter_vals(10):
                     if y % 2 == 0:
                         yield x - y
 
@@ -455,24 +484,24 @@ def main():
           .to_stream())
 
     # noinspection PyUnresolvedReferences
-    print((iterator(5) >> (lambda x: iterator(x * 2)))
+    print((miter_vals(5) >> (lambda x: miter_vals(x * 2)))
           .to_stream())
 
-    print(iterator()
+    print(miter_vals()
           .map(lambda x: x * 2)
           .to_stream())
 
-    print(iterator(iterator(1, 2, 3, 4, 5), iterator(5, 4, 3, 2, 1))
+    print(miter_vals(miter_vals(1, 2, 3, 4, 5), miter_vals(5, 4, 3, 2, 1))
           .flat_map(lambda x: x.last_option())
           .to_stream())
 
     n = 1000
-    print(Iterator(itertools.count(1))
+    print(miter(itertools.count(1))
           .fold_right(Now(1),
                       lambda a, lb: lb.map(lambda b: a * b) if a < n else Now(a))
           .get())
 
-    print(Iterator(itertools.count(1))
+    print(miter(itertools.count(1))
           .take(n)
           .fold_left(1, operator.mul))
 

@@ -123,7 +123,7 @@ class Option(MonadFilter[A],
         """
         return self.map(lambda x: [x, ]).get_or_else([])
 
-    def to_iterator(self) -> typing.Iterator[A]:
+    def to_iter(self) -> typing.Iterator[A]:
         """
         Converts the `Option` into a python iterator.
 

@@ -36,7 +36,7 @@ class Monad(Applicative,
     def __iter__(self) -> 'MonadIter[A]':
         """
         Returns:
-            MonadIter[A]: an iterator over the content of the monad to support
+            MonadIter[A]: a monadic iterator over the content of the monad to support
                           usage in generators
         """
         return MonadIter(self)
@@ -118,8 +118,8 @@ class Monad(Applicative,
 
 class MonadIter(typing.Iterator[A]):
     """
-    An iterator wrapper class over the content of the monad to support usage in
-    generators
+    A monadic iterator wrapper class over the content of the monad to support
+    usage in generators
     """
     def __init__(self, monad: Monad[A]):
         self.monad = monad

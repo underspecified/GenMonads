@@ -105,7 +105,7 @@ class ParList(MonadFilter[A],
             if isinstance(v, ParList):
                 return v._run(pool)
             elif isinstance(v, Convertible):
-                return v.to_iterator()
+                return v.to_iter()
             elif hasattr('unpack', v):
                 return (x for x in v.unpack())
             else:
@@ -232,7 +232,7 @@ class ParList(MonadFilter[A],
         Returns:
             ParList[A]: the rest of the list
         """
-        return ParList(lambda pool: mtry(self._run(pool).tail()).to_iterator())
+        return ParList(lambda pool: mtry(self._run(pool).tail()).to_iter())
 
     @staticmethod
     def pure(*values: A) -> 'ParList[A]':
@@ -294,7 +294,7 @@ class ParList(MonadFilter[A],
 
         return trampoline(go, a)
 
-    def to_iterator(self) -> typing.Iterator[A]:
+    def to_iter(self) -> typing.Iterator[A]:
         """
         Converts the `List` into a python iterator.
 

@@ -20,7 +20,7 @@ def arity(f):
 
 def is_generator(it):
     """
-    Checks if iterator `it` is a generator.
+    Checks if iterable `it` is a generator.
 
     Args:
         it (Iterable[T]): the function to check

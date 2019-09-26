@@ -1,3 +1,4 @@
+import sys
 import typing
 
 from genmonads.convertible import Convertible
@@ -94,7 +95,7 @@ class List(MonadFilter[A],
                     .get_or_else((v,)))
 
         return List(*[v
-                      for vs in (f(v1)for v1 in self.get())
+                      for vs in (f(v1) for v1 in self.get())
                       for v in to_mlist(vs)])
 
     def fold_left(self, b: B, f: FoldLeft[B, A]) -> B:
@@ -241,12 +242,12 @@ class List(MonadFilter[A],
 
         return trampoline(go, a)
 
-    def to_iterator(self) -> typing.Iterator[A]:
+    def to_iter(self) -> typing.Iterator[A]:
         """
-        Converts the `List` into a python iterator.
+        Converts the `List` into a pythonic iterator.
 
         Returns:
-            typing.Iterator[A]: the resulting python iterator
+            typing.Iterator[A]: the resulting pythonic iterator
         """
         return (x for x in self.get())
 
@@ -348,7 +349,7 @@ def main():
           .flat_map(lambda x: x.last_option()))
 
     xs = [1, 2, 3]
-    ys = ['a', 'b', 'c']
+    ys = sys.argv[1:]  # ['a', 'b', 'c']
     print(mfor((x, y)
                for x in mlist(*xs)
                for y in mlist(*ys)))

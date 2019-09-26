@@ -9,24 +9,24 @@ class Convertible(Generic[A]):
     A type that can be converted to and from pythonic lists.
     """
 
-    def to_iterator(self) -> typing.Iterator[A]:
+    def to_iter(self) -> typing.Iterator[A]:
         """
-        Converts the `Convertible` into an iterator.
+        Converts the `Convertible` into a python iterator.
 
         Returns:
             typing.Iterator[A]: the resulting python iterator
         """
         raise NotImplementedError
 
-    def to_miterator(self) -> 'Iterator[A]':
+    def to_miter(self) -> 'Iterator[A]':
         """
-        Converts the `Convertible` into an iterator.
+        Converts the `Convertible` into a monadic iterator.
 
         Returns:
-            genmonads.iterator.Iterator[A]: the resulting python iterator
+            genmonads.iterator.Iterator[A]: the resulting monadic iterator
         """
         from genmonads.iterator import Iterator
-        return Iterator.from_iterator(self.to_iterator())
+        return Iterator.from_iter(self.to_iter())
 
     def to_list(self) -> typing.List[A]:
         """
@@ -35,7 +35,7 @@ class Convertible(Generic[A]):
         Returns:
             typing.List[A]: the resulting python list
         """
-        return [x for x in self.to_iterator()]
+        return [x for x in self.to_iter()]
 
     def to_mlist(self) -> 'List[A]':
         """
@@ -45,7 +45,7 @@ class Convertible(Generic[A]):
             genmonads.mlist.List[A]: the resulting python list
         """
         from genmonads.mlist import List
-        return List.pure(*self.to_iterator())
+        return List.pure(*self.to_iter())
 
     def to_onel(self) -> 'Option[NonEmptyList[A]]':
         """
@@ -57,11 +57,11 @@ class Convertible(Generic[A]):
                                      otherwise
         """
         from genmonads.nel import onel
-        return onel(*self.to_iterator())
+        return onel(*self.to_iter())
 
     def to_par_list(self) -> 'ParList[A]':
         from genmonads.par_list import ParList
-        return ParList.from_iterator(self.to_iterator())
+        return ParList.from_iterator(self.to_iter())
 
     def to_stream(self) -> 'Stream[A]':
         """
@@ -71,4 +71,4 @@ class Convertible(Generic[A]):
             genmonads.iterator.Stream[A]: the resulting Stream
         """
         from genmonads.iterator import Stream
-        return Stream.from_iterator(self.to_iterator())
+        return Stream.from_iter(self.to_iter())

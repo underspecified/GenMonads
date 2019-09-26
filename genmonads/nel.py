@@ -107,19 +107,19 @@ class NonEmptyList(MonadFilter[A],
         Returns:
             NonEmptyList[B]: the resulting monad
         """
-        def to_nel(vs: Union[NonEmptyList[A], A]):
+        def to_list(vs: Union[NonEmptyList[A], A]):
             """
             Args:
                 vs (Union[NonEmptyList[A], A]): the values
 
             Returns:
-                Union[NonEmptyList[A], Iterator[A]]: an iterator or Nel over vs
+                List[A]: the values as a list
             """
             return vs.to_mlist().get_or_else([vs, ])
 
         return NonEmptyList(*[v
                               for vs in (f(v1)for v1 in self.get())
-                              for v in to_nel(vs)])
+                              for v in to_list(vs)])
 
     def fold_left(self, b: B, f: FoldLeft[B, A]) -> B:
         """
@@ -229,12 +229,12 @@ class NonEmptyList(MonadFilter[A],
 
         return trampoline(go, a)
 
-    def to_iterator(self) -> typing.Iterator[A]:
+    def to_iter(self) -> typing.Iterator[A]:
         """
-        Converts the `NonEmptyList` into a python iterator.
+        Converts the `NonEmptyList` into a python miter.
 
         Returns:
-            typing.Iterator[A]: the resulting python iterator
+            typing.Iterator[A]: the resulting python miter
         """
         return (x for x in self.get())
 

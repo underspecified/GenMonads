@@ -163,12 +163,12 @@ class Try(Monad[A],
         """
         return self.map(lambda x: [x, ]).get_or_else([])
 
-    def to_iterator(self) -> typing.Iterator[A]:
+    def to_iter(self) -> typing.Iterator[A]:
         """
-        Converts the `Try` into a python iterator.
+        Converts the `Try` into a pythonic iterator.
 
         Returns:
-            typing.Iterator[A]: the resulting python iterator
+            typing.Iterator[A]: the resulting pythonic iterator
         """
         return (x for x in self.to_list())
 
