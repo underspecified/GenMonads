@@ -159,7 +159,7 @@ class List(MonadFilter[A],
             Option[A]: the first item wrapped in `Some`, or `Nothing` if the
                        list is empty
         """
-        return mtry(lambda: self.head).to_option()
+        return mtry(lambda: self.head()).to_option()
 
     # noinspection PyMethodMayBeStatic
     def is_gettable(self) -> bool:
