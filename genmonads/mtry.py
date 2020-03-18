@@ -1,6 +1,7 @@
+
 from genmonads.eval import Eval
 from genmonads.foldable import Foldable
-from genmonads.monad import Monad
+from genmonads.monadfilter import MonadFilter
 from genmonads.mtry_base import Try as TryBase
 from genmonads.mytypes import *
 from genmonads.util import is_thunk
@@ -9,7 +10,7 @@ __all__ = ['Failure', 'Success', 'Try', 'failure', 'mtry', 'success']
 
 
 class Try(TryBase[A],
-          Monad[A],
+          MonadFilter[A],
           Foldable[A]):
     """
     A type that represents a failable computation.
@@ -240,7 +241,9 @@ def main():
 
     print(mfor(make_gen()))
 
-    print((mtry(lambda: 5) >> mtry(lambda: 2)))
+    print(mtry(lambda: 5) >> mtry(lambda: 2))
+    print(mtry(lambda: 5).filter(lambda x: x % 2 == 0))
+    print(mtry(lambda: 5).filter(lambda x: x % 2 != 0))
     print(mtry(lambda: 1 / 0).map(lambda x: x * 2))
     print(mtry(lambda: 1 / 0).or_else(Success(0)))
     print(mtry(lambda: 1 / 0).recover(lambda _: 0))

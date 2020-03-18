@@ -1,7 +1,7 @@
 import typing
 
 from genmonads.convertible import Convertible
-from genmonads.monad import Monad
+from genmonads.monadfilter import MonadFilter
 from genmonads.mytypes import *
 from genmonads.option_base import Option, Some, Nothing
 from genmonads.util import is_thunk
@@ -9,7 +9,7 @@ from genmonads.util import is_thunk
 __all__ = ['Failure', 'Success', 'Try', 'failure', 'mtry', 'success']
 
 
-class Try(Monad[A],
+class Try(MonadFilter[A],
           Convertible[A]):
     """
     A base class for implementing Trys for other types to depend on.
@@ -57,7 +57,20 @@ class Try(Monad[A],
         Returns:
             B: the resulting `B` instance
         """
-        return fb(self.get()) if self.is_success() else fa(self.get())
+        return fa(self.get()) if self.is_success() else fb(self.get())
+
+    @staticmethod
+    def empty() -> 'Try[A]':
+        return failure(ValueError(
+            "A computation yielded the zero instance for the Try monad")
+        )
+
+    def filter(self, p: Predicate[A]) -> 'Try[A]':
+        return self.flat_map(
+            lambda x: success(x) if p(x) else failure(
+                ValueError("Predicate does not match for value:", self.get())
+            )
+        )
 
     def flat_map(self, f: F1[A, 'Try[B]']) -> 'Try[B]':
         """
@@ -85,6 +98,18 @@ class Try(Monad[A],
 
     def is_success(self) -> bool:
         return isinstance(self, Success)
+
+    def map(self, f: Callable[[A], B]) -> 'Try[B]':
+        """
+        Applies a function to the inner value of a monad.
+
+        Args:
+            f (Callable[[A],B]): the function to apply
+
+        Returns:
+            Monad[B]: the resulting monad
+        """
+        return self.flat_map(lambda a: self.pure(lambda: f(a)))
 
     def or_else(self, default: 'Try[A]') -> 'Try[A]':
         """
