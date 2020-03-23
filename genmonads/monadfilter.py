@@ -88,7 +88,7 @@ class MonadFilter(Monad[A]):
             MonadFilter[A]: this instance if the predicate is `True` when
             applied to its inner value, otherwise the monad's empty instance
         """
-        return self.flat_map(lambda x: self.pure(x) if not p(x) else self.empty())
+        return self.filter(lambda x: not p(x))
 
     def flat_map(self, f: F1[A, 'MonadFilter[B]']) -> 'MonadFilter[B]':
         """

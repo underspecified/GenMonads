@@ -5,7 +5,7 @@ from genmonads.convertible import Convertible
 from genmonads.monad import Monad
 from genmonads.mytypes import *
 from genmonads.mtry_base import mtry
-from genmonads.option_base import Some, Nothing
+from genmonads.option_base import Some, Nothing, Option
 from genmonads.tailrec import trampoline
 from genmonads.util import is_thunk
 
@@ -242,7 +242,7 @@ class Later(Eval[A]):
 
     def __init__(self, thunk: Thunk[A]):
         self._thunk: Thunk[A] = thunk
-        self._value: Some[A] = Nothing()
+        self._value: Option[A] = Nothing()
 
     def __eq__(self, other: 'Later[A]') -> bool:
         """
