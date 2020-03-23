@@ -33,6 +33,7 @@ def mfor(gen: Generator[T, None, None], frame_depth: int = 5):
         #print('external_names:', external_names, file=sys.stderr)
         #print('globals:', gen.gi_frame.f_globals, file=sys.stderr)
 
+
         # for generator expressions, the out-most monad is evaluated,
         # converting it into a MonadIter
         #
@@ -58,12 +59,16 @@ def mfor(gen: Generator[T, None, None], frame_depth: int = 5):
                 globals = sys._getframe(i).f_globals
                 locals = sys._getframe(i).f_locals
                 locals['monad'] = monad
+
+                # add generator's local variables to the local scope
+                for k, v in gen.gi_frame.f_locals.items():
+                    if k != '.0':
+                        locals[k] = v
+
                 #print('code@%d:' % i, code, file=sys.stderr)
-                #print('globals@%d:' % i, globals, file=sys.stderr)
+                #print('globals@%d:' % i, globals.keys(), file=sys.stderr)
                 #print('locals@%d:' % i, locals, file=sys.stderr)
-                for k in locals:
-                    globals[k] = locals[k]
-                return eval(code, globals)
+                return eval(code, globals, locals)
             except (NameError, ValueError) as ex:
                 #print('Exception@%d' % i, type(ex), ex, file=sys.stderr)
                 i -= 1
