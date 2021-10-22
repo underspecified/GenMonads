@@ -162,7 +162,7 @@ class Try(MonadFilter[A],
         Returns:
             Try[B]: the resulting `Try`
         """
-        return self if self.is_success() else f(self.get())
+        return self if self.is_success() else self.pure(lambda: f(self.get()))
 
     def recover_with(self, f: F1[Exception, 'Try[B]']) -> 'Try[B]':
         """
